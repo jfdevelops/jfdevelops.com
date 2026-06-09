@@ -66,12 +66,14 @@ To add a package: create `packages/<name>/docs/` with markdown files, then rebui
 ### Cloudflare (deployment)
 
 - Config: `wrangler.jsonc`, `vite.config.ts` (`@cloudflare/vite-plugin`)
-- Deploy: `npm run deploy` (builds then `wrangler deploy`)
-- Setup:
-  1. `npm install -g wrangler` (or use project-local `npx wrangler`)
-  2. `wrangler login`
-  3. `npm run deploy`
-- Secrets: `wrangler secret put <NAME>` for server-side values
+- Local deploy: `npm run deploy` (builds then `wrangler deploy`)
+- CI/CD: `.github/workflows/ci.yml`
+  - Pull requests: install, generate routes, test, build
+  - Push to `main`: same checks, then deploy via `cloudflare/wrangler-action@v3`
+- GitHub repository secrets (required for auto-deploy):
+  - `CLOUDFLARE_API_TOKEN` — API token with **Edit Cloudflare Workers** permission
+  - `CLOUDFLARE_ACCOUNT_ID` — Cloudflare account ID
+- Worker secrets: `wrangler secret put <NAME>` for server-side values
 - Public vars: add under `vars` in `wrangler.jsonc`
 
 No Cloudflare-specific env vars are required for the current blank app.
@@ -113,7 +115,7 @@ npm run test         # Vitest
 ## Next steps
 
 - Add real packages under `packages/` with `docs/` directories
-- Connect Cloudflare account and deploy
+- Add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` GitHub secrets for CI deploys
 - Install CodeRabbit GitHub App on the repository
 - Wire contact form to a server function or external service
 - Replace `example-package` placeholder docs with real package content
