@@ -1,0 +1,14 @@
+# CodeRabbit is configured via the GitHub App, not in-app runtime code.
+# Install: https://github.com/apps/coderabbitai
+# After install, enable the app on this repository in GitHub Settings > Integrations.
+
+language: en-US
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  auto_review:
+    enabled: true
+    drafts: false
