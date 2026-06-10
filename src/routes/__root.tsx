@@ -19,14 +19,32 @@ export const Route = createRootRouteWithContext<{
       },
       {
         name: 'viewport',
-        content: 'width=device-width, initial-scale=1',
+        content: 'width=device-width, initial-scale=1, maximum-scale=1',
       },
       {
-        title: 'JF Develops',
+        title: 'JF Develops — Custom Software Consulting & Development',
       },
       {
         name: 'description',
-        content: 'Software consulting and package documentation by JF Develops.',
+        content:
+          'JF Develops builds custom web applications, internal tools, admin dashboards, and integrations with modern React and TypeScript. Work directly with the developer.',
+      },
+      {
+        name: 'theme-color',
+        content: '#1f1f1f',
+      },
+      {
+        property: 'og:title',
+        content: 'JF Develops — Custom Software Consulting & Development',
+      },
+      {
+        property: 'og:description',
+        content:
+          'Custom software that solves real business problems. Web apps, internal tools, dashboards, and integrations built with modern technologies.',
+      },
+      {
+        property: 'og:type',
+        content: 'website',
       },
     ],
     links: [
@@ -48,7 +66,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <HeadContent />
       </head>
-      <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]">
+      <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(42,42,42,0.16)]">
         <QueryClientProvider client={queryClient}>
           <Header />
           {children}
