@@ -25,7 +25,7 @@ export function ContactForm() {
           <label className="block text-sm font-semibold text-[var(--sea-ink)]">
             Email
             <input
-              className="mt-2 w-full rounded-xl border border-[var(--line)] bg-white/70 px-4 py-2.5 text-[var(--sea-ink)]"
+              className="mt-2 w-full rounded-xl border border-[var(--line)] bg-[var(--surface-strong)] px-4 py-2.5 text-[var(--sea-ink)]"
               type="email"
               value={field.state.value}
               onBlur={field.handleBlur}
@@ -41,7 +41,7 @@ export function ContactForm() {
           <label className="block text-sm font-semibold text-[var(--sea-ink)]">
             Message
             <textarea
-              className="mt-2 min-h-28 w-full rounded-xl border border-[var(--line)] bg-white/70 px-4 py-2.5 text-[var(--sea-ink)]"
+              className="mt-2 min-h-28 w-full rounded-xl border border-[var(--line)] bg-[var(--surface-strong)] px-4 py-2.5 text-[var(--sea-ink)]"
               value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(event) => field.handleChange(event.target.value)}
@@ -56,7 +56,7 @@ export function ContactForm() {
           <button
             type="submit"
             disabled={!canSubmit}
-            className="rounded-full border border-[rgba(50,143,151,0.3)] bg-[rgba(79,184,178,0.14)] px-5 py-2.5 text-sm font-semibold text-[var(--lagoon-deep)] transition hover:-translate-y-0.5 hover:bg-[rgba(79,184,178,0.24)] disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-full border border-[var(--lagoon-deep)] bg-[var(--lagoon-deep)] px-5 py-2.5 text-sm font-semibold text-[var(--foam)] transition hover:-translate-y-0.5 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isSubmitting ? 'Sending...' : 'Send message'}
           </button>
