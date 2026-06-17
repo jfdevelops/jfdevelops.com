@@ -1,5 +1,9 @@
 import { Link, createFileRoute, notFound } from '@tanstack/react-router'
 import { DocContent } from '#/docs/DocContent'
+import { IslandShell } from '#/components/ui/island-shell'
+import { Kicker } from '#/components/ui/kicker'
+import { PageWrap } from '#/components/ui/page-wrap'
+import { RouterNavLink } from '#/components/ui/nav-link'
 import { getDocPage, getPackageDocs } from '#/docs/registry'
 
 export const Route = createFileRoute('/docs/$package/$')({
@@ -23,29 +27,27 @@ function PackageDocPage() {
   const { pkg, page } = Route.useLoaderData()
 
   return (
-    <main className="page-wrap px-4 py-12">
+    <PageWrap as="main" className="px-4 py-12">
       <div className="grid gap-8 lg:grid-cols-[220px_1fr]">
-        <aside className="island-shell h-fit rounded-2xl p-4">
-          <p className="island-kicker mb-3">{pkg.name}</p>
+        <IslandShell as="aside" className="h-fit rounded-2xl p-4">
+          <Kicker className="mb-3">{pkg.name}</Kicker>
           <nav className="flex flex-col gap-2 text-sm">
             {pkg.pages.map((docPage) => (
-              <Link
+              <RouterNavLink
                 key={docPage.slug}
                 to="/docs/$package/$"
                 params={{ package: pkg.name, _splat: docPage.slug }}
-                className="nav-link"
-                activeProps={{ className: 'nav-link is-active' }}
               >
                 {docPage.title}
-              </Link>
+              </RouterNavLink>
             ))}
           </nav>
-        </aside>
+        </IslandShell>
 
-        <section className="island-shell rounded-2xl p-6 sm:p-8">
+        <IslandShell as="section" className="rounded-2xl p-6 sm:p-8">
           <DocContent content={page.content} />
-        </section>
+        </IslandShell>
       </div>
-    </main>
+    </PageWrap>
   )
 }

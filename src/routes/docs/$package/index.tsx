@@ -1,5 +1,9 @@
 import { Link, createFileRoute, notFound } from '@tanstack/react-router'
 import { DocContent } from '#/docs/DocContent'
+import { IslandShell } from '#/components/ui/island-shell'
+import { Kicker } from '#/components/ui/kicker'
+import { PageWrap } from '#/components/ui/page-wrap'
+import { RouterNavLink } from '#/components/ui/nav-link'
 import { getPackageDocs } from '#/docs/registry'
 
 export const Route = createFileRoute('/docs/$package/')({
@@ -19,31 +23,29 @@ function PackageDocsIndex() {
   const { pkg, indexPage } = Route.useLoaderData()
 
   return (
-    <main className="page-wrap px-4 py-12">
+    <PageWrap as="main" className="px-4 py-12">
       <div className="grid gap-8 lg:grid-cols-[220px_1fr]">
-        <aside className="island-shell h-fit rounded-2xl p-4">
-          <p className="island-kicker mb-3">Pages</p>
+        <IslandShell as="aside" className="h-fit rounded-2xl p-4">
+          <Kicker className="mb-3">Pages</Kicker>
           <nav className="flex flex-col gap-2 text-sm">
             {pkg.pages.map((page) => (
-              <Link
+              <RouterNavLink
                 key={page.slug}
                 to="/docs/$package/$"
                 params={{ package: pkg.name, _splat: page.slug }}
-                className="nav-link"
-                activeProps={{ className: 'nav-link is-active' }}
               >
                 {page.title}
-              </Link>
+              </RouterNavLink>
             ))}
           </nav>
-        </aside>
+        </IslandShell>
 
-        <section className="island-shell rounded-2xl p-6 sm:p-8">
+        <IslandShell as="section" className="rounded-2xl p-6 sm:p-8">
           {indexPage ? (
             <DocContent content={indexPage.content} />
           ) : (
             <div>
-              <h1 className="display-title mb-3 text-3xl font-bold text-[var(--sea-ink)]">
+              <h1 className="font-display mb-3 text-3xl font-bold text-[var(--sea-ink)]">
                 {pkg.name}
               </h1>
               <p className="text-[var(--sea-ink-soft)]">
@@ -51,8 +53,8 @@ function PackageDocsIndex() {
               </p>
             </div>
           )}
-        </section>
+        </IslandShell>
       </div>
-    </main>
+    </PageWrap>
   )
 }

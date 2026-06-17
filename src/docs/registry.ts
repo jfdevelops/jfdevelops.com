@@ -1,7 +1,8 @@
-const docModules = import.meta.glob<string>(
-  '../../packages/*/docs/**/*.md',
-  { eager: true, import: 'default', query: '?raw' },
-)
+const docModules = import.meta.glob<string>('../../packages/*/docs/**/*.md', {
+  eager: true,
+  import: 'default',
+  query: '?raw',
+})
 
 type DocPage = {
   slug: string
