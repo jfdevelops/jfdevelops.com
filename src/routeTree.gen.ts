@@ -9,19 +9,19 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
 import { Route as DocsIndexRouteImport } from './routes/docs/index'
+import { Route as homeIndexRouteImport } from './routes/(home)/index'
 import { Route as DocsPackageIndexRouteImport } from './routes/docs/$package/index'
 import { Route as DocsPackageSplatRouteImport } from './routes/docs/$package/$'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DocsIndexRoute = DocsIndexRouteImport.update({
   id: '/docs/',
   path: '/docs/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const homeIndexRoute = homeIndexRouteImport.update({
+  id: '/(home)/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DocsPackageIndexRoute = DocsPackageIndexRouteImport.update({
@@ -36,20 +36,20 @@ const DocsPackageSplatRoute = DocsPackageSplatRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof homeIndexRoute
   '/docs/': typeof DocsIndexRoute
   '/docs/$package/$': typeof DocsPackageSplatRoute
   '/docs/$package/': typeof DocsPackageIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/': typeof homeIndexRoute
   '/docs': typeof DocsIndexRoute
   '/docs/$package/$': typeof DocsPackageSplatRoute
   '/docs/$package': typeof DocsPackageIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/(home)/': typeof homeIndexRoute
   '/docs/': typeof DocsIndexRoute
   '/docs/$package/$': typeof DocsPackageSplatRoute
   '/docs/$package/': typeof DocsPackageIndexRoute
@@ -59,11 +59,16 @@ export interface FileRouteTypes {
   fullPaths: '/' | '/docs/' | '/docs/$package/$' | '/docs/$package/'
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '/docs' | '/docs/$package/$' | '/docs/$package'
-  id: '__root__' | '/' | '/docs/' | '/docs/$package/$' | '/docs/$package/'
+  id:
+    | '__root__'
+    | '/(home)/'
+    | '/docs/'
+    | '/docs/$package/$'
+    | '/docs/$package/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  homeIndexRoute: typeof homeIndexRoute
   DocsIndexRoute: typeof DocsIndexRoute
   DocsPackageSplatRoute: typeof DocsPackageSplatRoute
   DocsPackageIndexRoute: typeof DocsPackageIndexRoute
@@ -71,18 +76,18 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/docs/': {
       id: '/docs/'
       path: '/docs'
       fullPath: '/docs/'
       preLoaderRoute: typeof DocsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(home)/': {
+      id: '/(home)/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof homeIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/docs/$package/': {
@@ -103,7 +108,7 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  homeIndexRoute: homeIndexRoute,
   DocsIndexRoute: DocsIndexRoute,
   DocsPackageSplatRoute: DocsPackageSplatRoute,
   DocsPackageIndexRoute: DocsPackageIndexRoute,
