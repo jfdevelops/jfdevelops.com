@@ -1,5 +1,6 @@
 import { useForm } from '@tanstack/react-form'
 import { useState } from 'react'
+import { FeatureCard } from './ui/island-shell'
 
 export function ContactForm() {
   const [submitted, setSubmitted] = useState(false)
@@ -20,13 +21,13 @@ export function ContactForm() {
 
   if (submitted) {
     return (
-      <div className="island-shell feature-card rounded-xl p-6 text-center">
-        <h3 className="display-title mb-2 text-xl font-bold text-[var(--sea-ink)]">
+      <FeatureCard className="rounded-xl p-6 text-center">
+        <h3 className="font-display mb-2 text-xl font-bold text-[var(--sea-ink)]">
           Thanks &mdash; message received
         </h3>
         <p className="mb-4 text-sm leading-relaxed text-[var(--sea-ink-soft)]">
-          I&apos;ll get back to you shortly. Want to talk sooner? Book a call or
-          email me directly using the options nearby.
+          I&apos;ll get back to you shortly. Want to talk sooner? Book a call or email me directly
+          using the options nearby.
         </p>
         <button
           type="button"
@@ -38,7 +39,7 @@ export function ContactForm() {
         >
           Send another message
         </button>
-      </div>
+      </FeatureCard>
     )
   }
 

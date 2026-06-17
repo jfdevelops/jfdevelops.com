@@ -1,21 +1,27 @@
+import { createResourceLayout } from './definition'
+
 const CALENDLY_URL = 'https://calendly.com/jfdevelops/intro-call'
+
+const HeroSection = createResourceLayout({
+  id: 'top',
+  name: 'HeroSection',
+  resource: 'hero',
+  sectionName: 'Hero',
+  title: 'Hero',
+}).makeComposable()
 
 export function Hero() {
   return (
-    <section
-      id="top"
-      className="island-shell rise-in relative overflow-hidden rounded-[2rem] px-6 py-12 sm:px-10 sm:py-16"
-    >
+    <HeroSection className="animate-rise-in relative overflow-hidden rounded-[2rem] px-6 py-12 sm:px-10 sm:py-16">
       <div className="pointer-events-none absolute -left-20 -top-24 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(42,42,42,0.1),transparent_66%)]" />
       <div className="pointer-events-none absolute -bottom-20 -right-20 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(58,58,58,0.08),transparent_66%)]" />
-      <p className="island-kicker mb-3">JF Develops &middot; Software Consulting</p>
-      <h1 className="display-title mb-5 max-w-3xl text-4xl font-bold leading-[1.02] tracking-tight text-[var(--sea-ink)] sm:text-6xl">
+      <HeroSection.SectionName>JF Develops &middot; Software Consulting</HeroSection.SectionName>
+      <HeroSection.SectionTitle>
         Custom software that solves real business problems.
-      </h1>
+      </HeroSection.SectionTitle>
       <p className="mb-8 max-w-2xl text-pretty text-base text-[var(--sea-ink-soft)] sm:text-lg">
-        Web apps, internal tools, admin dashboards, integrations, and business
-        automation &mdash; built with modern technologies and shipped by the
-        developer you actually talk to.
+        Web apps, internal tools, admin dashboards, integrations, and business automation &mdash;
+        built with modern technologies and shipped by the developer you actually talk to.
       </p>
       <div className="flex flex-wrap gap-3">
         <a
@@ -33,7 +39,6 @@ export function Hero() {
           Request a quote
         </a>
       </div>
-
       <dl className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-4">
         {[
           { value: 'Full-stack', label: 'End-to-end delivery' },
@@ -42,15 +47,13 @@ export function Hero() {
           { value: 'Scalable', label: 'Built to grow' },
         ].map((stat) => (
           <div key={stat.label}>
-            <dt className="display-title text-xl font-bold text-[var(--sea-ink)] sm:text-2xl">
+            <dt className="font-display text-xl font-bold text-[var(--sea-ink)] sm:text-2xl">
               {stat.value}
             </dt>
-            <dd className="m-0 text-xs text-[var(--sea-ink-soft)] sm:text-sm">
-              {stat.label}
-            </dd>
+            <dd className="m-0 text-xs text-[var(--sea-ink-soft)] sm:text-sm">{stat.label}</dd>
           </div>
         ))}
       </dl>
-    </section>
+    </HeroSection>
   )
 }
