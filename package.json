@@ -2,6 +2,7 @@
   "name": "jfdevelops.com",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@10.28.1",
   "imports": {
     "#/*": "./src/*"
   },
@@ -10,10 +11,10 @@
     "generate-routes": "tsr generate",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "format": "biome format --write .",
     "check": "biome check --write .",
-    "deploy": "npm run build && wrangler deploy"
+    "deploy": "pnpm run build && wrangler deploy"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
