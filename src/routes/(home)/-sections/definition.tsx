@@ -1,3 +1,4 @@
+import { createPolymorphicComponent } from '@/components/polymorphic-component';
 import { Kicker } from '@/components/ui/kicker';
 import { cn } from '@/lib/utils';
 import { createProp, defineResourceLayout } from '@jfdevelops/react-layout';
@@ -88,12 +89,17 @@ function Layout({ className, ...props }: ComponentPropsWithRef<'section'>) {
   return <section className={cn('scroll-mt-24', className)} {...props} />;
 }
 
-function SectionHeaderWrapper({
-  className,
-  ...props
-}: ComponentPropsWithRef<'div'>) {
-  return <div className={cn('mb-6', className)} {...props} />;
-}
+const SectionHeaderWrapper = createPolymorphicComponent(
+  'div',
+  ({ className, ...props }, { Component, createProps }) => (
+    <Component
+      {...createProps(props, {
+        className: cn('mb-6', className),
+      })}
+    />
+  ),
+)({name: 'SectionHeaderWrapper'});
+
 
 function SectionName({ className, ...props }: ComponentPropsWithRef<'p'>) {
   return <Kicker className={cn('mb-2', className)} {...props} />;
