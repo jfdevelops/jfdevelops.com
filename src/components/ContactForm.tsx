@@ -1,9 +1,16 @@
+import { useConvexAction } from '@convex-dev/react-query'
 import { useForm } from '@tanstack/react-form'
+import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
+import { api } from '../../convex/_generated/api'
 import { FeatureCard } from './ui/island-shell'
 
 export function ContactForm() {
   const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const submitMessage = useMutation({
+    mutationFn: useConvexAction(api.contactActions.submit),
+  })
 
   const form = useForm({
     defaultValues: {
@@ -13,19 +20,25 @@ export function ContactForm() {
       message: '',
     },
     onSubmit: async ({ value }) => {
-      console.log('[v0] Contact form submitted', value)
-      await new Promise((resolve) => setTimeout(resolve, 600))
-      setSubmitted(true)
+      setError(null)
+      try {
+        await submitMessage.mutateAsync(value)
+        setSubmitted(true)
+      } catch {
+        setError(
+          'Something went wrong sending your message. Please try again or email me directly.',
+        )
+      }
     },
   })
 
   if (submitted) {
     return (
       <FeatureCard className="rounded-xl p-6 text-center">
-        <h3 className="font-display mb-2 text-xl font-bold text-[var(--sea-ink)]">
+        <h3 className="font-display mb-2 text-xl font-bold text-(--sea-ink)">
           Thanks &mdash; message received
         </h3>
-        <p className="mb-4 text-sm leading-relaxed text-[var(--sea-ink-soft)]">
+        <p className="mb-4 text-sm leading-relaxed text-(--sea-ink-soft)">
           I&apos;ll get back to you shortly. Want to talk sooner? Book a call or email me directly
           using the options nearby.
         </p>
@@ -125,6 +138,12 @@ export function ContactForm() {
           </label>
         )}
       </form.Field>
+
+      {error ? (
+        <p className="text-sm font-medium text-red-600" role="alert">
+          {error}
+        </p>
+      ) : null}
 
       <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
         {([canSubmit, isSubmitting]) => (

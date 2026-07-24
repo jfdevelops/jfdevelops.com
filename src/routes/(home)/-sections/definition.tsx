@@ -120,9 +120,9 @@ function SectionTitle({ className, ...props }: ComponentPropsWithRef<'h2'>) {
 function SectionDescription({
   className,
   ...props
-}: ComponentPropsWithRef<'p'>) {
+}: ComponentPropsWithRef<'div'>) {
   return (
-    <p
+    <div
       className={cn(
         'mb-6 text-sm leading-relaxed text-(--sea-ink-soft)',
         className,
