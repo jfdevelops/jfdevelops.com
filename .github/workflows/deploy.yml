@@ -1,0 +1,80 @@
+name: CI and deploy
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  validate-and-deploy:
+    name: Validate and deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      VITE_CONVEX_URL: ${{ vars.VITE_CONVEX_URL }}
+      VITE_CONVEX_SITE_URL: ${{ vars.VITE_CONVEX_SITE_URL }}
+      VITE_SITE_URL: ${{ vars.VITE_SITE_URL }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate build configuration
+        shell: bash
+        run: |
+          missing=0
+          for name in VITE_CONVEX_URL VITE_CONVEX_SITE_URL VITE_SITE_URL; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name repository variable is not configured"
+              missing=1
+            fi
+          done
+          exit "$missing"
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Build application
+        run: pnpm build
+
+      - name: Deploy Convex
+        if: github.event_name != 'pull_request'
+        run: pnpm convex:deploy
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+
+      - name: Deploy to Cloudflare
+        if: github.event_name != 'pull_request'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: >-
+            deploy
+            --var VITE_CONVEX_URL:${{ vars.VITE_CONVEX_URL }}
+            --var VITE_CONVEX_SITE_URL:${{ vars.VITE_CONVEX_SITE_URL }}
+            --var SITE_URL:${{ vars.VITE_SITE_URL }}
+          packageManager: pnpm
