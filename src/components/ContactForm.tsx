@@ -39,8 +39,7 @@ export function ContactForm() {
           Thanks &mdash; message received
         </h3>
         <p className="mb-4 text-sm leading-relaxed text-(--sea-ink-soft)">
-          I&apos;ll get back to you shortly. Want to talk sooner? Book a call or email me directly
-          using the options nearby.
+          I&apos;ll get back to you shortly. You can also email me directly using the option nearby.
         </p>
         <button
           type="button"

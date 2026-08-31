@@ -2,7 +2,7 @@ import { ContactForm } from '@/components/ContactForm';
 import { FeatureCard, IslandShell } from '@/components/ui/island-shell';
 import { Kicker } from '@/components/ui/kicker';
 import { cn } from '@/lib/utils';
-import { CalendarClock, Mail } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import type { ComponentPropsWithRef } from 'react';
 import { createResourceLayout } from './definition';
 
@@ -11,7 +11,6 @@ const ContactSection = createResourceLayout.makeComposable({
   resource: 'contact',
 });
 
-const calendlyUrl = 'https://calendly.com/jfdevelops/intro-call';
 const email = 'hello@jfdevelops.com';
 
 function Content({
@@ -47,25 +46,6 @@ export function Contact() {
           <div className='space-y-4'>
           <FeatureCard
             as='a'
-            href={calendlyUrl}
-            target='_blank'
-            rel='noreferrer'
-            className='flex min-h-11 items-start gap-3 rounded-xl p-4 no-underline'
-          >
-            <span className='mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-(--chip-line) bg-(--chip-bg) text-(--sea-ink)'>
-              <CalendarClock className='h-5 w-5' aria-hidden='true' />
-            </span>
-            <span>
-              <span className='block text-sm font-semibold text-(--sea-ink)'>
-                Book a call
-              </span>
-              <span className='block text-xs text-(--sea-ink-soft)'>
-                Grab a free 30-minute intro slot on my calendar.
-              </span>
-            </span>
-          </FeatureCard>
-          <FeatureCard
-            as='a'
             href={`mailto:${email}`}
             className='flex min-h-11 items-start gap-3 rounded-xl p-4 no-underline'
           >
@@ -79,7 +59,7 @@ export function Contact() {
               <span className='block break-all text-xs text-(--sea-ink-soft)'>
                 {email}
               </span>
-              </span>
+            </span>
             </FeatureCard>
           </div>
         </Content>
