@@ -1,87 +1,63 @@
-import { FeatureCard } from '@/components/ui/island-shell'
-import {
-  AppWindow,
-  Database,
-  Gauge,
-  LayoutDashboard,
-  LifeBuoy,
-  Plug,
-  Users,
-  Workflow,
-  Wrench,
-} from 'lucide-react'
+import { AppWindow, ArrowUpRight, Plug, Workflow, Wrench } from 'lucide-react'
 import { createResourceLayout } from './definition'
 
 const ServicesSection = createResourceLayout({
   id: 'services',
   name: 'ServicesSection',
   resource: 'services',
-  sectionName: 'Services',
-  title: 'What I build',
+  sectionName: 'What I can help with',
+  title: 'Good software makes room for better work.',
+  description:
+    'From a first product to the tools behind your team. Built to fit, and built to last.',
 })
-
 const services = [
   {
     icon: AppWindow,
-    title: 'Custom Web Applications',
+    title: 'Bring your product to life.',
     description:
-      'Bespoke products built to your exact workflow, not forced into a generic template.',
-  },
-  {
-    icon: Wrench,
-    title: 'Internal Business Tools',
-    description:
-      'Replace spreadsheets and manual steps with tools your team actually enjoys using.',
-  },
-  {
-    icon: LayoutDashboard,
-    title: 'Admin Dashboards',
-    description: 'Clear, fast dashboards that surface the metrics and controls that matter.',
-  },
-  {
-    icon: Users,
-    title: 'Customer Portals',
-    description: 'Self-serve portals that give your customers a secure, polished experience.',
-  },
-  {
-    icon: Plug,
-    title: 'API Development',
-    description:
-      'Well-documented, reliable APIs that power your apps and third-party integrations.',
-  },
-  {
-    icon: Database,
-    title: 'Database Design',
-    description: 'Schemas and data models built for integrity, performance, and future growth.',
+      'Custom web applications and customer portals that make your idea useful, intuitive, and ready for real people.',
+    detail: 'Web apps / Customer portals',
   },
   {
     icon: Workflow,
-    title: 'System Integrations',
-    description: 'Connect the tools you already use so data flows automatically between them.',
+    title: 'Give your team better tools.',
+    description:
+      'Replace scattered spreadsheets and repetitive steps with a workspace that makes the next move clear.',
+    detail: 'Internal tools / Dashboards',
   },
   {
-    icon: LifeBuoy,
-    title: 'Maintenance & Support',
-    description: 'Ongoing care to keep your software secure, updated, and running smoothly.',
+    icon: Plug,
+    title: 'Make your systems talk.',
+    description:
+      'Connect your apps, organize your data, and automate the handoffs that keep your business moving.',
+    detail: 'Integrations / APIs / Databases',
   },
   {
-    icon: Gauge,
-    title: 'Performance Optimization',
-    description: 'Profiling and tuning to make slow apps fast and expensive infra cheaper.',
+    icon: Wrench,
+    title: 'Keep moving forward.',
+    description:
+      'Thoughtful improvements, performance tuning, and ongoing support as your software and business grow.',
+    detail: 'Maintenance / Optimization',
   },
 ]
-
 export function Services() {
   return (
-    <ServicesSection className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {services.map(({ icon: Icon, title, description }) => (
-        <FeatureCard as="article" key={title} className="rounded-2xl p-5">
-          <span className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-(--chip-line) bg-(--chip-bg) text-(--sea-ink)">
-            <Icon className="h-5 w-5" aria-hidden="true" />
-          </span>
-          <h3 className="mb-1.5 text-base font-semibold text-(--sea-ink)">{title}</h3>
-          <p className="m-0 text-sm leading-relaxed text-(--sea-ink-soft)">{description}</p>
-        </FeatureCard>
+    <ServicesSection className="services-grid">
+      {services.map(({ icon: Icon, title, description, detail }, index) => (
+        <article className="service-card" key={title}>
+          <div className="service-top">
+            <Icon size={27} strokeWidth={1.5} aria-hidden="true" />
+            <span>0{index + 1}</span>
+          </div>
+          <h3>{title}</h3>
+          <p>{description}</p>
+          <div className="service-bottom">
+            <span>{detail}</span>
+            <a href="#contact" aria-label={`Discuss ${title.toLowerCase()}`}>
+              <ArrowUpRight size={20} />
+            </a>
+          </div>
+        </article>
       ))}
     </ServicesSection>
   )

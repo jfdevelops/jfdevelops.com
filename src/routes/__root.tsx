@@ -11,7 +11,7 @@ import Header from '../components/header/header';
 
 import appCss from '../styles.css?url';
 
-const themeInitScript = `(function(){try{var stored=window.localStorage.getItem('theme');var mode=(stored==='light'||stored==='dark'||stored==='auto')?stored:'auto';var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=mode==='auto'?(prefersDark?'dark':'light'):mode;var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);if(mode==='auto'){root.removeAttribute('data-theme')}else{root.setAttribute('data-theme',mode)}root.style.colorScheme=resolved;}catch(e){}})();`;
+const themeInitScript = `(function(){try{var stored=window.localStorage.getItem('theme');var mode=(stored==='light'||stored==='dark'||stored==='auto')?stored:'light';var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=mode==='auto'?(prefersDark?'dark':'light'):mode;var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);if(mode==='auto'){root.removeAttribute('data-theme')}else{root.setAttribute('data-theme',mode)}root.style.colorScheme=resolved;}catch(e){}})();`;
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -23,7 +23,7 @@ export const Route = createRootRouteWithContext<{
       },
       {
         name: 'viewport',
-        content: 'width=device-width, initial-scale=1, maximum-scale=1',
+        content: 'width=device-width, initial-scale=1',
       },
       {
         title: 'JF Develops — Custom Software Consulting & Development',
@@ -35,7 +35,7 @@ export const Route = createRootRouteWithContext<{
       },
       {
         name: 'theme-color',
-        content: '#1f1f1f',
+        content: '#146b5d',
       },
       {
         property: 'og:title',
@@ -59,11 +59,19 @@ export const Route = createRootRouteWithContext<{
       {
         rel: 'icon',
         type: 'image/png',
-        href: '/logo.png',
+        sizes: '32x32',
+        href: '/brand/favicon-32.png',
+      },
+      {
+        rel: 'icon',
+        type: 'image/png',
+        sizes: '16x16',
+        href: '/brand/favicon-16.png',
       },
       {
         rel: 'apple-touch-icon',
-        href: '/logo.png',
+        sizes: '180x180',
+        href: '/brand/apple-touch-icon.png',
       },
       {
         rel: 'manifest',
@@ -78,7 +86,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   const { queryClient } = Route.useRouteContext();
 
   return (
-    <html lang='en' suppressHydrationWarning>
+    <html lang='en' data-theme='light' className='light' suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <HeadContent />

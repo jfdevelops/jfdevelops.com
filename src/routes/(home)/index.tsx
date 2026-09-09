@@ -16,7 +16,7 @@ export const Route = createFileRoute('/(home)/')({
 
 function Home() {
   return (
-    <PageWrap as="main" className="space-y-16 px-4 pb-8 pt-14 sm:space-y-24">
+    <PageWrap as="main" className="home-page space-y-20 px-4 pb-8 pt-10 sm:space-y-28 sm:pt-16">
       {Hero}
       {Services}
       {CaseStudies}
