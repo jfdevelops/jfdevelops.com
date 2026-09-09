@@ -4,7 +4,7 @@ export function About() {
   return (
     <section id="about" className="about-band scroll-mt-24">
       <div className="about-mark" aria-hidden="true">
-        <span>&lt;JF /&gt;</span>
+        <img src="/brand/icon-192.png" alt="" width={192} height={192} />
         <small>INDEPENDENT BY DESIGN</small>
       </div>
       <div>

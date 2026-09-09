@@ -1,14 +1,20 @@
 export function BrandLogo() {
   return (
-    <span className='inline-flex items-center gap-2.5' role='img' aria-label='JF Develops'>
+    <span className="brand-logo" role="img" aria-label="JF Develops">
       <img
-        src='/brand/icon-192.png'
-        alt=''
-        width={48}
-        height={48}
-        className='block h-12 w-12 rounded-xl'
+        src="/brand/jf-develops-logo.png"
+        alt=""
+        width={620}
+        height={144}
+        className="brand-logo-light"
       />
-      <span aria-hidden='true' className='font-display text-[30px] font-bold tracking-tight text-(--sea-ink)'>Develops</span>
+      <img
+        src="/brand/jf-develops-logo-dark.png"
+        alt=""
+        width={620}
+        height={144}
+        className="brand-logo-dark"
+      />
     </span>
-  );
+  )
 }

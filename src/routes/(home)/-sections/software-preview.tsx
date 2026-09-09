@@ -1,4 +1,4 @@
-import { ArrowUpRight, Check, Circle, LayoutDashboard, Layers, Settings, Users } from 'lucide-react'
+import { ArrowUpRight, Check, Circle, Layers, LayoutDashboard, Settings, Users } from 'lucide-react'
 
 export function SoftwarePreview({ variant }: { variant: 'dashboard' | 'form' | 'tickets' }) {
   return (
@@ -19,7 +19,13 @@ export function SoftwarePreview({ variant }: { variant: 'dashboard' | 'form' | '
       </div>
       <div className="workspace">
         <div className="workspace-sidebar" aria-hidden="true">
-          <span className="workspace-monogram">JF</span>
+          <img
+            className="workspace-monogram"
+            src="/brand/icon-192.png"
+            alt=""
+            width={24}
+            height={24}
+          />
           <LayoutDashboard size={16} />
           <Layers size={16} />
           <Users size={16} />
@@ -61,8 +67,8 @@ export function SoftwarePreview({ variant }: { variant: 'dashboard' | 'form' | '
                   <span>Weekly activity</span>
                 </div>
                 <div className="bar-chart" aria-hidden="true">
-                  {[34, 52, 43, 68, 58, 83, 95, 73, 88, 100, 86, 112].map((height, index) => (
-                    <i key={index} style={{ height }} />
+                  {[34, 52, 43, 68, 58, 83, 95, 73, 88, 100, 86, 112].map((height) => (
+                    <i key={height} style={{ height }} />
                   ))}
                 </div>
                 <div className="chart-axis">
