@@ -1,0 +1,6 @@
+{
+  "name": "@jfdevelops/react-layout-composables",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Ready-to-compose patterns built on top of React Layout."
+}
