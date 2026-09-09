@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { PageWrap } from '#/components/ui/page-wrap'
+import { PageWrap } from '@/components/ui/page-wrap'
 import { homeResources } from './-sections/config'
 
 const Hero = homeResources.getComponent({ resource: 'hero' })

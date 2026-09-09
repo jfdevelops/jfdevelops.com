@@ -10,8 +10,8 @@ import {
   Text,
   Theme,
 } from '../components';
-import { createSubject } from '../utils/createSubject';
-import { renderTemplate } from '../utils/renderTemplate';
+import { createSubject } from '../utils/subject';
+import { renderTemplate } from '../utils/renderer';
 
 export type ContactEmailProps = {
   name: string;

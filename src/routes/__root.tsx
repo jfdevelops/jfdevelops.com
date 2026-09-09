@@ -6,7 +6,7 @@ import {
 import { QueryClientProvider, type QueryClient } from '@tanstack/react-query';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import { TanStackDevtools } from '@tanstack/react-devtools';
-import Footer from '../components/Footer';
+import Footer from '../components/footer';
 import Header from '../components/header/header';
 
 import appCss from '../styles.css?url';

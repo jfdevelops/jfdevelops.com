@@ -1,6 +1,6 @@
 import { createFileRoute, notFound } from '@tanstack/react-router'
-import { DocContent } from '#/docs/DocContent'
-import { getPackageDocs } from '#/docs/registry'
+import { DocContent } from '@/docs/doc-content'
+import { getPackageDocs } from '@/docs/registry'
 import { DocsShell } from '../-components/docs-shell'
 
 export const Route = createFileRoute('/docs/$package/')({

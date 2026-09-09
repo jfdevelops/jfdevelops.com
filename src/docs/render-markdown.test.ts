@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { renderMarkdown } from './renderMarkdown'
+import { renderMarkdown } from './render-markdown'
 
 describe('renderMarkdown', () => {
   it('renders common documentation blocks', () => {

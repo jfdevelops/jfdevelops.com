@@ -222,3 +222,16 @@ Files prefixed with `demo` can be safely deleted. They are there to provide a st
 You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
 
 For TanStack Start specific documentation, visit [TanStack Start](https://tanstack.com/start).
+
+## File and import conventions
+
+- Authored source filenames use lowercase kebab-case, such as `contact-form.tsx` and `render-markdown.ts`.
+- Use `@/` for imports rooted at `src`, or relative imports. The former `#/` package alias has been removed.
+- TanStack generates `src/route-tree.gen.ts`; its output path is configured in `vite.config.ts` and `tsr.config.json`. Do not edit generated route contents manually.
+- Router syntax filenames (`__root.tsx`, `$package`, and `$.tsx`) and framework-generated Convex filenames retain their required spellings. Conventional discovery files such as `AGENTS.md` and `README.md` also retain their names.
+- Convex module paths cannot contain hyphens. Use lowercase single-word filenames and folders there: `actions/contact.ts`, `utils/subject.ts`, and `utils/renderer.tsx`.
+- Run `npm run typecheck`, `npm run test`, and `npm run build` to validate changes.
+
+### Contact action rollout
+
+The contact action is now `api.actions.contact.submit` (module `actions/contact`). Deploy the renamed Convex backend before releasing the corresponding frontend. This source cleanup does not deploy the backend.

@@ -1,4 +1,4 @@
-import { ContactForm } from '@/components/ContactForm'
+import { ContactForm } from '@/components/contact-form'
 
 import { FeatureCard, IslandShell } from '@/components/ui/island-shell'
 

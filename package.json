@@ -4,9 +4,6 @@
   "type": "module",
   "packageManager": "pnpm@10.28.1",
   "portless": "jfdevelops",
-  "imports": {
-    "#/*": "./src/*"
-  },
   "scripts": {
     "dev": "portless run node scripts/dev.mjs",
     "dev:direct": "node scripts/dev.mjs",
@@ -26,7 +23,8 @@
     "clean": "powershell -ExecutionPolicy Bypass -File scripts/clean.ps1",
     "setup:defender": "powershell -ExecutionPolicy Bypass -File scripts/fix-defender.ps1",
     "reinstall": "pnpm run clean && pnpm install",
-    "update:jfd": "pnpm run clean && pnpm update \"@jfdevelops/*\" --latest && pnpm install"
+    "update:jfd": "pnpm run clean && pnpm update \"@jfdevelops/*\" --latest && pnpm install",
+    "typecheck": "tsc --noEmit --incremental false"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",

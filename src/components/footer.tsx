@@ -2,7 +2,7 @@ import { Link } from '@tanstack/react-router'
 import { Kicker } from './ui/kicker'
 import { PageWrap } from './ui/page-wrap'
 import { BrandLogo } from './brand-logo'
-import ThemeToggle from './ThemeToggle'
+import ThemeToggle from './theme-toggle'
 
 const columns = [
   {

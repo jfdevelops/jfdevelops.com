@@ -16,7 +16,7 @@ const config = defineConfig(() => {
       devtools(),
       ...(!isVitest ? [cloudflare({ viteEnvironment: { name: 'ssr' } })] : []),
       tailwindcss(),
-      tanstackStart(),
+      tanstackStart({ router: { generatedRouteTree: 'route-tree.gen.ts' } }),
       viteReact(),
     ],
   }

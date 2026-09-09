@@ -1,4 +1,4 @@
-import { IslandShell } from '#/components/ui/island-shell'
+import { IslandShell } from '@/components/ui/island-shell'
 import { createResourceLayout } from './definition'
 
 const FAQSection = createResourceLayout({

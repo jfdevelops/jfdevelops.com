@@ -1,4 +1,4 @@
-import { renderMarkdown } from './renderMarkdown'
+import { renderMarkdown } from './render-markdown'
 
 type DocContentProps = {
   content: string
