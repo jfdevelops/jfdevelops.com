@@ -6,10 +6,44 @@ function escapeHtml(value: string) {
     .replaceAll('"', '&quot;')
 }
 
+function sanitizeHref(value: string) {
+  const trimmedValue = value.trim()
+  const isSafe =
+    trimmedValue.startsWith('/') ||
+    trimmedValue.startsWith('#') ||
+    trimmedValue.startsWith('https://') ||
+    trimmedValue.startsWith('http://') ||
+    trimmedValue.startsWith('mailto:')
+
+  return isSafe ? escapeHtml(trimmedValue) : '#'
+}
+
+function applyEmphasis(value: string) {
+  return value
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/_([^_]+)_/g, '<em>$1</em>')
+}
+
 function inlineMarkdown(value: string) {
-  return escapeHtml(value)
-    .replace(/`([^`]+)`/g, '<code>$1</code>')
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+  const escapedValue = escapeHtml(value)
+  const placeholders: string[] = []
+
+  const stash = (html: string) => {
+    const index = placeholders.length
+    placeholders.push(html)
+    return `%%MD${index}%%`
+  }
+
+  const restore = (text: string) =>
+    text.replace(/%%MD(\d+)%%/g, (_match, index: string) => placeholders[Number(index)] ?? '')
+
+  const withProtected = escapedValue
+    .replace(/`([^`]+)`/g, (_match, code: string) => stash(`<code>${code}</code>`))
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, label: string, href: string) =>
+      stash(`<a href="${sanitizeHref(href)}">${restore(applyEmphasis(label))}</a>`),
+    )
+
+  return restore(applyEmphasis(withProtected))
 }
 
 export function renderMarkdown(markdown: string) {
@@ -18,6 +52,7 @@ export function renderMarkdown(markdown: string) {
   let inCodeBlock = false
   let codeLines: string[] = []
   let paragraphLines: string[] = []
+  let listType: 'ol' | 'ul' | null = null
 
   function flushParagraph() {
     if (paragraphLines.length === 0) {
@@ -28,9 +63,23 @@ export function renderMarkdown(markdown: string) {
     paragraphLines = []
   }
 
+  function flushList() {
+    if (!listType) {
+      return
+    }
+
+    html.push(`</${listType}>`)
+    listType = null
+  }
+
+  function flushTextBlocks() {
+    flushParagraph()
+    flushList()
+  }
+
   for (const line of lines) {
     if (line.startsWith('```')) {
-      flushParagraph()
+      flushTextBlocks()
 
       if (inCodeBlock) {
         html.push(`<pre><code>${escapeHtml(codeLines.join('\n'))}</code></pre>`)
@@ -49,32 +98,61 @@ export function renderMarkdown(markdown: string) {
     }
 
     if (line.startsWith('# ')) {
-      flushParagraph()
+      flushTextBlocks()
       html.push(`<h1>${inlineMarkdown(line.slice(2))}</h1>`)
       continue
     }
 
     if (line.startsWith('## ')) {
-      flushParagraph()
+      flushTextBlocks()
       html.push(`<h2>${inlineMarkdown(line.slice(3))}</h2>`)
       continue
     }
 
     if (line.startsWith('### ')) {
-      flushParagraph()
+      flushTextBlocks()
       html.push(`<h3>${inlineMarkdown(line.slice(4))}</h3>`)
       continue
     }
 
-    if (line.trim() === '') {
+    const unorderedItem = line.match(/^[-*]\s+(.+)$/)
+    const orderedItem = line.match(/^\d+\.\s+(.+)$/)
+    if (unorderedItem || orderedItem) {
       flushParagraph()
+      const nextListType = unorderedItem ? 'ul' : 'ol'
+
+      if (listType !== nextListType) {
+        flushList()
+        listType = nextListType
+        html.push(`<${listType}>`)
+      }
+
+      html.push(`<li>${inlineMarkdown((unorderedItem ?? orderedItem)?.[1] ?? '')}</li>`)
       continue
     }
 
+    if (line.startsWith('> ')) {
+      flushTextBlocks()
+      html.push(`<blockquote><p>${inlineMarkdown(line.slice(2))}</p></blockquote>`)
+      continue
+    }
+
+    if (line.trim() === '---') {
+      flushTextBlocks()
+      html.push('<hr>')
+      continue
+    }
+
+    if (line.trim() === '') {
+      flushTextBlocks()
+      continue
+    }
+
+    flushList()
     paragraphLines.push(line.trim())
   }
 
-  flushParagraph()
+  flushTextBlocks()
 
   if (inCodeBlock && codeLines.length > 0) {
     html.push(`<pre><code>${escapeHtml(codeLines.join('\n'))}</code></pre>`)

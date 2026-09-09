@@ -1,13 +1,15 @@
 import { Link } from '@tanstack/react-router'
 import { Kicker } from './ui/kicker'
 import { PageWrap } from './ui/page-wrap'
+import { BrandLogo } from './brand-logo'
+import ThemeToggle from './ThemeToggle'
 
 const columns = [
   {
     title: 'Services',
     links: [
       { href: '/#services', label: 'What I build' },
-      { href: '/#work', label: 'Case studies' },
+      { href: '/#case-studies', label: 'Case studies' },
       { href: '/#process', label: 'Process' },
     ],
   },
@@ -30,10 +32,9 @@ export default function Footer() {
         <div>
           <Link
             to="/"
-            className="inline-flex items-center gap-3 text-sm font-semibold text-[var(--sea-ink)] no-underline"
+            className="inline-flex min-h-11 items-center rounded-sm no-underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--sea-ink)"
           >
-            <img src="/logo.png" alt="JF Develops" className="h-8 w-8 object-contain" />
-            <span>JF Develops</span>
+            <BrandLogo />
           </Link>
           <p className="mt-4 max-w-xs text-sm leading-relaxed">
             Custom software that solves real business problems &mdash; built and shipped by the
@@ -62,7 +63,10 @@ export default function Footer() {
 
       <PageWrap className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-[var(--line)] pt-6 text-center sm:flex-row sm:text-left">
         <p className="m-0 text-sm">&copy; {year} JF Develops. All rights reserved.</p>
-        <Kicker className="m-0">Software consulting &amp; development</Kicker>
+        <div className="flex items-center gap-3">
+          <span className="text-xs">Appearance</span>
+          <ThemeToggle />
+        </div>
       </PageWrap>
     </footer>
   )

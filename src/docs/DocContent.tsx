@@ -7,7 +7,8 @@ type DocContentProps = {
 export function DocContent({ content }: DocContentProps) {
   return (
     <article
-      className="prose prose-neutral max-w-none text-[var(--sea-ink)]"
+      className="docs-content prose prose-neutral max-w-none"
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: renderMarkdown escapes HTML and sanitizes link targets.
       dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
     />
   )

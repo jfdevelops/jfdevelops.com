@@ -1,49 +1,66 @@
-import { createResourceLayout } from './definition'
-
-const HeroSection = createResourceLayout({
-  id: 'top',
-  name: 'HeroSection',
-  resource: 'hero',
-  sectionName: 'Hero',
-  title: 'Hero',
-}).makeComposable()
+import { ArrowDown, ArrowUpRight, Check } from 'lucide-react'
+import { SoftwarePreview } from './software-preview'
 
 export function Hero() {
   return (
-    <HeroSection className="animate-rise-in relative overflow-hidden rounded-[2rem] px-6 py-12 sm:px-10 sm:py-16">
-      <div className="pointer-events-none absolute -left-20 -top-24 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(42,42,42,0.1),transparent_66%)]" />
-      <div className="pointer-events-none absolute -bottom-20 -right-20 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(58,58,58,0.08),transparent_66%)]" />
-      <HeroSection.SectionName>JF Develops &middot; Software Consulting</HeroSection.SectionName>
-      <HeroSection.SectionTitle>
-        Custom software that solves real business problems.
-      </HeroSection.SectionTitle>
-      <p className="mb-8 max-w-2xl text-pretty text-base text-[var(--sea-ink-soft)] sm:text-lg">
-        Web apps, internal tools, admin dashboards, integrations, and business automation &mdash;
-        built with modern technologies and shipped by the developer you actually talk to.
-      </p>
-      <div className="flex flex-wrap gap-3">
-        <a
-          href="#contact"
-          className="inline-flex min-h-11 items-center rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-5 py-2.5 text-sm font-semibold text-[var(--sea-ink)] no-underline transition hover:-translate-y-0.5 hover:bg-[var(--link-bg-hover)]"
-        >
-          Request a quote
+    <section id="top" className="hero-section">
+      <div className="hero-copy">
+        <p className="eyebrow">
+          <span className="status-dot" /> Independent developer. Dedicated partner.
+        </p>
+        <h1>
+          Less busywork.
+          <br />
+          More <em>possibility.</em>
+        </h1>
+        <p className="hero-description">
+          Custom software for the way your business works. I build web apps, internal tools, and
+          integrations that turn everyday friction into a better way forward.
+        </p>
+        <div className="hero-actions">
+          <a href="#contact" className="brand-button">
+            Let’s build something <ArrowUpRight size={18} aria-hidden="true" />
+          </a>
+          <a href="#case-studies" className="text-link">
+            Explore the work <ArrowDown size={16} aria-hidden="true" />
+          </a>
+        </div>
+        <p className="hero-note">
+          <Check size={15} aria-hidden="true" /> One developer, from first conversation to launch.
+        </p>
+      </div>
+      <div className="hero-visual">
+        <div className="visual-caption">
+          <span>FROM IDEA TO EVERYDAY ESSENTIAL</span>
+          <span aria-hidden="true">↗</span>
+        </div>
+        <SoftwarePreview variant="dashboard" />
+        <div className="delivery-note">
+          <span className="delivery-icon">
+            <Check size={19} aria-hidden="true" />
+          </span>
+          <div>
+            <strong>Built around your workflow.</strong>
+            <span>Connected. Considered. Yours.</span>
+          </div>
+        </div>
+        <span className="visual-code" aria-hidden="true">
+          &lt;built for you /&gt;
+        </span>
+      </div>
+      <div className="hero-foundation">
+        <span>
+          Thoughtfully built.
+          <br />
+          <strong>From front to back.</strong>
+        </span>
+        <span>React & TypeScript</span>
+        <span>APIs & integrations</span>
+        <span>Data & dashboards</span>
+        <a href="#process">
+          A clear path to launch <ArrowUpRight size={16} aria-hidden="true" />
         </a>
       </div>
-      <dl className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        {[
-          { value: 'Full-stack', label: 'End-to-end delivery' },
-          { value: 'React / TS', label: 'Modern stack' },
-          { value: '1:1', label: 'Direct with the dev' },
-          { value: 'Scalable', label: 'Built to grow' },
-        ].map((stat) => (
-          <div key={stat.label}>
-            <dt className="font-display text-xl font-bold text-[var(--sea-ink)] sm:text-2xl">
-              {stat.value}
-            </dt>
-            <dd className="m-0 text-xs text-[var(--sea-ink-soft)] sm:text-sm">{stat.label}</dd>
-          </div>
-        ))}
-      </dl>
-    </HeroSection>
+    </section>
   )
 }
