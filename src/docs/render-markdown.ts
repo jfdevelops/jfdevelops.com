@@ -18,16 +18,32 @@ function sanitizeHref(value: string) {
   return isSafe ? escapeHtml(trimmedValue) : '#'
 }
 
-function inlineMarkdown(value: string) {
-  const escapedValue = escapeHtml(value)
-
-  return escapedValue
-    .replace(/`([^`]+)`/g, '<code>$1</code>')
+function applyEmphasis(value: string) {
+  return value
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     .replace(/_([^_]+)_/g, '<em>$1</em>')
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, label: string, href: string) => {
-      return `<a href="${sanitizeHref(href)}">${label}</a>`
-    })
+}
+
+function inlineMarkdown(value: string) {
+  const escapedValue = escapeHtml(value)
+  const placeholders: string[] = []
+
+  const stash = (html: string) => {
+    const index = placeholders.length
+    placeholders.push(html)
+    return `%%MD${index}%%`
+  }
+
+  const restore = (text: string) =>
+    text.replace(/%%MD(\d+)%%/g, (_match, index: string) => placeholders[Number(index)] ?? '')
+
+  const withProtected = escapedValue
+    .replace(/`([^`]+)`/g, (_match, code: string) => stash(`<code>${code}</code>`))
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, label: string, href: string) =>
+      stash(`<a href="${sanitizeHref(href)}">${restore(applyEmphasis(label))}</a>`),
+    )
+
+  return restore(applyEmphasis(withProtected))
 }
 
 export function renderMarkdown(markdown: string) {
