@@ -46,7 +46,7 @@ src/
 packages/
   <package>/docs/  # Per-package markdown injected at build time
 public/
-  logo.png         # JF Develops logo
+  brand/            # Active logo and app icon assets
 ```
 
 ## Docs architecture

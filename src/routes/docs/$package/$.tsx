@@ -1,6 +1,6 @@
 import { createFileRoute, notFound } from '@tanstack/react-router'
-import { DocContent } from '#/docs/DocContent'
-import { getDocPage, getPackageDocs } from '#/docs/registry'
+import { DocContent } from '@/docs/doc-content'
+import { getDocPage, getPackageDocs } from '@/docs/registry'
 import { DocsShell } from '../-components/docs-shell'
 
 export const Route = createFileRoute('/docs/$package/$')({
@@ -10,7 +10,7 @@ export const Route = createFileRoute('/docs/$package/$')({
       throw notFound()
     }
 
-    const page = getDocPage(params.package, params._splat)
+    const page = getDocPage(params.package, params._splat ?? '')
     if (!page) {
       throw notFound()
     }

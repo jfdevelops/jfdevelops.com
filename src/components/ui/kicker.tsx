@@ -1,5 +1,5 @@
 import { type ComponentPropsWithRef, type ElementType } from 'react'
-import { cn } from '#/lib/utils'
+import { cn } from '@/lib/utils'
 
 type AsProp<T extends ElementType> = { as?: T }
 type PolymorphicProps<T extends ElementType, P = {}> = AsProp<T> &

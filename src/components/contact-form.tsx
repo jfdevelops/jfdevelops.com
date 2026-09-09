@@ -9,7 +9,7 @@ export function ContactForm() {
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const submitMessage = useMutation({
-    mutationFn: useConvexAction(api.contactActions.submit),
+    mutationFn: useConvexAction(api.actions.contact.submit),
   })
 
   const form = useForm({

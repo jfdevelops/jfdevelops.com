@@ -1,6 +1,6 @@
 import { SoftwarePreview } from './software-preview'
-import { IslandShell } from '#/components/ui/island-shell'
-import { Kicker } from '#/components/ui/kicker'
+import { IslandShell } from '@/components/ui/island-shell'
+import { Kicker } from '@/components/ui/kicker'
 import { createResourceLayout } from './definition'
 
 const CaseStudiesSection = createResourceLayout({

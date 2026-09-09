@@ -48,11 +48,3 @@ export function createSubject<Props extends object>(
   return (args: ExtractProps<Props>) => render(validatedProps(args));
 }
 
-const subject = createSubject({
-  props: {
-    name: '',
-    email: '',
-    projectType: '',
-  },
-  render: ({ email, name }) => `New project inquiry from ${name}`,
-});

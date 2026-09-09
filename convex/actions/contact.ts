@@ -1,13 +1,13 @@
 'use node';
 
 import { v } from 'convex/values';
-import { internal } from './_generated/api';
-import { action } from './_generated/server';
-import { sendEmail } from './lib/email/client';
+import { internal } from '../_generated/api';
+import { action } from '../_generated/server';
+import { sendEmail } from '../lib/email/client';
 import {
   contactEmail,
   createContactSubject,
-} from './lib/email/templates/contact';
+} from '../lib/email/templates/contact';
 
 function requireEnvironmentValue(
   name: 'CONTACT_FROM_EMAIL' | 'CONTACT_TO_EMAIL',

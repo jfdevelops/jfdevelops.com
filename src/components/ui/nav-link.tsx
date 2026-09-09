@@ -1,6 +1,6 @@
 import { Link, type LinkProps } from '@tanstack/react-router'
 import { type ComponentPropsWithRef } from 'react'
-import { cn } from '#/lib/utils'
+import { cn } from '@/lib/utils'
 
 const navLinkClass = [
   'relative inline-flex items-center no-underline text-[var(--sea-ink-soft)]',
