@@ -72,6 +72,7 @@ function DocLink({ packageId, page }: { packageId: string; page: PackageDocs['pa
         to="/docs/$package"
         params={{ package: packageId }}
         className={linkClasses}
+        activeOptions={{ exact: true }}
         activeProps={activeProps}
       >
         <BookOpen aria-hidden="true" className="h-4 w-4 shrink-0" />
