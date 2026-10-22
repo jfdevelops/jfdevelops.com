@@ -4,16 +4,37 @@ Created on 2026-08-06 against commit `b0ddada` on branch
 `roadmap/project-roadmap`. Revised after defining the client portal, admin
 workspace, messaging, and invoicing product scope.
 
+## Detailed implementation plans
+
+| Plan | Title | Priority | Effort | Depends on | Status |
+|---|---|---|---|---|---|
+| [001](./001-admin-dashboard.md) | Admin dashboard and operational foundation | P1 | L | — | TODO |
+| [002](./002-admin-custom-database.md) | Configurable relational databases in admin | P1 | L | 001 | TODO |
+| [003](./003-client-scoped-workspace.md) | Client-scoped workspace and automatic reminders | P1 | L | 001, 002 | TODO |
+
+Status values: TODO, IN PROGRESS, DONE, BLOCKED (with a reason), or REJECTED
+(with a rationale).
+
+### Dependency notes
+
+- Plan 001 establishes authentication, tenant membership, the admin shell,
+  invoicing, manual reminders, and shared authorization helpers.
+- Plan 002 builds the custom relational database inside that admin shell.
+- Plan 003 projects explicitly shared Plan 002 records through Plan 001 client
+  memberships and adds automatic reminders/client invoice visibility.
+
 ## Product direction
 
 JF Develops is evolving from a consulting marketing site into three connected
 products:
 
 1. **Public site** — explains the offer, proves the work, and converts prospects.
-2. **Client portal** — gives each client a private view of projects, tasks,
-   progress, conversations, and invoices.
-3. **Admin workspace** — lets the JF Develops administrator manage clients,
-   projects, work status, conversations, and invoices.
+2. **Client portal** — gives each client a private view of information and
+   records explicitly shared with them, plus conversations and invoices.
+3. **Admin workspace** — provides an Airtable/Notion-like relational system for
+   creating collections, fields, records, views, and links on demand, then tying
+   those records to clients, invoices, or other records. Its primary grid uses
+   TanStack Table with a purpose-built, spreadsheet-friendly editing experience.
 
 The documentation site is a fourth surface sharing the same design system. It
 should remain public unless a future requirement explicitly calls for private
@@ -27,6 +48,12 @@ client documentation.
 - Establish tenant boundaries before exposing client data. Every project, task,
   conversation, message, and invoice must be authorized through a client
   membership rather than trusted from a URL parameter.
+- Separate association from visibility. Linking a generic workspace record to a
+  client is useful for internal organization, but sharing it in the client portal
+  requires an explicit record/field visibility decision.
+- Use a hybrid data model: generic collections, fields, records, relations, and
+  views for evolving operational information; strongly typed system tables for
+  authentication, authorization, invoices, money, reminders, and audit history.
 - Create the admin client/project workflow before the client dashboard. The admin
   needs a way to create the records that clients will see.
 - Build project progress before chat and invoicing. It provides the shared client
@@ -44,8 +71,8 @@ client documentation.
 |---|---|---|---:|---|
 | 0 | Product and UI foundation | Agreed workflows, data model, and design system | 1–2 weeks | — |
 | 1 | Identity and authorization | Secure client/admin login and invitations | 2–4 weeks | Phase 0 |
-| 2 | Client and project administration | Admin can create clients, projects, milestones, and tasks | 3–5 weeks | Phase 1 |
-| 3 | Portal dashboards | Clients and admin see trustworthy project progress | 3–5 weeks | Phase 2 |
+| 2 | Relational workspace and client administration | Admin can create clients and model linked operational records on demand | 4–7 weeks | Phase 1 |
+| 3 | Portal dashboards | Clients see only records and fields explicitly shared with them | 3–5 weeks | Phase 2 |
 | 4 | Project conversations | Clients can start threads and admin can respond | 3–5 weeks | Phase 3 |
 | 5 | Invoicing | Admin can create, issue, and track invoices | 3–5 weeks | Phases 2–3 |
 | 6 | Public site and docs overhaul | Cohesive marketing and real package documentation | 3–6 weeks | Phase 0; can run beside Phases 2–5 |
@@ -81,9 +108,10 @@ surfaces.
 
 - Write the authorization policy before route work: role checks, client
   membership checks, project ownership checks, and admin-only operations.
-- Specify a data model around `users`, `clients`, `clientMemberships`,
-  `projects`, `milestones`, `tasks`, `conversations`, `messages`,
-  `invoices`, `invoiceItems`, `notifications`, and `auditEvents`.
+- Specify a hybrid data model around strongly typed `users`, `clients`,
+  `clientMemberships`, `invoices`, `invoiceItems`, reminders, and `auditEvents`,
+  plus generic workspace collections, fields, records, relations, saved views,
+  and explicit client-sharing links.
 - Create low-fidelity flows for:
   - login, invitation acceptance, and password/account recovery;
   - client project overview and task detail;
@@ -144,21 +172,33 @@ design decision, not as completed groundwork.
 - Authorization helpers are centralized and used by every protected backend
   operation.
 
-## Phase 2 — Client and project administration
+## Phase 2 — Relational workspace and client administration
 
-**Goal:** let the admin create the source-of-truth records that power the portal.
+**Goal:** let the admin create the source-of-truth structures and records that
+power the portal without requiring a deployment for every new business concept.
 
 ### Scope
 
 - Build admin client management: create, view, edit, archive, invite members, and
   revoke access.
-- Build project management: client association, name, description, status,
-  start/target dates, and archived state.
-- Build milestone and task management with explicit ordering, status, due date,
-  priority, and optional client-visible notes.
-- Define progress consistently. Recommended first version: derive project progress
-  from milestone/task completion rather than storing an independently editable
-  percentage.
+- Build collection and field management with stable identifiers and supported
+  field types, including relations to other records and clients.
+- Build generic record creation/editing, table and record-detail views, basic
+  filtering/sorting, and saved views. Use TanStack Table as the headless grid
+  engine, backed by server-side validated queries and persisted view state.
+- Make table creation, `+` column creation, row entry, typed inline editing, and
+  relationship selection obvious without documentation. Support predictable
+  keyboard navigation, visible save/error state, and a record drawer for fields
+  that do not edit comfortably in a cell.
+- Require desktop cells to enter inline edit mode on double-click. Select each
+  editor, formatter, parser, filter, and validator from the column's configured
+  data type, with a discoverable equivalent editing action on touch devices.
+- Separate internal client links from explicit portal sharing, including optional
+  field allowlists and a preview of what the client will see.
+- Provide projects, milestones, and tasks as seedable collection templates rather
+  than privileged schema. Define progress through a later formula/rollup design or
+  a deliberately supported derived field; do not add arbitrary formula execution
+  to the first release.
 - Add server-side validation, safe archive behavior, and audit events for material
   admin changes.
 - Convert a qualified contact inquiry into a client/project through an explicit
@@ -166,12 +206,11 @@ design decision, not as completed groundwork.
 
 ### Exit criteria
 
-- Admin can create a client, invite a user, create a project, and assign ordered
-  milestones/tasks end to end.
-- Archived clients/projects are hidden by default without deleting financial or
-  conversation history.
-- Progress is deterministic and covered for empty, partial, completed, and
-  reopened work.
+- Admin can create a client, invite a user, define a collection, add fields and
+  records, relate records, and share selected records/fields end to end.
+- Archived clients, collections, and records are hidden by default without
+  deleting financial, relational, or conversation history.
+- Relation traversal cannot expose an unshared record to a client.
 - All list views handle pagination or bounded result sets from the start.
 
 ## Phase 3 — Client and admin dashboards
@@ -180,9 +219,10 @@ design decision, not as completed groundwork.
 
 ### Client dashboard
 
-- Show active and recent projects with status, target date, and progress.
-- Provide project detail with milestones, tasks, completed work, upcoming work,
-  and a simple activity timeline.
+- Show collections and records the client is explicitly allowed to see, organized
+  through admin-selected portal views.
+- Provide generic record detail with visible typed fields and safe links to other
+  records shared with the same client.
 - Include obvious entry points to project conversations and invoices, even if
   those modules initially show a planned/empty state.
 - Make it clear which information is read-only and how clients request a change.
@@ -193,8 +233,8 @@ design decision, not as completed groundwork.
   unread conversations, draft/due invoices, and recent inquiries.
 - Provide fast navigation into client, project, task, conversation, and invoice
   management rather than reproducing every editor on the overview page.
-- Use the same underlying project and progress queries as the client view, with
-  authorization-aware projections, to avoid conflicting status calculations.
+- Use the same underlying workspace query layer as the client view, with
+  authorization-aware field projections, to avoid conflicting record data.
 
 ### UI overhaul delivery
 
@@ -206,8 +246,8 @@ design decision, not as completed groundwork.
 
 ### Exit criteria
 
-- A client can answer “what is happening, what is next, and how far along are we?”
-  without contacting the admin.
+- A client can find the operational information intentionally shared with them
+  without seeing internal fields or records.
 - Admin can identify the next operational action from the dashboard.
 - Client and admin views agree on shared project status and progress.
 - Dashboard routes have authorized integration tests and responsive/accessibility
