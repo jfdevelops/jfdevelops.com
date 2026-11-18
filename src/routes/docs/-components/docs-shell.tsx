@@ -24,10 +24,10 @@ export function DocsShell({
 
   return (
     <main className="w-full">
-      <div className="grid min-h-[calc(100dvh-6rem)] items-start lg:grid-cols-[280px_minmax(0,1fr)]">
+      <div className="grid min-h-[calc(100dvh-var(--site-header-height,6rem))] items-start lg:grid-cols-[280px_minmax(0,1fr)]">
         <IslandShell
           as="aside"
-          className="rounded-none border-x-0 border-t-0 p-4 shadow-none lg:sticky lg:top-24 lg:max-h-[calc(100dvh-6rem)] lg:overflow-y-auto lg:border-b-0 lg:border-r lg:p-6"
+          className="rounded-none border-x-0 border-t-0 p-4 shadow-none lg:sticky lg:top-[var(--site-header-height,6rem)] lg:max-h-[calc(100dvh-var(--site-header-height,6rem))] lg:overflow-y-auto lg:border-b-0 lg:border-r lg:p-6"
         >
           <p className="font-semibold">{pkg.name}</p>
           <label htmlFor="docs-version" className="block text-sm">
@@ -83,7 +83,7 @@ export function DocsShell({
         </IslandShell>
         <IslandShell
           as="section"
-          className="min-h-[calc(100dvh-6rem)] min-w-0 rounded-none border-0 p-6 shadow-none sm:p-8 lg:p-10"
+          className="min-h-[calc(100dvh-var(--site-header-height,6rem))] min-w-0 rounded-none border-0 p-6 shadow-none sm:p-8 lg:p-10"
         >
           <nav aria-label="Breadcrumb" className="mb-6">
             <Link to="/docs">Docs</Link> / {pkg.name} / {version.label}
