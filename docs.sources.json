@@ -1,0 +1,12 @@
+{
+  "react-layout": {
+    "repository": "https://github.com/jfdevelops/react-layout",
+    "description": "Build typed resource layouts, routes, and reusable UI with React Layout.",
+    "defaultChannel": "stable",
+    "channels": {
+      "stable": {
+        "branch": "main"
+      }
+    }
+  }
+}

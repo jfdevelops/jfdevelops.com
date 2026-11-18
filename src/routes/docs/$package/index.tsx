@@ -1,45 +1,18 @@
-import { createFileRoute, notFound } from '@tanstack/react-router'
-import { DocContent } from '@/docs/doc-content'
-import { getPackageDocs } from '@/docs/registry'
-import { DocsShell } from '../-components/docs-shell'
+import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
+import { getDocsContext } from '@/docs/queries'
 
 export const Route = createFileRoute('/docs/$package/')({
-  loader: ({ params }) => {
-    const pkg = getPackageDocs(params.package)
-    if (!pkg) {
+  loader: async ({ params }) => {
+    const docs = await getDocsContext({ data: { package: params.package } })
+    if (!docs) {
       throw notFound()
     }
+    const { pkg } = docs
 
-    const indexPage = pkg.pages.find((page) => page.slug === 'index')
-    return { pkg, indexPage }
+    throw redirect({
+      to: '/docs/$package/$',
+      params: { package: pkg.id, _splat: pkg.defaultVersion },
+      search: {},
+    })
   },
-  head: ({ loaderData }) => ({
-    meta: [
-      { title: `${loaderData?.pkg.name ?? 'Library'} documentation — JF Develops` },
-      {
-        name: 'description',
-        content: loaderData?.pkg.description ?? 'JF Develops library documentation.',
-      },
-    ],
-  }),
-  component: PackageDocsIndex,
 })
-
-function PackageDocsIndex() {
-  const { pkg, indexPage } = Route.useLoaderData()
-
-  return (
-    <DocsShell pkg={pkg}>
-      {indexPage ? (
-        <DocContent content={indexPage.content} />
-      ) : (
-        <div>
-          <h1 className="font-display mb-3 text-3xl font-bold text-[var(--sea-ink)]">{pkg.name}</h1>
-          <p className="text-[var(--sea-ink-soft)]">
-            Select a page from the sidebar to get started.
-          </p>
-        </div>
-      )}
-    </DocsShell>
-  )
-}

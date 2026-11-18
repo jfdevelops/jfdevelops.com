@@ -1,0 +1,7 @@
+allowBuilds:
+  esbuild: true
+  lightningcss: true
+  workerd: true
+  sharp: false
+minimumReleaseAge: 0
+strictPeerDependencies: true

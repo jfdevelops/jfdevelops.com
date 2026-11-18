@@ -31,7 +31,27 @@ const sectionLinks = createResourceLinks({
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-50 border-b border-(--line) bg-(--header-bg) px-4 backdrop-blur-lg">
+    <header
+      ref={(element) => {
+        if (!element) {
+          return
+        }
+
+        const updateHeight = () => {
+          document.documentElement.style.setProperty(
+            '--site-header-height',
+            `${element.getBoundingClientRect().height}px`,
+          )
+        }
+        const observer = new ResizeObserver(updateHeight)
+
+        updateHeight()
+        observer.observe(element)
+
+        return () => observer.disconnect()
+      }}
+      className="sticky top-0 z-50 border-b border-(--line) bg-(--header-bg) px-4 backdrop-blur-lg"
+    >
       <PageWrap as="nav" className="flex flex-wrap items-center gap-x-3 gap-y-2 py-3 sm:py-4">
         <div className="shrink-0">
           <Link
