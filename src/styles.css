@@ -590,3 +590,10 @@ header nav a:not([class*="bg-"]):hover { color: var(--brand-accent); }
 .delivery-icon { flex-shrink: 0; }
 .software-preview .illustrated-form p { background: var(--sea-ink); color: var(--foam); }
 .software-preview .form-progress > span:first-child { color: var(--sea-ink); }
+
+.docs-content :is(h2, h3, h4, h5, h6) {
+  scroll-margin-top: 6rem;
+}
+.docs-content pre { overflow-x: auto; }
+.docs-content .docs-callout { border-inline-start: 3px solid var(--lagoon); padding: 1rem; }
+.docs-content .docs-callout-warning { border-color: #d97706; }
