@@ -597,3 +597,18 @@ header nav a:not([class*="bg-"]):hover { color: var(--brand-accent); }
 .docs-content pre { overflow-x: auto; }
 .docs-content .docs-callout { border-inline-start: 3px solid var(--lagoon); padding: 1rem; }
 .docs-content .docs-callout-warning { border-color: #d97706; }
+
+/* Both color themes are generated at build time. */
+.docs-content .shiki, .docs-content .shiki span {
+  color: var(--shiki-light);
+}
+.docs-content .shiki { background-color: var(--shiki-light-bg); }
+:root[data-theme="dark"] .docs-content .shiki,
+:root[data-theme="dark"] .docs-content .shiki span { color: var(--shiki-dark); }
+:root[data-theme="dark"] .docs-content .shiki { background-color: var(--shiki-dark-bg); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .docs-content .shiki,
+  :root:not([data-theme="light"]) .docs-content .shiki span { color: var(--shiki-dark); }
+  :root:not([data-theme="light"]) .docs-content .shiki { background-color: var(--shiki-dark-bg); }
+}
+.docs-type:has(.docs-type-trigger) > .docs-type-fallback { display: none; }

@@ -1,14 +1,16 @@
 import path from 'node:path'
-import hljs from 'highlight.js'
 import MarkdownIt from 'markdown-it'
 
-export function renderPage(body, { file, library, headings, routes = {} }) {
-  const md = new MarkdownIt({
-    html: false,
-    highlight(code, language) {
-      return hljs.getLanguage(language) ? hljs.highlight(code, { language }).value : ''
-    },
-  })
+export function renderPage(body, { file, library, headings, routes = {}, renderCode }) {
+  const md = new MarkdownIt({ html: false })
+  if (renderCode) {
+    md.renderer.rules.fence = (tokens, index) => {
+      const token = tokens[index]
+      const language = token.info.trim().split(/\s+/)[0]
+
+      return renderCode(token.content, language)
+    }
+  }
   let heading = 0
   md.renderer.rules.heading_open = (tokens, index, options, _env, renderer) => {
     tokens[index].attrSet('id', headings[heading++].slug)

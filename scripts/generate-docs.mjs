@@ -4,14 +4,18 @@ import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
+import { createCodeRenderer } from './docs/highlight.mjs'
 import { renderPage } from './docs/markdown.mjs'
+import { createPageCodeRenderer } from './docs/snippets.mjs'
 import { checkoutDocs, selectVersions, validateSources } from './docs/sources.mjs'
+import { createVersionTypes } from './docs/types.mjs'
 
 export async function generateDocs(sourceFile = 'docs.sources.json') {
   const sources = JSON.parse(await readFile(sourceFile, 'utf8'))
   validateSources(sources)
   const staging = await mkdtemp(path.join(os.tmpdir(), 'jf-docs-'))
   const registry = []
+  const codeRenderer = await createCodeRenderer()
 
   try {
     for (const [id, library] of Object.entries(sources)) {
@@ -64,13 +68,28 @@ export async function generateDocs(sourceFile = 'docs.sources.json') {
           pageExists[version.id] = entries.map((entry) => entry.pageId)
           const slugFor = (pageId) => `${version.id}${pageId === 'index' ? '' : `/${pageId}`}`
 
+          const inputs = await Promise.all(
+            entries.map(async (entry) => {
+              const file = `docs/${version.path}/${entry.pageId}.md`
+              const { data, body } = parseFrontmatter(
+                await readFile(path.join(checkout, file), 'utf8'),
+              )
+              const { headings, fences } = scanMarkdown(body)
+
+              return { file, data, body, headings, fences }
+            }),
+          )
+          const twoslasher = await createVersionTypes(inputs, version)
+
           for (const [index, entry] of entries.entries()) {
-            const file = `docs/${version.path}/${entry.pageId}.md`
-            const { data, body } = parseFrontmatter(
-              await readFile(path.join(checkout, file), 'utf8'),
-            )
-            const headings = scanMarkdown(body).headings
-            const html = renderPage(body, { file, library: id, headings, routes })
+            const { file, data, body, headings } = inputs[index]
+            const html = renderPage(body, {
+              file,
+              library: id,
+              headings,
+              routes,
+              renderCode: createPageCodeRenderer(codeRenderer, twoslasher),
+            })
             const renderedIds = [...html.matchAll(/<h[2-6] id="([^"]*)"/g)].map((match) => match[1])
 
             if (JSON.stringify(renderedIds) !== JSON.stringify(headings.map((h) => h.slug))) {
@@ -124,6 +143,7 @@ export async function generateDocs(sourceFile = 'docs.sources.json') {
       `Generated ${registry.reduce((n, pkg) => n + pkg.pages.length, 0)} validated docs pages`,
     )
   } finally {
+    codeRenderer.dispose()
     await rm(staging, { recursive: true, force: true })
   }
 }

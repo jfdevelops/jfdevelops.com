@@ -1,12 +1,14 @@
 import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
-import { getPackageDocs } from '@/docs/registry'
+import { getDocsContext } from '@/docs/queries'
 
 export const Route = createFileRoute('/docs/$package/')({
-  loader: ({ params }) => {
-    const pkg = getPackageDocs(params.package)
-    if (!pkg) {
+  loader: async ({ params }) => {
+    const docs = await getDocsContext({ data: { package: params.package } })
+    if (!docs) {
       throw notFound()
     }
+    const { pkg } = docs
+
     throw redirect({
       to: '/docs/$package/$',
       params: { package: pkg.id, _splat: pkg.defaultVersion },

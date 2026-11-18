@@ -69,3 +69,39 @@ interactive elements use this project's shadcn/Base UI primitives.
 `pnpm test`, `pnpm typecheck` and `pnpm build` validate the integration. Run local
 apps through `pnpm dev` and the configured Portless URL. Old repository-path stubs
 remain unpublished because the website never served them.
+
+## Highlighting and type hovers
+
+All fenced code is highlighted with Shiki in light and dark themes at build time.
+TS, TSX, JS and JSX snippets additionally run through Twoslash. Earlier complete
+imports and declarations on the same page provide hidden context for subsequent
+snippets; incomplete fragments are kept exactly as written. Hovers expose resolved
+compiler information and JSDoc. Unresolved `any`/`unknown` symbols are omitted rather
+than inventing library APIs. Syntax highlighting still works without JavaScript;
+client-side shadcn tooltips add pointer and keyboard access to the static metadata.
+Code tooltips use zero hover delay and no entry animation; opening one performs no
+network request or compiler work.
+
+Each release gets an isolated type environment. The core package uses the exact
+manifest endpoint version, companion packages use the docs compatibility table or
+pinned installation commands, and other imports use that published release's npm
+metadata. The website's installed library version is never used for docs inference.
+Npm installation runs with lifecycle scripts disabled. Environments and their npm
+lockfiles live in ignored `.cache/docs-types`, keyed by dependencies and TypeScript
+version, and are reused by subsequent build steps. Delete this cache to re-resolve
+third-party dependency ranges. A cold build needs npm access as well as GitHub.
+An unreleased channel with no published npm snapshot still builds with syntax
+highlighting and locally inferable types. Missing library symbols get no hover;
+there is no fallback to the website's package versions. Publishing a prerelease
+provides the real declarations on the next build. A library-owned type fixture
+contract could support unpublished APIs later.
+
+Type inference is not a replacement for the library's example checks: partial
+snippets deliberately suppress diagnostics, and the manifest's example-verification
+banner remains authoritative. The page text and code never execute. Inferred type
+and JSDoc strings are rendered as text in tooltips.
+
+The full generated registry stays on the server. A page request receives its HTML
+and shared navigation metadata, rather than every version's HTML. Navigation uses
+the site's own server function; there are no runtime GitHub/npm requests or compiler
+bundles in the browser or Worker.

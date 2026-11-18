@@ -3,10 +3,10 @@ import { ArrowRight, BookOpen, Boxes, GitBranch } from 'lucide-react'
 import { FeatureCard, IslandShell } from '@/components/ui/island-shell'
 import { Kicker } from '@/components/ui/kicker'
 import { PageWrap } from '@/components/ui/page-wrap'
-import { getPackages } from '@/docs/registry'
+import { getDocsLibraries } from '@/docs/queries'
 
 export const Route = createFileRoute('/docs/')({
-  loader: () => getPackages(),
+  loader: () => getDocsLibraries(),
   head: () => ({
     meta: [
       { title: 'Documentation — JF Develops' },

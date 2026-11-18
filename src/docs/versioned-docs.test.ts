@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { getDocPage, getPackageDocs, getPackages, versionDestination } from './registry'
+import { getDocPage, getPackageDocs, getPackages } from './source.server'
+import { versionDestination } from './registry'
 
 const pkg = getPackageDocs('react-layout')!
 describe('versioned docs contract', () => {
   it('publishes one library with every manifest page in navigation order', () => {
     expect(getPackages().some((p) => p.id === 'react-layout')).toBe(true)
-    expect(pkg.versions.find((version) => version.id === pkg.defaultVersion)?.status).toBe('current')
+    expect(pkg.versions.find((version) => version.id === pkg.defaultVersion)?.status).toBe(
+      'current',
+    )
     for (const version of pkg.versions) {
       expect(pkg.pages.filter((p) => p.version === version.id).map((p) => p.pageId)).toEqual(
         version.navigation.flatMap((g) => g.pages),

@@ -19,7 +19,6 @@ describe('build-time Markdown', () => {
     expect(html).toContain('docs-callout-warning')
     expect(html).toContain('and this too')
     expect(html).toContain('language-tsx')
-    expect(html).toContain('hljs-')
   })
   it('resolves page, cross-version, fragment and image URLs and disables HTML and unsafe URLs', () => {
     const html = render(

@@ -15,3 +15,5 @@ todos.json
 *.tsbuildinfo
 src/docs/generated/
 public/docs-assets/
+
+.cache/docs-types/

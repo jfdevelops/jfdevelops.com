@@ -1,7 +1,8 @@
 import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { DocContent } from '@/docs/doc-content'
-import { getDocPage, getPackageDocs } from '@/docs/registry'
+import { DocBody } from '@/docs/body'
+import { DocContent } from '@/docs/content'
+import { getDocsContext } from '@/docs/queries'
 import { DocsBreadcrumb } from '../-components/breadcrumb'
 import { DocsProvider } from '../-components/context'
 import { DocsShell } from '../-components/docs-shell'
@@ -20,12 +21,15 @@ export const Route = createFileRoute('/docs/$package/$')({
 
     return {}
   },
-  loader: ({ params }) => {
-    const pkg = getPackageDocs(params.package)
-    if (!pkg) {
+  loader: async ({ params }) => {
+    const docs = await getDocsContext({
+      data: { package: params.package, slug: params._splat ?? '' },
+    })
+    if (!docs) {
       throw notFound()
     }
 
+    const { pkg, page } = docs
     const slug = params._splat ?? ''
     if (slug.endsWith('/index') && pkg.versions.some((version) => `${version.id}/index` === slug)) {
       throw redirect({
@@ -34,7 +38,6 @@ export const Route = createFileRoute('/docs/$package/$')({
         search: {},
       })
     }
-    const page = getDocPage(params.package, params._splat ?? '')
     if (!page) {
       throw notFound()
     }
@@ -80,7 +83,11 @@ function PackageDocPage() {
               </Alert>
             )}
           </DocsNotices>
-          <DocContent page={page} />
+          <DocContent>
+            <h1>{page.title}</h1>
+            {/* biome-ignore lint/security/noDangerouslySetInnerHtml: Page HTML is validated and escaped at build time. */}
+            <DocBody key={page.slug} dangerouslySetInnerHTML={{ __html: page.html }} />
+          </DocContent>
           <DocsPager />
         </DocsMain>
       </DocsShell>
