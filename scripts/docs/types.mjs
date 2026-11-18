@@ -59,7 +59,7 @@ export function collectDependencies(pages, version, metadata) {
     ...versions,
   }
   // React types are compile-time support, never the website's library dependency.
-  available['@types/react'] ??= '19.2.17'
+  available['@types/react'] ??= '19.3.0'
   const dependencies = {}
 
   for (const name of [...imports].sort()) {
@@ -104,7 +104,7 @@ export async function createVersionTypes(pages, version) {
       )
       metadata = {
         unpublished: true,
-        devDependencies: { react: '19.2.7', '@types/react': '19.2.17' },
+        devDependencies: { react: '19.3.1', '@types/react': '19.3.0' },
       }
     }
   }

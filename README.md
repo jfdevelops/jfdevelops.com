@@ -2,11 +2,17 @@ Welcome to your new TanStack Start app!
 
 # Getting Started
 
+Use Node 26.13.1 (`.nvmrc`) and pnpm 12.21.0 locally and in CI. TypeScript stays on 6.0.3 because the docs compiler depends on Twoslash, whose current peer range excludes TypeScript 7.
+
 To run this application:
 
 ```bash
-npm install
-npm run dev
+nvm install
+nvm use
+npm install -g --allow-scripts=pnpm pnpm@12.21.0
+pnpm install --frozen-lockfile
+pnpm docs:seed
+pnpm dev
 ```
 
 # Building For Production
@@ -14,7 +20,7 @@ npm run dev
 To build this application for production:
 
 ```bash
-npm run build
+pnpm build
 ```
 
 ## Testing
@@ -22,7 +28,7 @@ npm run build
 This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
 
 ```bash
-npm run test
+pnpm test
 ```
 
 ## Styling
@@ -36,16 +42,16 @@ If you prefer not to use Tailwind CSS:
 1. Remove the demo pages in `src/routes/demo/`
 2. Replace the Tailwind import in `src/styles.css` with your own styles
 3. Remove `tailwindcss()` from the plugins array in `vite.config.ts`
-4. Uninstall the packages: `npm install @tailwindcss/vite tailwindcss -D`
+4. Uninstall the packages: `pnpm remove @tailwindcss/vite tailwindcss`
 
 
 ## Deploy to Cloudflare Workers
 
 This project uses the Cloudflare Vite plugin (configured in `vite.config.ts`) and `wrangler.jsonc`:
 
-1. Install Wrangler: `npm install -g wrangler`
-2. Authenticate: `wrangler login`
-3. Deploy: `npx wrangler deploy`
+1. Install project dependencies: `pnpm install --frozen-lockfile`
+2. Authenticate: `pnpm exec wrangler login`
+3. Deploy: `pnpm deploy`
 
 For production env vars, run `wrangler secret put MY_VAR` for each secret listed in `.env.example`. Public (non-secret) vars go in `wrangler.jsonc` under `vars`.
 
@@ -230,7 +236,7 @@ For TanStack Start specific documentation, visit [TanStack Start](https://tansta
 - TanStack generates `src/route-tree.gen.ts`; its output path is configured in `vite.config.ts` and `tsr.config.json`. Do not edit generated route contents manually.
 - Router syntax filenames (`__root.tsx`, `$package`, and `$.tsx`) and framework-generated Convex filenames retain their required spellings. Conventional discovery files such as `AGENTS.md` and `README.md` also retain their names.
 - Convex module paths cannot contain hyphens. Use lowercase single-word filenames and folders there: `actions/contact.ts`, `utils/subject.ts`, and `utils/renderer.tsx`.
-- Run `npm run typecheck`, `npm run test`, and `npm run build` to validate changes.
+- Run `npm run typecheck`, `pnpm test`, and `pnpm build` to validate changes.
 
 ### Contact action rollout
 

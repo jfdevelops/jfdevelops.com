@@ -7,7 +7,7 @@ export const getDocsLibraries = createServerFn({ method: 'GET' }).handler(async 
 })
 
 export const getDocsContext = createServerFn({ method: 'GET' })
-  .inputValidator((input: { package: string; slug?: string }) => {
+  .validator((input: { package: string; slug?: string }) => {
     if (
       typeof input?.package !== 'string' ||
       (input.slug !== undefined && typeof input.slug !== 'string')
