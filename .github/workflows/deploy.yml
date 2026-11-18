@@ -6,6 +6,8 @@ on:
     branches:
       - main
   workflow_dispatch:
+  repository_dispatch:
+    types: [docs-updated]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

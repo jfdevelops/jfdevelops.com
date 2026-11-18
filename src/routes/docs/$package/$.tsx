@@ -1,7 +1,16 @@
 import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { DocContent } from '@/docs/doc-content'
 import { getDocPage, getPackageDocs } from '@/docs/registry'
+import { DocsBreadcrumb } from '../-components/breadcrumb'
+import { DocsProvider } from '../-components/context'
 import { DocsShell } from '../-components/docs-shell'
+import { DocsMain } from '../-components/main'
+import { DocsNavigation } from '../-components/navigation'
+import { DocsNotices } from '../-components/notices'
+import { DocsPager } from '../-components/pager'
+import { DocsSidebar } from '../-components/sidebar'
+import { VersionSelector } from '../-components/version-selector'
 
 export const Route = createFileRoute('/docs/$package/$')({
   validateSearch: (search: Record<string, unknown>): { missingPage?: boolean } => {
@@ -55,9 +64,26 @@ function PackageDocPage() {
   const { missingPage } = Route.useSearch()
 
   return (
-    <DocsShell pkg={pkg} page={page}>
-      {missingPage && <p role="status">This page does not exist in this version.</p>}
-      <DocContent page={page} />
-    </DocsShell>
+    <DocsProvider value={{ pkg, page }}>
+      <DocsShell>
+        <DocsSidebar>
+          <p className="font-semibold">{pkg.name}</p>
+          <VersionSelector />
+          <DocsNavigation />
+        </DocsSidebar>
+        <DocsMain>
+          <DocsBreadcrumb />
+          <DocsNotices>
+            {missingPage && (
+              <Alert>
+                <AlertDescription>This page does not exist in this version.</AlertDescription>
+              </Alert>
+            )}
+          </DocsNotices>
+          <DocContent page={page} />
+          <DocsPager />
+        </DocsMain>
+      </DocsShell>
+    </DocsProvider>
   )
 }

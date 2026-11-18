@@ -1,7 +1,12 @@
 {
   "react-layout": {
     "repository": "https://github.com/jfdevelops/react-layout",
-    "commit": "6febaf61804d941482cc77f0ee257cfd6b974560",
-    "description": "Build typed resource layouts, routes, and reusable UI with React Layout."
+    "description": "Build typed resource layouts, routes, and reusable UI with React Layout.",
+    "defaultChannel": "stable",
+    "channels": {
+      "stable": {
+        "branch": "main"
+      }
+    }
   }
 }

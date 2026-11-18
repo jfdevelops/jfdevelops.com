@@ -2,7 +2,7 @@ import path from 'node:path'
 import hljs from 'highlight.js'
 import MarkdownIt from 'markdown-it'
 
-export function renderPage(body, { file, library, headings }) {
+export function renderPage(body, { file, library, headings, routes = {} }) {
   const md = new MarkdownIt({
     html: false,
     highlight(code, language) {
@@ -27,13 +27,16 @@ export function renderPage(body, { file, library, headings }) {
     }
     const [target, fragment] = href.split('#')
     const resolved = path.posix.normalize(path.posix.join(path.posix.dirname(file), target))
+    const [sourceVersion, ...segments] = resolved.slice(5).split('/')
+    const route = routes[sourceVersion] ?? sourceVersion
+
     if (image && resolved.startsWith('docs/')) {
-      return `/docs-assets/${library}/${resolved.slice(5)}`
+      return `/docs-assets/${library}/${route}/${segments.join('/')}`
     }
     if (!resolved.startsWith('docs/') || !resolved.endsWith('.md')) {
       return '#'
     }
-    const slug = resolved.slice(5, -3).replace(/\/index$/, '')
+    const slug = `${route}/${segments.join('/').slice(0, -3)}`.replace(/\/index$/, '')
 
     return `/docs/${library}/${slug}${fragment ? `#${fragment}` : ''}`
   }

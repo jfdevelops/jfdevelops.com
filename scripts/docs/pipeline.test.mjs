@@ -2,7 +2,9 @@ import { execFileSync, spawnSync } from 'node:child_process'
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
+
+vi.setConfig({ testTimeout: 60000, hookTimeout: 60000 })
 
 const temp = mkdtempSync(path.join(os.tmpdir(), 'docs-failure-test-'))
 const fixture = path.join(temp, 'repo')
@@ -18,7 +20,16 @@ afterAll(() => rmSync(temp, { recursive: true, force: true }))
 
 function run(commit) {
   const source = path.join(temp, 'sources.json')
-  writeFileSync(source, JSON.stringify({ 'react-layout': { repository: fixture, commit } }))
+  writeFileSync(
+    source,
+    JSON.stringify({
+      'react-layout': {
+        repository: fixture,
+        defaultChannel: 'stable',
+        channels: { stable: { commit } },
+      },
+    }),
+  )
   const result = spawnSync(process.execPath, ['scripts/generate-docs.mjs', source], {
     encoding: 'utf8',
   })
@@ -58,7 +69,11 @@ describe('fail closed without replacing generated content', () => {
 
 it('rejects a broken relative link using the pinned library checker', () => {
   const source = JSON.parse(readFileSync('docs.sources.json', 'utf8'))['react-layout']
-  execFileSync('git', ['fetch', '--depth=1', source.repository, source.commit], { cwd: fixture })
+  execFileSync(
+    'git',
+    ['fetch', '--depth=1', source.repository, `refs/heads/${source.channels.stable.branch}`],
+    { cwd: fixture },
+  )
   execFileSync('git', ['checkout', 'FETCH_HEAD', '--', '.'], { cwd: fixture })
   const page = path.join(fixture, 'docs/v4/index.md')
   writeFileSync(page, `${readFileSync(page, 'utf8')}\n[Broken fixture](./missing-fixture.md)\n`)

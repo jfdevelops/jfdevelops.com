@@ -34,3 +34,18 @@ describe('build-time Markdown', () => {
     expect(html).not.toContain('href="http:')
   })
 })
+
+it('rewrites links and assets within a branch channel while preserving cross-version links', () => {
+  const html = renderPage(
+    '[local](./guides/start.md) [old](../v3/index.md) ![asset](./assets/x.svg)',
+    {
+      file: 'docs/v4/index.md',
+      library: 'library',
+      headings: [],
+      routes: { v4: 'alpha' },
+    },
+  )
+  expect(html).toContain('/docs/library/alpha/guides/start')
+  expect(html).toContain('/docs/library/v3')
+  expect(html).toContain('/docs-assets/library/alpha/assets/x.svg')
+})

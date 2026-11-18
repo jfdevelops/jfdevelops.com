@@ -1,33 +1,71 @@
-# Published library docs
+# Library-owned documentation
 
-`docs.sources.json` owns the publication pin. Update its full commit SHA in a reviewed
-website PR after the desired docs land on the library's default branch. The current
-pin publishes React Layout v4 through v0. Companion packages are documented inside
-these guides and never registered as libraries.
+The site is a rendering shell. Libraries own their `docs/docs.json` manifest,
+page frontmatter, navigation, version directories, release status and examples.
+Register a library once in `docs.sources.json`; each successful build publishes
+all versions in its default channel's manifest. Adding a new version directory
+and its manifest entry requires no site routes, version numbers or UI changes.
+Unregistered directories fail the library checker instead of silently publishing
+incomplete content. Companion packages remain inside their library's guides.
 
-`pnpm docs:generate` fetches that exact commit into a temporary checkout, runs its
-`scripts/check-docs.mjs` with errors forwarded to the console, requires manifest
-schema version 1, and generates `src/docs/generated/registry.json` plus static
-`public/docs-assets`. Generated files are ignored by Git. No docs content is fetched
-at request time. The build, development command, tests and typecheck generate docs
-before proceeding; a fetch or validation failure stops them. CI deploys only after
-successful tests and build, leaving the previous Cloudflare deployment in place
-when validation fails.
+## Sources and channels
 
-The build renderer uses MarkdownIt with raw HTML disabled and Highlight.js. Heading
-IDs are supplied directly by the pinned checker, and generation verifies every
-rendered heading against it. Source frontmatter is parsed by the same checker,
-including CRLF normalization. All manifest navigation entries must render; no page
-is skipped. Each version retains its manifest metadata, groups and page order.
+React Layout currently has one channel, `stable`, following its `main` branch.
+No alpha channel is enabled. The default channel imports every manifest version,
+including future versions marked `next`. The manifest controls display labels
+(such as `v5 Alpha`) and the default released version.
 
-The existing catch-all route serves version/page slugs, redirects explicit index
-URLs, and returns 404 for unknown pages or versions. Switching versions preserves a
-page and valid fragment; missing pages fall back to the version index with a notice.
-Old repository-path redirect stubs are intentionally not published: this website
-never served those paths.
+Every channel specifies exactly one `branch` or full 40-character `commit`.
+Branches resolve to immutable commit snapshots during generation; the resolved
+SHA is recorded on every generated version and logged in CI. Use a commit when
+docs must remain frozen until a reviewed website pin update.
 
-Use `pnpm dev` and the configured Portless URL (`jfdevelops`) for local access.
-Do not start a direct preview server. `pnpm test`, `pnpm typecheck` and `pnpm build`
-validate the integration. Tests cover renderer behavior, every generated page,
-version switching, heading parity and generation failures. No deployment is needed
-to run these checks.
+An optional additional branch channel can select a version from another branch:
+
+```json
+{
+  "some-library": {
+    "repository": "https://github.com/owner/library",
+    "description": "Library documentation.",
+    "defaultChannel": "stable",
+    "channels": {
+      "stable": { "branch": "main" },
+      "alpha": { "branch": "next", "label": "Alpha" }
+    }
+  }
+}
+```
+
+This example is not active configuration. Additional channels publish the source
+manifest's default version at `/docs/some-library/alpha`, use an unreleased banner,
+and rewrite internal links and asset URLs to that channel. Set `version` to select
+a particular source version instead. Route collisions fail generation.
+
+## Build and refresh
+
+`pnpm docs:generate` checks out each source, runs its `scripts/check-docs.mjs`,
+requires manifest schema version 1, and generates the ignored
+`src/docs/generated/registry.json` and `public/docs-assets`. All sources must pass
+before outputs are replaced. CI builds this artifact; docs content is never
+fetched at request time. Local dev, tests and typecheck also generate it first.
+
+Branch changes become visible on the next website build. Website pushes and
+manual `workflow_dispatch` already build. A library workflow can send a
+`repository_dispatch` with event type `docs-updated` to this website after its docs
+checks pass; this rebuilds the default branch. The sender needs a token permitted
+to dispatch to the website repository. No sender credentials are stored here.
+New directories alone do not trigger CI across repositories.
+
+The source contract must continue to validate. A fetch, manifest, link, rendering
+or heading-parity failure stops the build; CI deploys only after successful tests
+and build, so the previous Cloudflare deployment continues serving.
+
+## UI and validation
+
+Docs compose a provider, shell, sidebar, version selector, navigation, breadcrumb,
+notices, main content and pager. Layout components accept native element props;
+interactive elements use this project's shadcn/Base UI primitives.
+
+`pnpm test`, `pnpm typecheck` and `pnpm build` validate the integration. Run local
+apps through `pnpm dev` and the configured Portless URL. Old repository-path stubs
+remain unpublished because the website never served them.
