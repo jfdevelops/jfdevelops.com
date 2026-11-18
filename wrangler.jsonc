@@ -3,5 +3,7 @@
   "name": "jfdevelops",
   "compatibility_date": "2025-09-02",
   "compatibility_flags": ["nodejs_compat"],
-  "main": "@tanstack/react-start/server-entry"
+  "main": "src/server.ts",
+  "r2_buckets": [{ "binding": "DOCS_BUCKET", "bucket_name": "jfdevelops-docs" }],
+  "version_metadata": { "binding": "VERSION_METADATA" }
 }

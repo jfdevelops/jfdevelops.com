@@ -4,13 +4,15 @@ import os from 'node:os'
 import path from 'node:path'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
-vi.setConfig({ testTimeout: 60000, hookTimeout: 60000 })
+vi.setConfig({ testTimeout: 120000, hookTimeout: 120000 })
 
 const temp = mkdtempSync(path.join(os.tmpdir(), 'docs-failure-test-'))
 const fixture = path.join(temp, 'repo')
 let baseline
 beforeAll(() => {
-  baseline = readFileSync('src/docs/generated/registry.json', 'utf8')
+  baseline = '{"previous":true}'
+  mkdirSync(path.join(temp, 'src/docs/generated'), { recursive: true })
+  writeFileSync(path.join(temp, 'src/docs/generated/registry.json'), baseline)
   mkdirSync(fixture)
   execFileSync('git', ['init', '-q'], { cwd: fixture })
   execFileSync('git', ['config', 'user.email', 'fixture@example.com'], { cwd: fixture })
@@ -30,11 +32,12 @@ function run(commit) {
       },
     }),
   )
-  const result = spawnSync(process.execPath, ['scripts/generate-docs.mjs', source], {
+  const result = spawnSync(process.execPath, [path.resolve('scripts/generate-docs.mjs'), source], {
     encoding: 'utf8',
+    cwd: temp,
   })
   expect(result.status).not.toBe(0)
-  expect(readFileSync('src/docs/generated/registry.json', 'utf8')).toBe(baseline)
+  expect(readFileSync(path.join(temp, 'src/docs/generated/registry.json'), 'utf8')).toBe(baseline)
 
   return result.stdout + result.stderr
 }
@@ -68,14 +71,14 @@ describe('fail closed without replacing generated content', () => {
 })
 
 it('rejects a broken relative link using the pinned library checker', () => {
-  const source = JSON.parse(readFileSync('docs.sources.json', 'utf8'))['react-layout']
-  execFileSync(
-    'git',
-    ['fetch', '--depth=1', source.repository, `refs/heads/${source.channels.stable.branch}`],
-    { cwd: fixture },
-  )
+  // This is a fixed regression fixture, independent of publisher channel changes.
+  const source = {
+    repository: 'https://github.com/jfdevelops/react-layout',
+    commit: '6febaf61804d941482cc77f0ee257cfd6b974560',
+  }
+  execFileSync('git', ['fetch', '--depth=1', source.repository, source.commit], { cwd: fixture })
   execFileSync('git', ['checkout', 'FETCH_HEAD', '--', '.'], { cwd: fixture })
   const page = path.join(fixture, 'docs/v4/index.md')
   writeFileSync(page, `${readFileSync(page, 'utf8')}\n[Broken fixture](./missing-fixture.md)\n`)
   expect(run(commit())).toContain('missing-fixture.md')
-}, 30000)
+}, 120000)

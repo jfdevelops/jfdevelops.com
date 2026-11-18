@@ -1,0 +1,74 @@
+name: Publish library docs
+
+on:
+  workflow_dispatch:
+    inputs:
+      sources:
+        description: 'docs.sources.json content (blank uses this repo configuration)'
+        type: string
+        required: false
+      viewer_ref:
+        description: 'Website tooling commit or branch'
+        type: string
+        default: main
+      viewer_origin:
+        description: 'Deployed viewer origin for cache warming'
+        type: string
+        default: https://jfdevelops.com
+  workflow_call:
+    inputs:
+      sources:
+        type: string
+        required: true
+      viewer_ref:
+        type: string
+        default: main
+      viewer_origin:
+        type: string
+        default: https://jfdevelops.com
+    secrets:
+      CLOUDFLARE_API_TOKEN:
+        required: true
+      CLOUDFLARE_ACCOUNT_ID:
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-publish-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          repository: jfdevelops/jfdevelops.com
+          ref: ${{ inputs.viewer_ref || 'main' }}
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Configure library sources
+        env:
+          DOCS_SOURCES_JSON: ${{ inputs.sources }}
+        run: |
+          node --input-type=module <<'JS'
+          import { writeFileSync } from 'node:fs'
+          if (process.env.DOCS_SOURCES_JSON) {
+            writeFileSync('docs.sources.json', JSON.stringify(JSON.parse(process.env.DOCS_SOURCES_JSON)))
+          }
+          JS
+      - run: pnpm docs:generate
+      - run: pnpm docs:verify
+      - name: Upload, warm, then publish
+        run: pnpm docs:publish --remote
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          DOCS_WARM_URL: ${{ inputs.viewer_origin || 'https://jfdevelops.com' }}

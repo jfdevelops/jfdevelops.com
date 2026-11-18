@@ -1,9 +1,5 @@
-import type registry from './generated/registry.json'
-
-export type DocPage = (typeof registry)[number]['pages'][number]
-export type PackageDocs = Omit<(typeof registry)[number], 'pages'> & {
-  pages: Omit<DocPage, 'content' | 'html'>[]
-}
+import type { DocPage, PackageDocs } from './schema'
+export type { DocPage, PackageDocs } from './schema'
 
 export function versionDestination(pkg: PackageDocs, page: DocPage, version: string, hash = '') {
   const target = pkg.pages.find(

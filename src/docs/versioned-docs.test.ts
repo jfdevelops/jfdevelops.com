@@ -1,8 +1,15 @@
 import { describe, expect, it } from 'vitest'
-import { getDocPage, getPackageDocs, getPackages } from './source.server'
 import { versionDestination } from './registry'
+import { fixtureLibrary } from './testing/fixture'
 
-const pkg = getPackageDocs('react-layout')!
+const pkg = fixtureLibrary()
+
+function getDocPage(_id: string, slug: string) {
+  return pkg.pages.find((page) => page.slug === slug) ?? null
+}
+function getPackages() {
+  return [pkg]
+}
 describe('versioned docs contract', () => {
   it('publishes one library with every manifest page in navigation order', () => {
     expect(getPackages().some((p) => p.id === 'react-layout')).toBe(true)

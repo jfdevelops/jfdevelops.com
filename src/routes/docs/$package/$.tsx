@@ -14,6 +14,8 @@ import { DocsSidebar } from '../-components/sidebar'
 import { VersionSelector } from '../-components/version-selector'
 
 export const Route = createFileRoute('/docs/$package/$')({
+  staleTime: 15000,
+  preloadStaleTime: 15000,
   validateSearch: (search: Record<string, unknown>): { missingPage?: boolean } => {
     if (search.missingPage === true || search.missingPage === 'true') {
       return { missingPage: true }

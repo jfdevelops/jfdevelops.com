@@ -1,19 +1,19 @@
-import registry from './generated/registry.json'
+import { env } from 'cloudflare:workers'
+import { getRequestHeader } from '@tanstack/react-start/server'
+import { createDocsStorage } from './storage'
 
-export function getPackages() {
-  return registry.map((pkg) => ({
-    id: pkg.id,
-    name: pkg.name,
-    description: pkg.description,
-    version: pkg.version,
-    pageCount: pkg.pages.filter((p) => p.version === pkg.defaultVersion).length,
-  }))
+export async function getDocsStorage() {
+  return createDocsStorage(env.DOCS_BUCKET, await caches.open('docs-objects'))
 }
 
-export function getPackageDocs(id: string) {
-  return registry.find((pkg) => pkg.id === id) ?? null
+export async function getPackages() {
+  return (await getDocsStorage()).libraries()
 }
 
-export function getDocPage(id: string, slug: string) {
-  return getPackageDocs(id)?.pages.find((page) => page.slug === slug) ?? null
+export async function getDocsContext(id: string, slug?: string) {
+  return (await getDocsStorage()).context(
+    id,
+    slug,
+    getRequestHeader('x-docs-snapshot') ?? undefined,
+  )
 }

@@ -18,19 +18,7 @@ export const getDocsContext = createServerFn({ method: 'GET' })
     return input
   })
   .handler(async ({ data }) => {
-    const { getPackageDocs } = await import('./source.server')
-    const library = getPackageDocs(data.package)
+    const { getDocsContext } = await import('./source.server')
 
-    if (!library) {
-      return null
-    }
-
-    const { pages, ...metadata } = library
-    const pkg = {
-      ...metadata,
-      pages: pages.map(({ content: _content, html: _html, ...page }) => page),
-    }
-    const page = pages.find((page) => page.slug === data.slug) ?? null
-
-    return { pkg, page }
+    return getDocsContext(data.package, data.slug)
   })

@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import type { ComponentProps } from 'react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -27,13 +28,16 @@ export function DocsNavigation({ className, ...props }: ComponentProps<'nav'>) {
                     variant={item.slug === page.slug ? 'secondary' : 'ghost'}
                     className="h-auto w-full justify-start whitespace-normal px-2 py-1.5 text-left text-sm"
                     render={
-                      <a
-                        href={`/docs/${pkg.id}/${item.slug}`}
+                      <Link
+                        to="/docs/$package/$"
+                        params={{ package: pkg.id, _splat: item.slug }}
+                        preload="intent"
+                        preloadDelay={0}
                         aria-label={item.title}
                         aria-current={item.slug === page.slug ? 'page' : undefined}
                       >
                         {item.title}
-                      </a>
+                      </Link>
                     }
                   >
                     {item.title}
