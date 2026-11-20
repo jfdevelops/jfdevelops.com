@@ -25,12 +25,13 @@ describe('Markdown-only repository ingestion', () => {
       path.join(root, 'packages/core/package.json'),
       JSON.stringify({ name: '@example/forms', version: '1.2.0' }),
     )
+    await writeFile(path.join(root, 'README.md'), '# Forms\n')
     for (const framework of ['react', 'core']) {
       const directory = path.join(root, 'docs/framework', framework, 'v1')
       await mkdir(directory, { recursive: true })
       await writeFile(
         path.join(directory, 'overview.md'),
-        '---\ntitle: Overview\ndescription: Learn forms.\norder: 10\n---\n\nBuild a form.\n\n## Next steps\n\nRead this page.\n',
+        '---\ntitle: Overview\ndescription: Learn forms.\norder: 10\n---\n\nBuild a form.\n\n```bash\npnpm add @example/forms\n```\n\n## Next steps\n\n[Repository guide](../../../../README.md).\n',
       )
     }
     const registration = {
@@ -49,5 +50,8 @@ describe('Markdown-only repository ingestion', () => {
     expect(library.frameworks.map((framework) => framework.id).sort()).toEqual(['core', 'react'])
     expect(library.frameworks.every((framework) => framework.defaultVersion === 'v1')).toBe(true)
     expect(library.pageCount).toBe(2)
+    const page = await readFile(path.join(root, 'docs/framework/react/v1/overview.md'), 'utf8')
+    expect(page).toContain('```pnpm\npnpm add @example/forms')
+    expect(page).toContain(`https://github.com/example/forms/blob/${registration.commit}/README.md`)
   })
 })

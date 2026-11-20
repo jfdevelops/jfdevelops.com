@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { checkDocs, loadConfig, writeDocsNavigation } from '@jfdevelops/docs'
+import { normalizeRepositoryDocs } from './normalize.mjs'
 
 export async function prepareLibrary(checkout, registration, run, install) {
   const manifest = JSON.parse(await readFile(path.join(checkout, 'package.json'), 'utf8'))
@@ -11,7 +12,10 @@ export async function prepareLibrary(checkout, registration, run, install) {
     if (generate) await run('pnpm', [generate], checkout)
   }
   const config = loadConfig(checkout, registration.docs)
-  if (!generate) writeDocsNavigation({ root: checkout, config })
+  if (!generate) {
+    await normalizeRepositoryDocs(checkout, registration)
+    writeDocsNavigation({ root: checkout, config })
+  }
   if (check) await run('pnpm', [check], checkout)
   else {
     const result = checkDocs({ root: checkout, config })
