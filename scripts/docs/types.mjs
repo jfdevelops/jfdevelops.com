@@ -26,13 +26,10 @@ export function annotateCodeBlocks(markdown, context) {
           lines.slice(previousManagerEnd + 1, index).every((candidate) => !candidate.trim())
         const next = lines.slice(end + 1).find((candidate) => candidate.trim()) ?? ''
         previousManagerEnd = end
+        const nextIsManager = /^ {0,3}(?:`{3,}|~{3,})(?:npm|pnpm|yarn|bun)\b/.test(next)
         // Preserve Fumadocs' automatic conversion for a standalone npm command.
-        if (
-          match[3] === 'npm' &&
-          !previousIsManager &&
-          !/^ {0,3}(?:`{3,}|~{3,})(?:npm|pnpm|yarn|bun)\b/.test(next)
-        )
-          return line
+        if (!previousIsManager && !nextIsManager)
+          return match[3] === 'npm' ? line : `${match[1]}${match[2]}bash${match[4]}`
         return `${match[1]}${match[2]}bash${match[4]} tab="${match[3]}" tab-group="package-manager"`
       }
       if (

@@ -14,6 +14,9 @@ describe('type-hover code block preparation', () => {
     expect(annotateCodeBlocks('```npm\nnpm i library\n```', 'library/react/v1')).toBe(
       '```npm\nnpm i library\n```',
     )
+    expect(annotateCodeBlocks('```pnpm\npnpm add library\n```', 'library/react/v1')).toBe(
+      '```bash\npnpm add library\n```',
+    )
   })
   it('marks TypeScript fences after normalizing Windows line endings', () => {
     const input = '```tsx\r\nconst value = 1\r\n```\r\n'
