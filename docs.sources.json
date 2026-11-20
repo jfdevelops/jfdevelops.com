@@ -16,6 +16,11 @@
       "commit": "1d1997a8deae6eef18212e22772787f29cecfb33",
       "description": "Portable agent skills, shared conventions, and package-owned skill discovery.",
       "docs": { "name": "Skills" }
+    },
+    {
+      "repository": "https://github.com/jfdevelops/cli",
+      "commit": "0314e5197cc5383db417fff4432a4eb34bcc77a3",
+      "description": "Create projects, configure shared tooling, and manage package-owned agent skills."
     }
   ]
 }

@@ -16,7 +16,8 @@ export const Route = createFileRoute('/docs/')({
       { title: 'Documentation — JF Develops' },
       {
         name: 'description',
-        content: 'Guides, examples, and API documentation for JF Develops React libraries.',
+        content:
+          'Guides, examples, and API documentation for JF Develops libraries and developer tools.',
       },
     ],
   }),
@@ -40,7 +41,7 @@ function DocsIndex() {
             Build with better building blocks.
           </h1>
           <p className="mt-4 max-w-lg text-sm leading-7 text-fd-muted-foreground">
-            Composable React libraries, practical guides, and API references.
+            Type-safe libraries, developer tools, practical guides, and API references.
             <br className="hidden sm:block" /> Everything you need to start putting the pieces
             together.
           </p>
@@ -98,7 +99,7 @@ function DocsIndex() {
             })}
           </div>
           <p className="mt-6 text-center text-xs text-fd-muted-foreground">
-            React + TypeScript. Focused APIs. Composable by design.
+            TypeScript libraries. Developer tools. Practical guides.
           </p>
         </section>
       </div>
