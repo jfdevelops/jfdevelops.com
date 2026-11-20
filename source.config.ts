@@ -45,6 +45,7 @@ function createTypeTransformer(context: (typeof typeContexts)[number]) {
 const headingCounts = new WeakMap<object, Map<string, number>>()
 export default defineConfig({
   mdxOptions: {
+    remarkNpmOptions: { persist: { id: 'package-manager' } },
     rehypeCodeOptions: {
       themes: { light: 'github-light', dark: 'github-dark' },
       transformers: [

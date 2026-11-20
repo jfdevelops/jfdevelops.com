@@ -3,6 +3,7 @@ import path from 'node:path'
 
 export function annotateCodeBlocks(markdown, context) {
   let fence
+  let previousManagerEnd = -1
   const lines = markdown.replace(/\r\n/g, '\n').split('\n')
   return lines
     .map((line, index) => {
@@ -14,6 +15,26 @@ export function annotateCodeBlocks(markdown, context) {
       const match = /^( {0,3})(`{3,}|~{3,})([^\s]*)(.*)$/.exec(line)
       if (!match) return line
       fence = { character: match[2][0], length: match[2].length }
+      if (['npm', 'pnpm', 'yarn', 'bun'].includes(match[3])) {
+        const end = lines.findIndex(
+          (candidate, candidateIndex) =>
+            candidateIndex > index &&
+            new RegExp(`^ {0,3}${fence.character}{${fence.length},}\\s*$`).test(candidate),
+        )
+        const previousIsManager =
+          previousManagerEnd >= 0 &&
+          lines.slice(previousManagerEnd + 1, index).every((candidate) => !candidate.trim())
+        const next = lines.slice(end + 1).find((candidate) => candidate.trim()) ?? ''
+        previousManagerEnd = end
+        // Preserve Fumadocs' automatic conversion for a standalone npm command.
+        if (
+          match[3] === 'npm' &&
+          !previousIsManager &&
+          !/^ {0,3}(?:`{3,}|~{3,})(?:npm|pnpm|yarn|bun)\b/.test(next)
+        )
+          return line
+        return `${match[1]}${match[2]}bash${match[4]} tab="${match[3]}" tab-group="package-manager"`
+      }
       if (
         !['ts', 'tsx', 'typescript', 'js', 'jsx', 'javascript'].includes(match[3]) ||
         /\b(?:notwoslash|no-twoslash)\b/.test(match[4])

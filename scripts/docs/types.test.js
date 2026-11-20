@@ -2,6 +2,19 @@ import { describe, expect, it } from 'vitest'
 import { annotateCodeBlocks } from './types.mjs'
 
 describe('type-hover code block preparation', () => {
+  it('groups authored package-manager commands without duplicating generated alternatives', () => {
+    const input = ['npm', 'pnpm', 'yarn', 'bun']
+      .map((manager) => `\`\`\`${manager}\n${manager} command\n\`\`\``)
+      .join('\n\n')
+    const output = annotateCodeBlocks(input, 'library/react/v1')
+    for (const manager of ['npm', 'pnpm', 'yarn', 'bun']) {
+      expect(output).toContain(`bash tab="${manager}" tab-group="package-manager"`)
+      expect(output).toContain(`${manager} command`)
+    }
+    expect(annotateCodeBlocks('```npm\nnpm i library\n```', 'library/react/v1')).toBe(
+      '```npm\nnpm i library\n```',
+    )
+  })
   it('marks TypeScript fences after normalizing Windows line endings', () => {
     const input = '```tsx\r\nconst value = 1\r\n```\r\n'
     expect(annotateCodeBlocks(input, 'library/react/v2')).toBe(
