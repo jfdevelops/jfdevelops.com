@@ -16,10 +16,13 @@ export async function normalizeRepositoryDocs(
     }
     if (!entry.name.endsWith('.md')) continue
     const input = (await readFile(file, 'utf8')).replace(/\r\n/g, '\n')
-    let output = input.replace(
-      /^```(?:bash|sh)\n((?:npm (?:i|install)|pnpm add|yarn add|bun add)[^\n]*\n)```/gm,
-      (_match, command) => `\`\`\`${command.split(' ')[0]}\n${command}\`\`\``,
-    )
+    // The shared content contract represents documentation-file examples as text.
+    let output = input
+      .replace(/^```(?:markdown|md)\s*$/gm, '```text')
+      .replace(
+        /^```(?:bash|sh)\n((?:npm (?:i|install)|pnpm add|yarn add|bun add)[^\n]*\n)```/gm,
+        (_match, command) => `\`\`\`${command.split(' ')[0]}\n${command}\`\`\``,
+      )
     for (const match of output.matchAll(/\]\(([^\s)]+)\)/g)) {
       const target = match[1]
       if (!target.startsWith('.')) continue

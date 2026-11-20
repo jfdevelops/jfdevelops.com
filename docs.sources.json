@@ -10,6 +10,12 @@
       "commit": "3005838d05ef1ea26b616e0c4feec6a046ddc09b",
       "description": "Type-safe multi-step forms, reusable definitions, and form builders.",
       "docs": { "package": "packages/core", "name": "Multi Step Form" }
+    },
+    {
+      "repository": "https://github.com/jfdevelops/skills",
+      "commit": "1d1997a8deae6eef18212e22772787f29cecfb33",
+      "description": "Portable agent skills, shared conventions, and package-owned skill discovery.",
+      "docs": { "name": "Skills" }
     }
   ]
 }
