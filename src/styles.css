@@ -1,13 +1,16 @@
 
 @import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
+@import "fumadocs-twoslash/twoslash.css";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/inter";
 
 @custom-variant dark (&:is(.dark *));
 
-@plugin "@tailwindcss/typography";
+
 
 @theme {
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
@@ -184,18 +187,18 @@ body {
 }
 
 
-a {
+body:not(.docs-surface) a {
   color: var(--lagoon-deep);
   text-decoration-color: rgba(42, 42, 42, 0.4);
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
 }
 
-a:hover {
+body:not(.docs-surface) a:hover {
   color: var(--palm);
 }
 
-code {
+body:not(.docs-surface) code {
   font-size: 0.9em;
   border: 1px solid var(--line);
   background: color-mix(in oklab, var(--surface-strong) 82%, white 18%);
@@ -203,7 +206,7 @@ code {
   padding: 2px 7px;
 }
 
-pre code {
+body:not(.docs-surface) pre code {
   border: 0;
   background: transparent;
   padding: 0;
@@ -417,7 +420,7 @@ pre code {
 }
 
 button,
-a {
+body:not(.docs-surface) a {
   transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease,
     transform 180ms ease;
 }
@@ -511,25 +514,6 @@ a {
   }
 }
 
-.docs-content {
-  --tw-prose-body: var(--sea-ink-soft);
-  --tw-prose-headings: var(--sea-ink);
-  --tw-prose-lead: var(--sea-ink-soft);
-  --tw-prose-links: var(--lagoon-deep);
-  --tw-prose-bold: var(--sea-ink);
-  --tw-prose-counters: var(--sea-ink-soft);
-  --tw-prose-bullets: var(--sea-ink-soft);
-  --tw-prose-hr: var(--line);
-  --tw-prose-quotes: var(--sea-ink);
-  --tw-prose-quote-borders: var(--line);
-  --tw-prose-captions: var(--sea-ink-soft);
-  --tw-prose-code: var(--sea-ink);
-  --tw-prose-pre-code: var(--sea-ink);
-  --tw-prose-pre-bg: color-mix(in oklab, var(--chip-bg) 88%, transparent);
-  --tw-prose-th-borders: var(--line);
-  --tw-prose-td-borders: var(--line);
-}
-
 /* Brand foundations */
 :root { --brand-accent: var(--lagoon); --brand-tint: #f3f3f3; --kicker: var(--sea-ink-soft); }
 :root[data-theme="dark"] { --brand-accent: #70c7b4; --brand-tint: #242424; --kicker: var(--sea-ink-soft); }
@@ -585,8 +569,74 @@ a {
 /* Teal is an action color; editorial text and supporting graphics stay neutral. */
 .eyebrow, .hero-copy h1 em, .service-top, .process-step > span,
 .about-mark, .about-band li, .hero-note svg { color: var(--sea-ink); }
-header nav a:not([class*="bg-"]) { color: var(--sea-ink); }
-header nav a:not([class*="bg-"]):hover { color: var(--brand-accent); }
+body:not(.docs-surface) header nav a:not([class*="bg-"]) { color: var(--sea-ink); }
+body:not(.docs-surface) header nav a:not([class*="bg-"]):hover { color: var(--brand-accent); }
 .delivery-icon { flex-shrink: 0; }
 .software-preview .illustrated-form p { background: var(--sea-ink); color: var(--foam); }
 .software-preview .form-progress > span:first-child { color: var(--sea-ink); }
+
+body.docs-surface {
+  color: var(--color-fd-foreground);
+  background: var(--color-fd-background);
+}
+
+/* Keep Fumadocs on the same palette as the rest of the site. */
+.docs-surface,
+.docs-surface #nd-sidebar {
+  --color-fd-background: var(--bg-base);
+  --color-fd-foreground: var(--sea-ink);
+  --color-fd-card: var(--surface-strong);
+  --color-fd-card-foreground: var(--sea-ink);
+  --color-fd-popover: var(--foam);
+  --color-fd-popover-foreground: var(--sea-ink);
+  --color-fd-primary: var(--lagoon-deep);
+  --color-fd-primary-foreground: var(--foam);
+  --color-fd-secondary: var(--sand);
+  --color-fd-secondary-foreground: var(--sea-ink);
+  --color-fd-muted: var(--sand);
+  --color-fd-muted-foreground: var(--sea-ink-soft);
+  --color-fd-accent: var(--chip-bg);
+  --color-fd-accent-foreground: var(--sea-ink);
+  --color-fd-border: var(--line);
+  --color-fd-ring: var(--lagoon);
+}
+
+/* The sidebar occupies the left edge; the article and TOC share the reading pane. */
+.docs-reader {
+  --fd-layout-width: 100vw;
+}
+
+.docs-reader #nd-page {
+  max-width: 48rem;
+  padding-top: 2.5rem;
+}
+
+.docs-reader #nd-page > .prose {
+  font-size: 0.9375rem;
+}
+
+.docs-reader #nd-page > h1 {
+  margin-bottom: 0;
+  font-size: 1.875rem;
+  letter-spacing: -0.035em;
+}
+
+.docs-reader #nd-page > p {
+  margin-bottom: 0.5rem;
+}
+
+.docs-home {
+  --fd-layout-width: 72rem;
+}
+
+@media (min-width: 768px) {
+  .docs-reader {
+    --fd-sidebar-width: 250px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .docs-reader {
+    --fd-toc-width: 230px;
+  }
+}

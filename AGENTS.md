@@ -44,22 +44,30 @@ src/
   docs/            # Docs registry and markdown rendering
   components/      # Shared UI
 packages/
-  <package>/docs/  # Per-package markdown injected at build time
+  <package>/docs/  # Legacy placeholder docs; not consumed
+.docs-content/    # Generated public docs from pinned library repositories (ignored)
 public/
   brand/            # Active logo and app icon assets
 ```
 
 ## Docs architecture
 
-Package docs live in `packages/<name>/docs/**/*.md` and are bundled via `import.meta.glob` in `src/docs/registry.ts`.
+Library repositories and pinned commits are registered in `docs.sources.json`. `pnpm docs:generate`
+fetches the commit into `.docs-cache/`, installs dependencies, runs the library's docs generator and
+checker, and reads its generated schema-v2 `docs/docs.json` and `meta.json` navigation. Only public
+framework/version content is copied into `.docs-content/` and compiled with Fumadocs MDX.
+`packages/*/docs` placeholders and the old website-owned package groups are not consumed.
 
 Routes:
 
 - `/docs` — package index
-- `/docs/$package` — package landing (`index.md`)
-- `/docs/$package/$` — individual doc pages by slug
+- `/docs/$package` — redirects to the default framework/version
+- `/docs/$package/$` — `<framework>/<version>/<page>`; framework/version root shows its first page
 
-To add a package: create `packages/<name>/docs/` with markdown files, then rebuild.
+To add a library: register its repository and full commit SHA, then run `pnpm docs:generate` here.
+Frameworks, versions, statuses, defaults and navigation must come from library-generated metadata.
+Keep Framework above Version in the sidebar. Companion packages stay ordinary plugin/devtools pages.
+See README.md's Library documentation section for the build and authoring workflow.
 
 ## Partner integrations
 
@@ -114,8 +122,8 @@ npm run test         # Vitest
 
 ## Next steps
 
-- Add real packages under `packages/` with `docs/` directories
+- Register library repositories and pinned commits in `docs.sources.json`
 - Add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` GitHub secrets for CI deploys
 - Install CodeRabbit GitHub App on the repository
 - Wire contact form to a server function or external service
-- Replace `example-package` placeholder docs with real package content
+- Remove legacy placeholder docs after the repository ingestion migration is accepted

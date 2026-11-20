@@ -5,6 +5,10 @@
   "packageManager": "pnpm@10.28.1",
   "portless": "jfdevelops",
   "scripts": {
+    "docs:generate": "node scripts/generate-doc-sources.mjs",
+    "prebuild": "pnpm docs:generate",
+    "pretest": "pnpm docs:generate",
+    "pretypecheck": "pnpm docs:generate",
     "dev": "portless run node scripts/dev.mjs",
     "dev:direct": "node scripts/dev.mjs",
     "build": "vite build",
@@ -46,10 +50,15 @@
     "@tanstack/react-router-ssr-query": "latest",
     "@tanstack/react-start": "latest",
     "@tanstack/router-plugin": "^1.168.18",
+    "@types/mdx": "^2.0.14",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "convex": "^1.42.3",
-    "lucide-react": "^0.545.0",
+    "fumadocs-core": "^16.15.18",
+    "fumadocs-mdx": "^15.4.6",
+    "fumadocs-twoslash": "^4.0.5",
+    "fumadocs-ui": "^16.15.18",
+    "lucide-react": "^1.47.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-email": "6.9.0",
@@ -60,6 +69,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.16",
+    "@jfdevelops/docs": "0.2.0",
     "@tailwindcss/typography": "^0.5.20",
     "@tanstack/devtools-vite": "latest",
     "@tanstack/router-cli": "^1.167.17",
@@ -74,7 +84,8 @@
     "typescript": "^6.0.3",
     "vite": "^8.0.16",
     "vitest": "^4.1.8",
-    "wrangler": "^4.99.0"
+    "wrangler": "^4.99.0",
+    "yaml": "^2.9.1"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

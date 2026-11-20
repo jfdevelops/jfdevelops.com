@@ -13,3 +13,10 @@ __unconfig*
 todos.json
 
 *.tsbuildinfo
+.docs-cache/
+.docs-content/
+public/docs-assets/
+src/docs/generated-library-manifests.json
+src/docs/generated-type-contexts.json
+src/docs/generated-sources.ts
+.source/

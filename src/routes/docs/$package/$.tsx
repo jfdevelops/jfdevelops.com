@@ -1,33 +1,23 @@
-import { createFileRoute, notFound } from '@tanstack/react-router'
-import { DocContent } from '@/docs/doc-content'
-import { getDocPage, getPackageDocs } from '@/docs/registry'
-import { DocsShell } from '../-components/docs-shell'
+import { createFileRoute } from '@tanstack/react-router'
+import { DocPage, loadDocPage } from '../-components/doc-page'
+
+function getSlugs(splat: string | undefined) {
+  return splat?.split('/').filter(Boolean) ?? []
+}
 
 export const Route = createFileRoute('/docs/$package/$')({
-  loader: ({ params }) => {
-    const pkg = getPackageDocs(params.package)
-    if (!pkg) {
-      throw notFound()
-    }
-
-    const page = getDocPage(params.package, params._splat ?? '')
-    if (!page) {
-      throw notFound()
-    }
-
-    return { pkg, page }
-  },
+  validateSearch: (search: Record<string, unknown>) => ({
+    docsNotice: search.docsNotice === 'missing-page' ? ('missing-page' as const) : undefined,
+  }),
+  loader: ({ params }) => loadDocPage(params.package, getSlugs(params._splat)),
   head: ({ loaderData }) => ({
     meta: [
       {
-        title: `${loaderData?.page.title ?? 'Guide'} — ${loaderData?.pkg.name ?? 'JF Develops'}`,
+        title: `${loaderData?.title ?? 'Guide'} — ${loaderData?.pkg.name ?? 'JF Develops'}`,
       },
       {
         name: 'description',
-        content:
-          loaderData?.page.description ||
-          loaderData?.pkg.description ||
-          'JF Develops library documentation.',
+        content: loaderData?.description ?? 'JF Develops library documentation.',
       },
     ],
   }),
@@ -35,11 +25,14 @@ export const Route = createFileRoute('/docs/$package/$')({
 })
 
 function PackageDocPage() {
-  const { pkg, page } = Route.useLoaderData()
+  const { package: packageSlug, _splat: splat } = Route.useParams()
+  const { docsNotice } = Route.useSearch()
 
   return (
-    <DocsShell pkg={pkg}>
-      <DocContent content={page.content} />
-    </DocsShell>
+    <DocPage
+      packageSlug={packageSlug}
+      slugs={getSlugs(splat)}
+      missingPage={docsNotice === 'missing-page'}
+    />
   )
 }

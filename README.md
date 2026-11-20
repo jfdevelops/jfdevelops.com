@@ -124,21 +124,52 @@ More information on layouts can be found in the [Layouts documentation](https://
 
 ## Library documentation
 
-The `/docs` routes are generated from Markdown that belongs to each library. During this initial UI
-phase, placeholder library folders live under `packages/` and mirror the expected source layout:
+The website consumes each library's generated documentation at a pinned Git commit. Register the
+repository, full commit SHA, and site description in `docs.sources.json`. Update the pin to publish
+a later library docs revision.
 
-```text
-packages/<library>/
-  package.json
-  docs/
-    index.md
-    <page>.md
-```
+Run `pnpm docs:generate` **in this repository**. It fetches an isolated checkout under `.docs-cache/`,
+installs its locked dependencies, then runs its available `docs:generate`/`generate-docs` and
+`docs:check`/`check:docs` scripts. For Markdown-only repositories, the site's pinned
+`@jfdevelops/docs` tool generates navigation and checks the content. Optional source `docs` settings
+select the documented `package` directory and display `name` in those repositories.
+The generated schema-v2 `docs/docs.json` supplies library identity, frameworks, default versions,
+version statuses, and page navigation. Per-directory generated `meta.json` files supply sidebar
+order, including the TypeDoc reference. No website-owned package list or per-version registration is
+needed. An invalid pin, failed generator/checker, or unsupported manifest schema fails the build.
 
-Each page may include `title`, `description`, and `order` frontmatter. The site discovers these files
-with `import.meta.glob` at build time, so adding a package or page does not require editing the route
-components. Replace the placeholder folders with checked-out or installed package sources when the
-repository sync step is introduced.
+The site copies only public version directories into `.docs-content/` and compiles them with
+Fumadocs MDX. API reference pages load as separate chunks; docs do not fetch GitHub at request time.
+Generation runs before development, builds, tests, and typechecking. Validated output is cached by
+commit locally; the library checker still runs on subsequent preparations. Generated content and
+copied assets are ignored by Git. The `packages/` placeholder docs are no longer a content source.
+
+Routes:
+
+- `/docs` lists libraries.
+- `/docs/<library>` redirects to its default framework and version.
+- `/docs/<library>/<framework>` redirects to that framework's default version.
+- `/docs/<library>/<framework>/<version>` shows the first page in generated navigation.
+- `/docs/<library>/<framework>/<version>/<page>` shows a specific page.
+
+The sidebar places Framework above Version. Switching retains the page and a valid heading anchor
+where possible; otherwise it opens the target version's first page with an explanatory notice.
+Older, legacy, and unreleased versions display status banners from the manifest. Companion packages
+are ordinary library-authored plugin/devtools pages, with no independent selectors.
+
+TypeScript and JavaScript examples get build-time Twoslash hover information automatically. The
+current version resolves against the pinned library source and its compiler aliases. Historical
+versions use isolated type environments with the manifest's exact published core version and the
+companion versions pinned in their docs. Inferred types are cached by commit and framework/version;
+the TypeScript compiler is never shipped to the browser.
+
+Partial snippets are not treated as compiler tests. Unresolved identifiers do not receive misleading
+`any` tooltips. A library author can add `no-twoslash` to a fence's metadata to opt out for a particular
+example; shell commands and non-code prose are unaffected. The website only annotates its generated
+copy and does not change library Markdown.
+Library authors maintain Markdown under `docs/framework/<framework>/v<major>/`. They run their
+repository's docs generation and checking scripts where available. This website follows the
+schema-v2 contract and does not modify library files outside its own ignored cache.
 
 ## Server Functions
 
