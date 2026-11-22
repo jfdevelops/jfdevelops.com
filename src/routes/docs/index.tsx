@@ -1,16 +1,12 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import { ArrowRight, Blocks, BookOpen, Braces } from 'lucide-react'
-import {
-  getDefaultFramework,
-  getDefaultVersion,
-  getLibraries,
-  getStatusLabel,
-} from '@/docs/registry'
+import { getDocsLibraries } from '@/docs/client'
+import { getDefaultFramework, getDefaultVersion, getStatusLabel } from '@/docs/registry'
 import { docsLayoutOptions } from './-components/layout-options'
 
 export const Route = createFileRoute('/docs/')({
-  loader: () => ({ packages: getLibraries() }),
+  loader: async () => ({ packages: await getDocsLibraries() }),
   head: () => ({
     meta: [
       { title: 'Documentation — JF Develops' },
@@ -31,7 +27,7 @@ function DocsIndex() {
   const firstPackage = packages[0]
 
   return (
-    <HomeLayout {...docsLayoutOptions()} className="docs-home">
+    <HomeLayout {...docsLayoutOptions(packages)} className="docs-home">
       <div className="mx-auto w-full max-w-5xl px-6 pb-20">
         <section className="flex flex-col items-center pb-14 pt-20 text-center sm:pb-16 sm:pt-24">
           <p className="mb-4 text-xs font-medium uppercase tracking-widest text-fd-primary">

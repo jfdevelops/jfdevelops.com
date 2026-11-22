@@ -1,26 +1,12 @@
 {
+  "snapshotRepository": "jfdevelops/jfdevelops.com",
+  "snapshotBranch": "docs-content",
   "libraries": [
     {
+      "id": "react-layout",
       "repository": "https://github.com/jfdevelops/react-layout",
-      "commit": "05bdd4eb6d6ae61f69f91a4510c3d5d7a0bb9934",
+      "branch": "main",
       "description": "Typed resource layouts, composable page states, and reusable React page structure."
-    },
-    {
-      "repository": "https://github.com/jfdevelops/multi-step-form",
-      "commit": "3005838d05ef1ea26b616e0c4feec6a046ddc09b",
-      "description": "Type-safe multi-step forms, reusable definitions, and form builders.",
-      "docs": { "package": "packages/core", "name": "Multi Step Form" }
-    },
-    {
-      "repository": "https://github.com/jfdevelops/skills",
-      "commit": "1d1997a8deae6eef18212e22772787f29cecfb33",
-      "description": "Portable agent skills, shared conventions, and package-owned skill discovery.",
-      "docs": { "name": "Skills" }
-    },
-    {
-      "repository": "https://github.com/jfdevelops/cli",
-      "commit": "0314e5197cc5383db417fff4432a4eb34bcc77a3",
-      "description": "Create projects, configure shared tooling, and manage package-owned agent skills."
     }
   ]
 }

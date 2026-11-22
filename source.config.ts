@@ -1,8 +1,17 @@
+import { existsSync, readFileSync } from 'node:fs'
 import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins'
 import { defineConfig } from 'fumadocs-mdx/config'
 import { transformerTwoslash } from 'fumadocs-twoslash'
 import { createFileSystemTypesCache } from 'fumadocs-twoslash/cache-fs'
-import typeContexts from './src/docs/generated-type-contexts.json'
+
+const typeContexts: Array<{
+  key: string
+  cacheKey: string
+  cwd: string
+  compilerOptions: Record<string, unknown>
+}> = existsSync('src/docs/generated-type-contexts.json')
+  ? JSON.parse(readFileSync('src/docs/generated-type-contexts.json', 'utf8'))
+  : []
 
 function createTypeTransformer(context: (typeof typeContexts)[number]) {
   function matches(meta: string, language: string) {
@@ -45,6 +54,7 @@ function createTypeTransformer(context: (typeof typeContexts)[number]) {
 const headingCounts = new WeakMap<object, Map<string, number>>()
 export default defineConfig({
   mdxOptions: {
+    remarkImageOptions: false,
     remarkNpmOptions: { persist: { id: 'package-manager' } },
     rehypeCodeOptions: {
       themes: { light: 'github-light', dark: 'github-dark' },

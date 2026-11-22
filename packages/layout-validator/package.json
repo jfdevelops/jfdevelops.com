@@ -1,6 +1,0 @@
-{
-  "name": "@jfdevelops/react-layout-validator",
-  "version": "0.0.0",
-  "private": true,
-  "description": "Development-time checks for accessible, well-formed React layouts."
-}

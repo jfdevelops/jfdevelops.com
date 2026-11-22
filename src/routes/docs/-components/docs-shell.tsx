@@ -3,11 +3,9 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs'
 import { ArrowLeft } from 'lucide-react'
 import type { ReactNode } from 'react'
 import ThemeToggle from '@/components/theme-toggle'
-import { getDocSource } from '@/docs/generated-sources'
 import {
   type DocsFramework,
   type DocsVersion,
-  getLibraries,
   getSwitchTarget,
   type PackageDocs,
 } from '@/docs/registry'
@@ -20,9 +18,16 @@ type DocsShellProps = {
   framework: DocsFramework
   version: DocsVersion
   pageId: string
+  libraries: PackageDocs[]
 }
-export function DocsShell({ children, pkg, framework, version, pageId }: DocsShellProps) {
-  const source = getDocSource(pkg.slug, framework.id, version.id)
+export function DocsShell({
+  children,
+  pkg,
+  framework,
+  version,
+  pageId,
+  libraries,
+}: DocsShellProps) {
   const navigate = useNavigate()
   const hash = useLocation({ select: (location) => location.hash })
 
@@ -39,11 +44,11 @@ export function DocsShell({ children, pkg, framework, version, pageId }: DocsShe
   return (
     <DocsLayout
       key={`${pkg.slug}/${framework.id}/${version.id}`}
-      {...docsLayoutOptions()}
+      {...docsLayoutOptions(libraries)}
       themeSwitch={{ enabled: false }}
-      tree={source.getPageTree()}
+      tree={version.tree ?? { name: pkg.name, children: [] }}
       containerProps={{ className: 'docs-reader' }}
-      tabs={getLibraries().map((library) => ({
+      tabs={libraries.map((library) => ({
         title: library.name,
         description: library.description,
         url: `/docs/${library.slug}`,

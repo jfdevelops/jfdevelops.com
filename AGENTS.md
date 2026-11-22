@@ -44,30 +44,20 @@ src/
   docs/            # Docs registry and markdown rendering
   components/      # Shared UI
 packages/
-  <package>/docs/  # Legacy placeholder docs; not consumed
-.docs-content/    # Generated public docs from pinned library repositories (ignored)
+  <package>/docs/  # Per-package markdown injected at build time
 public/
   brand/            # Active logo and app icon assets
 ```
 
 ## Docs architecture
 
-Library repositories and pinned commits are registered in `docs.sources.json`. `pnpm docs:generate`
-fetches the commit into `.docs-cache/`, installs dependencies, runs the library's docs generator and
-checker, and reads its generated schema-v2 `docs/docs.json` and `meta.json` navigation. Only public
-framework/version content is copied into `.docs-content/` and compiled with Fumadocs MDX.
-`packages/*/docs` placeholders and the old website-owned package groups are not consumed.
-
-Routes:
-
-- `/docs` — package index
-- `/docs/$package` — redirects to the default framework/version
-- `/docs/$package/$` — `<framework>/<version>/<page>`; framework/version root shows its first page
-
-To add a library: register its repository and full commit SHA, then run `pnpm docs:generate` here.
-Frameworks, versions, statuses, defaults and navigation must come from library-generated metadata.
-Keep Framework above Version in the sidebar. Companion packages stay ordinary plugin/devtools pages.
-See README.md's Library documentation section for the build and authoring workflow.
+Library repositories are registered in `docs.sources.json` with their main branch. A scheduled
+GitHub workflow generates Fumadocs snapshots and publishes them to the docs-content branch.
+The deployed Worker loads library metadata and requested pages on demand, serves cached HTML,
+and refreshes pointers in the background. R2 is not used. Normal dev/test/build commands do
+not generate docs. Only UI/runtime changes and repository-list changes require deployment.
+See docs/site-docs.md. Frameworks, versions and navigation come from library metadata.
+Keep Framework above Version; companion packages remain ordinary plugin/devtools pages.
 
 ## Partner integrations
 
@@ -122,8 +112,20 @@ npm run test         # Vitest
 
 ## Next steps
 
-- Register library repositories and pinned commits in `docs.sources.json`
+- Add real packages under `packages/` with `docs/` directories
 - Add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` GitHub secrets for CI deploys
 - Install CodeRabbit GitHub App on the repository
 - Wire contact form to a server function or external service
-- Remove legacy placeholder docs after the repository ingestion migration is accepted
+- Replace `example-package` placeholder docs with real package content
+
+<!-- jfdevelops:start -->
+
+## jfdevelops skills
+
+Read each skill before the work it describes:
+
+- [jf-coding-conventions](.agents/skills/jf-coding-conventions/SKILL.md): Apply jfdevelops coding conventions when implementing or reviewing JavaScript, TypeScript, or React code. Read before editing code; use the target project's toolchain and framework.
+- [jf-git](.agents/skills/jf-git/SKILL.md): Follow repository Git conventions before initializing history, naming or switching branches, staging changes, writing commits, or creating and updating pull requests.
+- [jf-naming-conventions](.agents/skills/jf-naming-conventions/SKILL.md): Choose names for files, directories, packages, functions, types, and public APIs in jfdevelops projects. Read before adding or renaming these elements.
+
+<!-- jfdevelops:end -->

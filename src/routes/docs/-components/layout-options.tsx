@@ -1,9 +1,9 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared'
 import { BookOpen } from 'lucide-react'
 import ThemeToggle from '@/components/theme-toggle'
-import { getLibraries } from '@/docs/registry'
+import type { PackageDocs } from '@/docs/registry'
 
-export function docsLayoutOptions() {
+export function docsLayoutOptions(libraries: PackageDocs[] = []) {
   return {
     nav: {
       url: '/docs',
@@ -19,7 +19,7 @@ export function docsLayoutOptions() {
         type: 'menu',
         text: 'Documentation',
         on: 'nav',
-        items: getLibraries().map((pkg) => ({
+        items: libraries.map((pkg) => ({
           text: pkg.name,
           description: pkg.description,
           url: `/docs/${pkg.slug}`,

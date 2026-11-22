@@ -20,3 +20,5 @@ src/docs/generated-library-manifests.json
 src/docs/generated-type-contexts.json
 src/docs/generated-sources.ts
 .source/
+.docs-snapshots/
+.docs-publish/

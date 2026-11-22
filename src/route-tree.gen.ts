@@ -9,19 +9,19 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as DocsIndexRouteImport } from './routes/docs/index'
 import { Route as homeIndexRouteImport } from './routes/(home)/index'
+import { Route as DocsIndexRouteImport } from './routes/docs/index'
 import { Route as DocsPackageIndexRouteImport } from './routes/docs/$package/index'
 import { Route as DocsPackageSplatRouteImport } from './routes/docs/$package/$'
 
-const DocsIndexRoute = DocsIndexRouteImport.update({
-  id: '/docs/',
-  path: '/docs/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const homeIndexRoute = homeIndexRouteImport.update({
   id: '/(home)/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocsIndexRoute = DocsIndexRouteImport.update({
+  id: '/docs/',
+  path: '/docs/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DocsPackageIndexRoute = DocsPackageIndexRouteImport.update({
@@ -60,11 +60,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '/docs' | '/docs/$package/$' | '/docs/$package'
   id:
-    | '__root__'
-    | '/(home)/'
-    | '/docs/'
-    | '/docs/$package/$'
-    | '/docs/$package/'
+    '__root__' | '/(home)/' | '/docs/' | '/docs/$package/$' | '/docs/$package/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -76,18 +72,18 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/docs/': {
-      id: '/docs/'
-      path: '/docs'
-      fullPath: '/docs/'
-      preLoaderRoute: typeof DocsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/(home)/': {
       id: '/(home)/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof homeIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docs/': {
+      id: '/docs/'
+      path: '/docs'
+      fullPath: '/docs/'
+      preLoaderRoute: typeof DocsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/docs/$package/': {

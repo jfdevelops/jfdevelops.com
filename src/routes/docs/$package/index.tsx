@@ -16,7 +16,7 @@ export const Route = createFileRoute('/docs/$package/')({
 })
 
 function PackageDocsIndex() {
-  const { package: packageSlug } = Route.useParams()
+  const data = Route.useLoaderData()
 
-  return <DocPage packageSlug={packageSlug} slugs={[]} />
+  return <DocPage data={data} />
 }

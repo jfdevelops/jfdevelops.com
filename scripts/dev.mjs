@@ -1,6 +1,6 @@
 process.env.CI = 'true'
 
-await import('./generate-doc-sources.mjs')
+
 
 const { createServer } = await import('vite')
 const server = await createServer({

@@ -1,4 +1,4 @@
-import manifests from './generated-library-manifests.json'
+import type { Root } from 'fumadocs-core/page-tree'
 
 type DocsStatus = 'current' | 'previous' | 'legacy' | 'next'
 type DocEntry = { id: string; file: string; title: string; headings: string[] }
@@ -10,6 +10,7 @@ type DocsVersion = {
   endpointVersion: string | null
   defaultPage: string
   pages: DocEntry[]
+  tree?: Root
 }
 type DocsFramework = { id: string; title: string; defaultVersion: string; versions: DocsVersion[] }
 type PackageDocs = {
@@ -21,14 +22,6 @@ type PackageDocs = {
   commit: string
   pageCount: number
   frameworks: DocsFramework[]
-}
-const libraries = manifests as PackageDocs[]
-
-export function getLibraries() {
-  return libraries
-}
-export function getPackageDocs(slug: string) {
-  return libraries.find((library) => library.slug === slug) ?? null
 }
 export function getDefaultFramework(library: PackageDocs) {
   return library.frameworks[0]
@@ -98,7 +91,7 @@ export function resolveDocHref(
       if (!relative.startsWith(`${candidate.path}/`)) continue
       const target = relative.slice(candidate.path.length + 1)
       if (image && target.startsWith('assets/'))
-        return `/docs-assets/${library.slug}/${library.commit}/${relative}${resolved.search}${resolved.hash}`
+        return `https://raw.githubusercontent.com/${new URL(library.repository).pathname.slice(1)}/${library.commit}/docs/${relative}${resolved.search}${resolved.hash}`
       const id = target.replace(/\.md$/, '').replace(/\/index$/, '')
       const page = candidate.pages.find((page) => page.id === id)
       if (page)

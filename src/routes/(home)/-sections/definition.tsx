@@ -1,17 +1,19 @@
+import { defineResourceLayout } from '@jfdevelops/react-layout'
+import { reactNode } from '@jfdevelops/react-layout-adapter-zod'
+import type { ComponentPropsWithRef } from 'react'
+import { z } from 'zod'
 import { createPolymorphicComponent } from '@/components/polymorphic-component'
 import { Kicker } from '@/components/ui/kicker'
 import { cn } from '@/lib/utils'
-import { createProp, defineResourceLayout } from '@jfdevelops/react-layout'
-import type { ComponentPropsWithRef } from 'react'
 
 export const { createResourceConfig, createResourceLayout, createResourceLinks } =
   defineResourceLayout({
     resources: ['about', 'case-studies', 'contact', 'faq', 'hero', 'process', 'services'],
     options: {
-      sectionName: createProp.component({ type: 'ReactNode' }),
-      title: createProp.component({ type: 'ReactNode' }),
-      description: createProp.component({ type: 'ReactNode' }).optional(),
-      id: createProp.string(),
+      sectionName: reactNode(),
+      title: reactNode(),
+      description: reactNode().optional(),
+      id: z.string(),
     },
     layout: {
       composables: (create) => ({
@@ -44,8 +46,8 @@ export const { createResourceConfig, createResourceLayout, createResourceLinks }
           id: true,
         },
         custom: {
-          children: createProp.component({ type: 'ReactNode' }),
-          className: createProp.string().optional(),
+          children: 'required',
+          className: z.string().optional(),
         },
       },
       render: ({ sectionName, title, description, id, children, className }, { composables }) => {

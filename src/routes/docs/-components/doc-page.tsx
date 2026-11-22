@@ -1,21 +1,21 @@
 import { notFound, redirect } from '@tanstack/react-router'
 import FumadocsLink from 'fumadocs-core/link'
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/page'
-import { use } from 'react'
 import { getMdxComponents } from '@/components/mdx'
-import { getDocSource } from '@/docs/generated-sources'
+import { getDocContent, getDocLibrary, getDocsLibraries } from '@/docs/client'
 import {
   getDefaultFramework,
   getDefaultVersion,
-  getPackageDocs,
   getPageUrl,
   resolveDocContext,
   resolveDocHref,
 } from '@/docs/registry'
+import { renderDocs } from '@/docs/render'
 import { DocsShell } from './docs-shell'
 
 export async function loadDocPage(packageSlug: string, slugs: string[]) {
-  const pkg = getPackageDocs(packageSlug)
+  const summary = await getDocLibrary({ data: packageSlug })
+  const pkg = summary?.library
   if (!pkg) throw notFound()
   if (slugs.length < 2) {
     const framework = slugs[0]
@@ -31,34 +31,39 @@ export async function loadDocPage(packageSlug: string, slugs: string[]) {
   }
   const context = resolveDocContext(pkg, slugs)
   if (!context) throw notFound()
-  const page = getDocSource(pkg.slug, context.framework.id, context.version.id)?.getPage(
-    context.pageId === 'index' ? [] : context.pageId.split('/'),
-  )
-  if (!page) throw notFound()
-  await page.data.preload()
-  return {
-    pkg: { name: pkg.name },
-    title: page.data.title,
-    description: page.data.description ?? pkg.description,
-  }
+  const content = await getDocContent({
+    data: {
+      library: pkg.slug,
+      framework: context.framework.id,
+      version: context.version.id,
+      page: context.pageId,
+    },
+  })
+  if (!content) throw notFound()
+  const libraries = await getDocsLibraries()
+  return { ...content, libraries, title: content.page.title, description: content.page.description }
 }
 
-type DocPageProps = { packageSlug: string; slugs: string[]; missingPage?: boolean }
-export function DocPage({ packageSlug, slugs, missingPage }: DocPageProps) {
-  const pkg = getPackageDocs(packageSlug)
-  const context = pkg ? resolveDocContext(pkg, slugs) : null
-  if (!pkg || !context) return null
-  const { framework, version, pageId } = context
-  const page = getDocSource(pkg.slug, framework.id, version.id)?.getPage(
-    pageId === 'index' ? [] : pageId.split('/'),
-  )
-  if (!page) return null
-  const { body: MdxContent, toc } = use(page.data.load())
+type DocPageProps = { data: Awaited<ReturnType<typeof loadDocPage>>; missingPage?: boolean }
+export function DocPage({ data, missingPage }: DocPageProps) {
+  const { pkg, page, libraries } = data
+  const framework = pkg.frameworks.find((framework) => framework.id === page.framework)
+  if (!framework) throw new Error('Missing docs framework')
+  const version = framework.versions.find((version) => version.id === page.version)
+  if (!version) throw new Error('Missing docs version')
+  const pageId = page.id
+  const toc = page.toc
   const currentVersion = getDefaultVersion(framework)
   const currentPage = currentVersion.pages.find((page) => page.id === pageId)
 
   return (
-    <DocsShell pkg={pkg} framework={framework} version={version} pageId={pageId}>
+    <DocsShell
+      pkg={pkg}
+      framework={framework}
+      version={version}
+      pageId={pageId}
+      libraries={libraries}
+    >
       <DocsPage toc={toc}>
         {missingPage ? (
           <div role="status" className="rounded-lg border border-fd-border bg-fd-muted p-4 text-sm">
@@ -80,11 +85,12 @@ export function DocPage({ packageSlug, slugs, missingPage }: DocPageProps) {
             </FumadocsLink>
           </div>
         ) : null}
-        <DocsTitle>{page.data.title}</DocsTitle>
-        <DocsDescription>{page.data.description}</DocsDescription>
+        <DocsTitle>{page.title}</DocsTitle>
+        <DocsDescription>{page.description}</DocsDescription>
         <DocsBody>
-          <MdxContent
-            components={getMdxComponents({
+          {renderDocs(
+            page.body,
+            getMdxComponents({
               a: function DocLink({ href, ...props }) {
                 const target = href ? resolveDocHref(pkg, version, pageId, href) : href
                 return (
@@ -108,8 +114,8 @@ export function DocPage({ packageSlug, slugs, missingPage }: DocPageProps) {
                   />
                 )
               },
-            })}
-          />
+            }),
+          )}
         </DocsBody>
       </DocsPage>
     </DocsShell>

@@ -1,7 +1,8 @@
-import { spawn } from 'node:child_process'
+import { execFile, spawn } from 'node:child_process'
 import { access, cp, mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { promisify } from 'node:util'
 import { collectLibrary } from './docs/collect.mjs'
 import { prepareLibrary } from './docs/prepare.mjs'
 import { addTypeContext, prepareTypeContext } from './docs/types.mjs'
@@ -40,7 +41,19 @@ const declarations = []
 const sources = []
 const libraryIds = new Set()
 const typeContexts = []
-for (const registration of config.libraries) {
+for (const source of config.libraries) {
+  if (
+    source.branch !== 'main' ||
+    !/^https:\/\/github.com\/[\w.-]+\/[\w.-]+$/.test(source.repository)
+  )
+    throw new Error('Docs sources must register a public GitHub repository and main branch.')
+  const { stdout } = await promisify(execFile)(
+    'git',
+    ['ls-remote', source.repository, 'refs/heads/main'],
+    { timeout: 60000 },
+  )
+  const commit = stdout.split(/\s+/)[0]
+  const registration = { ...source, commit }
   if (
     !/^https:\/\/github\.com\/[\w.-]+\/[\w.-]+$/.test(registration.repository) ||
     !/^[a-f0-9]{40}$/.test(registration.commit)
@@ -65,6 +78,10 @@ for (const registration of config.libraries) {
   await prepareLibrary(checkout, registration, run, !(await exists(ready)))
   const manifest = JSON.parse(await readFile(path.join(checkout, 'docs/docs.json'), 'utf8'))
   const library = await collectLibrary(checkout, manifest, registration)
+  if (library.slug !== registration.id)
+    throw new Error(
+      `Generated library identity changed: ${library.slug}; registered as ${registration.id}`,
+    )
   if (libraryIds.has(library.slug)) throw new Error(`Duplicate docs library: ${library.slug}`)
   libraryIds.add(library.slug)
   const destination = path.join(projectRoot, '.docs-content', library.slug, registration.commit)

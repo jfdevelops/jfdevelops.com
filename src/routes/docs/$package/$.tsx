@@ -25,14 +25,8 @@ export const Route = createFileRoute('/docs/$package/$')({
 })
 
 function PackageDocPage() {
-  const { package: packageSlug, _splat: splat } = Route.useParams()
+  const data = Route.useLoaderData()
   const { docsNotice } = Route.useSearch()
 
-  return (
-    <DocPage
-      packageSlug={packageSlug}
-      slugs={getSlugs(splat)}
-      missingPage={docsNotice === 'missing-page'}
-    />
-  )
+  return <DocPage data={data} missingPage={docsNotice === 'missing-page'} />
 }
