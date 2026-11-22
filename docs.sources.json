@@ -24,6 +24,12 @@
         "package": "packages/core",
         "name": "Multi Step Form"
       }
+    },
+    {
+      "id": "create-error",
+      "repository": "https://github.com/jfdevelops/error-blueprint",
+      "branch": "main",
+      "description": "Strongly typed error families with configurable context, validation, and shared behavior."
     }
   ]
 }
