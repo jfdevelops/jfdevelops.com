@@ -56,6 +56,9 @@ for (const registration of config.libraries) {
       await run('git', ['init', '--quiet'], checkout)
       await run('git', ['remote', 'add', 'origin', registration.repository], checkout)
     }
+    // Library checkers consume Markdown fences verbatim; keep repository LF endings on Windows.
+    await run('git', ['config', 'core.autocrlf', 'false'], checkout)
+    await run('git', ['config', 'core.eol', 'lf'], checkout)
     await run('git', ['fetch', '--depth=1', 'origin', registration.commit], checkout)
     await run('git', ['checkout', '--detach', registration.commit], checkout)
   }
