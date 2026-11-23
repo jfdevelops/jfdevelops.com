@@ -12,7 +12,8 @@
       "id": "cli",
       "repository": "https://github.com/jfdevelops/cli",
       "branch": "main",
-      "description": "Create projects, configure shared tooling, and manage package-owned agent skills."
+      "description": "Create projects, configure shared tooling, and manage package-owned agent skills.",
+      "group": "developer-tools"
     }
   ]
 }
