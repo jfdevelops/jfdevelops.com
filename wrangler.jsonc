@@ -2,8 +2,11 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "jfdevelops",
   "compatibility_date": "2025-09-02",
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
   "main": "src/server.ts",
-  "r2_buckets": [{ "binding": "DOCS_BUCKET", "bucket_name": "jfdevelops-docs" }],
-  "version_metadata": { "binding": "VERSION_METADATA" }
+  "version_metadata": {
+    "binding": "VERSION_METADATA"
+  }
 }

@@ -1,0 +1,75 @@
+name: Refresh GitHub docs snapshots
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['docs.sources.json', 'docs/type-contexts/**', 'scripts/docs/**', 'scripts/generate-doc-sources.mjs', 'source.config.ts', 'src/components/mdx.tsx', 'src/docs/snapshot.ts', 'package.json', 'pnpm-lock.yaml', '.github/workflows/refresh-docs.yml']
+  pull_request:
+    paths: ['docs.sources.json', 'docs/type-contexts/**', 'scripts/docs/**', 'scripts/generate-doc-sources.mjs', 'source.config.ts', 'src/components/mdx.tsx', 'src/docs/snapshot.ts', 'package.json', 'pnpm-lock.yaml', '.github/workflows/refresh-docs.yml']
+
+concurrency:
+  group: docs-snapshots-${{ github.event_name == 'pull_request' && github.ref || 'main' }}
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  snapshots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+      - name: Read prior public snapshots
+        shell: bash
+        run: |
+          mkdir -p .docs-snapshots
+          if curl --fail --location --retry 2 "https://github.com/${GITHUB_REPOSITORY}/archive/refs/heads/docs-content.tar.gz" -o /tmp/docs-content.tar.gz; then
+            tar -xzf /tmp/docs-content.tar.gz --strip-components=1 -C .docs-snapshots
+          fi
+      - id: changes
+        run: node scripts/docs/check-updates.mjs
+      - uses: pnpm/action-setup@v4
+        if: steps.changes.outputs.changed == 'true'
+      - run: pnpm install --frozen-lockfile
+        if: steps.changes.outputs.changed == 'true'
+      - run: pnpm docs:snapshot
+        if: steps.changes.outputs.changed == 'true'
+      - run: pnpm exec vitest run scripts/docs/hover-contract.test.js
+        if: steps.changes.outputs.changed == 'true'
+      - uses: actions/upload-artifact@v4
+        if: steps.changes.outputs.changed == 'true'
+        with:
+          name: docs-snapshots
+          path: .docs-snapshots
+          include-hidden-files: true
+      - uses: actions/checkout@v6
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && steps.changes.outputs.changed == 'true'
+        with:
+          path: .docs-publish
+      - name: Atomically publish snapshots to GitHub
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && steps.changes.outputs.changed == 'true'
+        shell: bash
+        run: |
+          cd .docs-publish
+          if git fetch --depth=1 origin docs-content; then
+            git checkout -B docs-content FETCH_HEAD
+          else
+            git checkout --orphan docs-content
+            git rm -rf --ignore-unmatch .
+          fi
+          cp -a ../.docs-snapshots/. .
+          git add .
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'docs(snapshot): refresh generated main content'
+          git push origin HEAD:docs-content

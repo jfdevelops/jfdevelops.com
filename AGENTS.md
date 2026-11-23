@@ -51,15 +51,13 @@ public/
 
 ## Docs architecture
 
-Package docs live in `packages/<name>/docs/**/*.md` and are bundled via `import.meta.glob` in `src/docs/registry.ts`.
-
-Routes:
-
-- `/docs` — package index
-- `/docs/$package` — package landing (`index.md`)
-- `/docs/$package/$` — individual doc pages by slug
-
-To add a package: create `packages/<name>/docs/` with markdown files, then rebuild.
+Library repositories are registered in `docs.sources.json` with their main branch. A scheduled
+GitHub workflow generates Fumadocs snapshots and publishes them to the docs-content branch.
+The deployed Worker loads library metadata and requested pages on demand, serves cached HTML,
+and refreshes pointers in the background. R2 is not used. Normal dev/test/build commands do
+not generate docs. Only UI/runtime changes and repository-list changes require deployment.
+See docs/site-docs.md. Frameworks, versions and navigation come from library metadata.
+Keep Framework above Version; companion packages remain ordinary plugin/devtools pages.
 
 ## Partner integrations
 

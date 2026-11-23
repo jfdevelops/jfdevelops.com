@@ -5,3 +5,7 @@ allowBuilds:
   sharp: false
 minimumReleaseAge: 0
 strictPeerDependencies: true
+
+overrides:
+  '@emnapi/core': ^1.7.1
+  '@emnapi/runtime': ^1.7.1

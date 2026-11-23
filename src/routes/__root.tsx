@@ -1,13 +1,17 @@
 import { TanStackDevtools } from '@tanstack/react-devtools'
-import { QueryClientProvider, type QueryClient } from '@tanstack/react-query'
-import { createRootRouteWithContext, HeadContent, Scripts } from '@tanstack/react-router'
+import { type QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import {
+  createRootRouteWithContext,
+  HeadContent,
+  Scripts,
+  useRouterState,
+} from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
+import { RootProvider } from 'fumadocs-ui/provider/tanstack'
+import { themeInitScript } from '@/lib/theme'
 import Footer from '../components/footer'
 import Header from '../components/header/header'
-
 import appCss from '../styles.css?url'
-
-const themeInitScript = `(function(){try{var stored=window.localStorage.getItem('theme');var mode=(stored==='light'||stored==='dark'||stored==='auto')?stored:'light';var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=mode==='auto'?(prefersDark?'dark':'light'):mode;var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);if(mode==='auto'){root.removeAttribute('data-theme')}else{root.setAttribute('data-theme',mode)}root.style.colorScheme=resolved;}catch(e){}})();`
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
@@ -80,18 +84,26 @@ export const Route = createRootRouteWithContext<{
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   const { queryClient } = Route.useRouteContext()
+  const isDocs = useRouterState({
+    select: (state) => /^\/docs(?:\/|$)/.test(state.location.pathname),
+  })
 
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: Static inline script prevents a theme flash before React hydrates. */}
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <HeadContent />
       </head>
-      <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(42,42,42,0.16)]">
+      <body
+        className={`font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(42,42,42,0.16)] ${isDocs ? 'docs-surface' : ''}`}
+      >
         <QueryClientProvider client={queryClient}>
-          <Header />
-          {children}
-          <Footer />
+          <RootProvider search={{ enabled: false }} theme={{ enabled: false }}>
+            {isDocs ? null : <Header />}
+            {children}
+            {isDocs ? null : <Footer />}
+          </RootProvider>
         </QueryClientProvider>
         <TanStackDevtools
           config={{

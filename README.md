@@ -11,7 +11,6 @@ nvm install
 nvm use
 npm install -g --allow-scripts=pnpm pnpm@12.21.0
 pnpm install --frozen-lockfile
-pnpm docs:seed
 pnpm dev
 ```
 
@@ -130,21 +129,10 @@ More information on layouts can be found in the [Layouts documentation](https://
 
 ## Library documentation
 
-The `/docs` routes are generated from Markdown that belongs to each library. During this initial UI
-phase, placeholder library folders live under `packages/` and mirror the expected source layout:
-
-```text
-packages/<library>/
-  package.json
-  docs/
-    index.md
-    <page>.md
-```
-
-Each page may include `title`, `description`, and `order` frontmatter. The site discovers these files
-with `import.meta.glob` at build time, so adding a package or page does not require editing the route
-components. Replace the placeholder folders with checked-out or installed package sources when the
-repository sync step is introduced.
+Documentation uses runtime GitHub snapshots and Fumadocs. Register library repositories in
+`docs.sources.json`; the refresh workflow follows each main branch without deploying the site.
+Pages are fetched on demand and cached at the edge. See [the docs architecture](docs/site-docs.md)
+for snapshot generation, type hovers, freshness and failure behavior.
 
 ## Server Functions
 

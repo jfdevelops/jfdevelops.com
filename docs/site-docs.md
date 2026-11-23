@@ -1,126 +1,109 @@
-# R2 documentation publishing
+# Runtime documentation
 
-The website is a docs viewer. Library documentation is published independently of
-website deployments. Libraries own their manifest, navigation, versions, Markdown
-and examples. New manifest pages, versions and libraries appear on the next docs
-publication; no new viewer route or website build is required.
+The website uses Fumadocs HomeLayout, DocsLayout, MDX components, code tabs and
+Twoslash popups. Documentation content is loaded on demand from public GitHub
+snapshots. R2 is not used.
 
-## Storage contract
+## Repository list
 
-The private R2 bucket is `jfdevelops-docs`, bound to the viewer as `DOCS_BUCKET`.
-Publication schema version 1 uses these keys:
+`docs.sources.json` registers each public library repository, its generated library
+ID, the `main` branch, and the website description. Frameworks, versions, defaults,
+navigation and page titles come from the library-generated schema-v2 manifest.
+Adding a repository changes this allowlist and requires a website deployment.
+New pages and versions in an existing repository do not.
 
-```text
-libraries/<library>.json                     atomic current-snapshot pointer
-snapshots/<library>/<sha256>/manifest.json   navigation and page metadata
-snapshots/<library>/<sha256>/pages/<slug>.json
-snapshots/<library>/<sha256>/assets/...
-```
+## What happens on a page request
 
-Every snapshot is content-addressed. The publisher validates the complete artifact,
-uploads every page and asset, warms page HTML, and only then replaces the library's
-pointer. An upload or warm failure leaves the previous pointer serving. Old snapshots
-stay available for existing readers and rollback. Snapshot hashes include asset
-bytes; image URLs are rewritten to immutable snapshot paths. Private R2 writers are
-trusted publication identities; the bucket has no public write endpoint.
+The Worker loads a small current-snapshot pointer, that library's metadata, and the
+requested page. It does not fetch every documentation page, install dependencies,
+run library scripts, or execute downloaded JavaScript. Pointer checks are cached
+for 60 seconds. Stale pointers remain usable for seven days while a refresh runs
+through `waitUntil`. A failed refresh keeps the last validated pointer. A temporary
+page fetch failure can fall back to the previous snapshot.
 
-## Reader performance
+Immutable metadata and page JSON are cached by content revision. Complete public
+HTML is cached by URL, snapshot and UI deployment ID. Browsers revalidate HTML.
+Cookies, authorization, Set-Cookie responses, errors and snapshot mismatches bypass
+the shared HTML cache. Unknown repositories and pages are never fetched as arbitrary
+URLs.
 
-The viewer server-renders the requested page, including highlighted code and static
-type metadata. It never compiles examples or calls GitHub/npm while serving docs.
-Immutable artifacts are cached at the edge; pointers refresh after 15 seconds.
-Full HTML is cached by URL, snapshot and viewer deployment ID, so updates and viewer
-deployments select new cache entries. Browsers revalidate HTML instead of keeping an
-old snapshot for a day. Requests with cookies or authorization bypass shared HTML
-caching, as do responses that set cookies. Sidebar links prefetch on hover/focus.
-Code tooltips have zero delay and no entry animation.
+Cloudflare caches are data-center-local and may be evicted. A genuinely cold request
+still needs GitHub access; a cache is not permanent offline storage. Normal warm
+requests serve server-rendered content without a browser loading spinner.
 
-Warming runs before pointer promotion using `x-docs-snapshot`, and verifies the
-returned snapshot header. Immutable snapshots are public documentation, including
-staged snapshots when their hash is known. A warm failure aborts promotion. Warming
-reaches the publisher's Cloudflare location, not every location worldwide. Other
-locations render on their first request; that request waits for server content and
-normal network latency rather than showing a browser-side loading screen. The Cache
-API requires the deployed custom domain; workers.dev does not provide equivalent
-edge-cache behavior. The bare `/docs` library index is server-rendered from R2.
+## How snapshots update
 
-## Local development
+`Refresh GitHub docs snapshots` checks the repository list on a five-minute GitHub
+Actions schedule, on relevant site changes, and through workflow_dispatch. Scheduled
+runs can be delayed by GitHub. It resolves each repository's exact main SHA and skips
+unchanged sources. It never deploys the website or publishes to R2.
+
+When content changes, the workflow runs the library's docs generator/checker and
+Fumadocs MDX compiler. TypeScript inference runs against the library source and
+dependencies in this build environment. Fumadocs output is serialized to a validated
+React render tree: component names, text, safe props, highlighted tokens, and type
+information. The deployed viewer maps those names to its own Fumadocs components.
+It does not evaluate MDX code in a request.
+
+All immutable pages and metadata are committed together to the website repository's
+`docs-content` branch. A current pointer identifies the complete snapshot and its
+source commit. The site checks this pointer at runtime, independently of its own
+deployment. Old snapshots stay available for readers and fallback. Pull requests
+generate and upload a test artifact but cannot publish pointers.
+
+The first merged run bootstraps the docs-content branch. Until a registered library
+has a successful snapshot, its docs are unavailable rather than served from fabricated
+metadata. GitHub outages at a cold location may also make docs temporarily unavailable.
+
+## Development and checks
 
 ```sh
-pnpm install
-pnpm docs:seed     # generate/validate/highlight, then populate local R2
-pnpm dev           # Portless only; no docs regeneration on startup
+pnpm install --frozen-lockfile
+pnpm dev
+pnpm test
+pnpm typecheck
+pnpm build
 ```
 
-Local publication and Vite share `.wrangler/state/v3`. `pnpm docs:publish` publishes
-an already generated artifact locally. `.env.local` still needs the application's
-existing `VITE_CONVEX_URL`. The website build and normal tests do not need a generated
-docs registry. `pnpm cf-typegen` refreshes Worker binding types after config changes.
+Local development serves ignored snapshots automatically. The first `pnpm dev` prepares
+missing snapshots, which can take several minutes; subsequent starts reuse them.
+Tests and website builds do not generate or bundle library docs. To refresh local content:
 
-## Library CI
-
-The reusable `.github/workflows/publish-docs.yml` runs generation and publication
-without deploying the website. Call it from each library after docs changes pass CI,
-or after a release has published. For example, in the library repository:
-
-```yaml
-name: Publish docs
-on:
-  push:
-    branches: [main]
-    paths: ['docs/**', 'scripts/check-docs.mjs', 'tools/docs/**']
-  workflow_dispatch:
-jobs:
-  docs:
-    uses: jfdevelops/jfdevelops.com/.github/workflows/publish-docs.yml@main
-    with:
-      sources: >-
-        {"react-layout":{"repository":"https://github.com/jfdevelops/react-layout","description":"React Layout documentation.","defaultChannel":"stable","channels":{"stable":{"commit":"${{ github.sha }}"}}}}
-    secrets:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.DOCS_CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+```sh
+pnpm docs:snapshot
 ```
 
-Pin the reusable workflow and its `viewer_ref` input to a reviewed website tooling
-commit for stronger reproducibility. The token needs access to the docs bucket and
-Workers remote binding sessions used by Wrangler. Publication runs are serialized per
-caller repository. Keep one publication owner per library; deliberately publishing
-an older snapshot is also the rollback mechanism. The workflow's default warm URL is
-`https://jfdevelops.com`. It does not run the website deployment workflow, Convex
-deployment, or `wrangler deploy`.
+This writes ignored .docs-snapshots files. It does not push them. The publishing workflow
+owns the GitHub commit. Generated source checkouts, type caches and MDX collections stay
+ignored as well. Updating rendering components or runtime behavior needs a site
+deployment; editing an existing library's docs only needs a successful automatic refresh.
 
-A site operator can run `DOCS_WARM_URL=https://jfdevelops.com pnpm docs:publish --remote`.
-The initial seed, before the new viewer has been deployed, uses the explicit
-`pnpm docs:publish --remote --bootstrap` exception to skip warming. After deploying
-the viewer once, normal library publications require no website redeployment.
+No extra server or environment setting is required for local docs. An optional
+`VITE_DOCS_SNAPSHOT_ORIGIN` can point to an existing loopback snapshot server.
+This override is available only in development and is ignored in production.
 
-## Generation and channels
+## Type-hover context
 
-`pnpm docs:generate` resolves each configured branch or commit, runs the library's
-checker and requires manifest schema version 1. It renders all manifest versions and
-navigation entries and checks heading parity. `pnpm docs:verify` validates the result
-against the publication contract. Unregistered folders fail the library checker;
-they are not silently published. Companion packages remain inside library guides.
+Every JavaScript and TypeScript fence is analyzed, including fences that previously
+opted out. The importer resolves public API imports and carries dependencies from
+other snippets on the same page into a hidden compiler prelude. Each displayed
+fragment remains its own module so repeated example variable names do not conflict.
 
-`docs.sources.json` is publisher configuration, not viewer configuration. Its default
-channel imports all manifest versions. Optional additional branch channels can select
-one source version, label it Alpha and publish an unreleased route. No alpha channel
-is currently configured. Runtime discovery uses R2 pointers, not this file.
+A fragment that relies on application-specific setup needs that real setup to infer
+its types. Libraries can supply a sibling `<page>.context.tsx` file with the imports
+and declarations used by their examples; it refreshes with their docs. Existing
+site compatibility contexts live under `docs/type-contexts/<library>/<framework>/<version>`.
+These are actual public API calls checked by TypeScript, never hand-written tooltip
+labels. Use self-contained examples or context files for accurate inference; an
+undefined identifier has no type information for an editor or the docs to display.
 
-Shiki handles light/dark highlighting. Twoslash uses version-isolated declarations
-and hidden earlier page declarations for partial snippets. Unresolved symbols get no
-invented hover. Unpublished next versions still render with local inference. Npm
-installation uses `--ignore-scripts`; isolated caches and lockfiles stay in ignored
-`.cache/docs-types`. Tooltips render type/JSDoc strings as text. Library example
-verification remains authoritative; hover inference does not replace its tests.
+## Catalog groups
 
-## Validation and rollout
+Registrations in `docs.sources.json` may set `group` to `developer-tools` for CLI
+and agent tooling. Other registrations default to `libraries`. The docs home,
+navbar menu, and library switcher use the same groups. These are site presentation
+settings; frameworks, versions, and page navigation still come from library docs.
 
-`pnpm test`, `pnpm typecheck` and `pnpm build` validate the viewer without generating
-or publishing docs. Publisher validation is separate: `pnpm docs:generate` followed
-by `pnpm docs:verify`. Tests cover pointer promotion, failures, cache hits, revision
-switches, staged warming, assets, keyboard/pointer tooltips and the content pipeline.
-
-The bucket can be provisioned and seeded before deployment. Merge/deploy the stacked
-viewer PR once to activate its R2 binding, then enable the library workflow above.
-No library repository has been modified by this website change.
+Documentation images use commit-addressed `/docs-assets/` URLs. The Worker caches
+public repository image bytes and serves their correct MIME type, including SVG;
+SVG responses are sandboxed and never treated as executable site documents.
