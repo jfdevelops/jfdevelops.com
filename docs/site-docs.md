@@ -96,3 +96,14 @@ site compatibility contexts live under `docs/type-contexts/<library>/<framework>
 These are actual public API calls checked by TypeScript, never hand-written tooltip
 labels. Use self-contained examples or context files for accurate inference; an
 undefined identifier has no type information for an editor or the docs to display.
+
+## Catalog groups
+
+Registrations in `docs.sources.json` may set `group` to `developer-tools` for CLI
+and agent tooling. Other registrations default to `libraries`. The docs home,
+navbar menu, and library switcher use the same groups. These are site presentation
+settings; frameworks, versions, and page navigation still come from library docs.
+
+Documentation images use commit-addressed `/docs-assets/` URLs. The Worker caches
+public repository image bytes and serves their correct MIME type, including SVG;
+SVG responses are sandboxed and never treated as executable site documents.

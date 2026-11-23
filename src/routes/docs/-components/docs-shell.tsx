@@ -10,6 +10,7 @@ import {
   type PackageDocs,
 } from '@/docs/registry'
 import { docsLayoutOptions } from './layout-options'
+import { LibrarySelector } from './library-selector'
 import { Selectors } from './selectors'
 
 type DocsShellProps = {
@@ -48,19 +49,18 @@ export function DocsShell({
       themeSwitch={{ enabled: false }}
       tree={version.tree ?? { name: pkg.name, children: [] }}
       containerProps={{ className: 'docs-reader' }}
-      tabs={libraries.map((library) => ({
-        title: library.name,
-        description: library.description,
-        url: `/docs/${library.slug}`,
-      }))}
+      tabs={false}
       sidebar={{
         banner: (
-          <Selectors
-            frameworks={pkg.frameworks}
-            framework={framework}
-            version={version}
-            onSwitch={switchDocs}
-          />
+          <div className="flex flex-col gap-2">
+            <LibrarySelector libraries={libraries} selected={pkg} />
+            <Selectors
+              frameworks={pkg.frameworks}
+              framework={framework}
+              version={version}
+              onSwitch={switchDocs}
+            />
+          </div>
         ),
         footer: (
           <div className="flex flex-col gap-4 border-t border-fd-border pt-4">

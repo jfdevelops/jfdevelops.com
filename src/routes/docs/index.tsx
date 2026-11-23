@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
-import { ArrowRight, Blocks, BookOpen, Braces } from 'lucide-react'
+import { ArrowRight, Blocks, Braces } from 'lucide-react'
+import { getLibraryGroups } from '@/docs/catalog'
 import { getDocsLibraries } from '@/docs/client'
 import { getDefaultFramework, getDefaultVersion, getStatusLabel } from '@/docs/registry'
 import { DocsError, DocsNotFound } from './-components/docs-status'
@@ -23,11 +24,10 @@ export const Route = createFileRoute('/docs/')({
   component: DocsIndex,
 })
 
-const packageIcons = [Blocks, Braces, BookOpen]
-
 function DocsIndex() {
   const { packages } = Route.useLoaderData()
-  const firstPackage = packages[0]
+  const groups = getLibraryGroups(packages)
+  const firstPackage = groups[0]?.libraries[0]
 
   return (
     <HomeLayout {...docsLayoutOptions(packages)} className="docs-home">
@@ -62,45 +62,52 @@ function DocsIndex() {
             </a>
           </div>
         </section>
-        <section id="libraries" aria-labelledby="libraries-title" className="scroll-mt-24">
-          <h2 id="libraries-title" className="mb-4 text-xs font-medium text-fd-muted-foreground">
-            Libraries
-          </h2>
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] gap-3">
-            {packages.map((pkg, index) => {
-              const Icon = packageIcons[index % packageIcons.length]
-              return (
-                <Link
-                  key={pkg.slug}
-                  to="/docs/$package"
-                  params={{ package: pkg.slug }}
-                  className="group flex flex-col rounded-xl border border-fd-border bg-fd-card p-5 text-start transition-colors hover:bg-fd-accent/50"
-                >
-                  <Icon aria-hidden="true" className="mb-4 size-5 text-fd-primary" />
-                  <h3 className="flex items-center justify-between gap-3 text-sm font-semibold">
-                    {pkg.name}
-                    <ArrowRight
-                      aria-hidden="true"
-                      className="size-3.5 text-fd-muted-foreground transition-transform group-hover:translate-x-1"
-                    />
-                  </h3>
-                  <p className="mt-2 flex-1 text-sm leading-6 text-fd-muted-foreground">
-                    {pkg.description}
-                  </p>
-                  <span className="mt-5 flex items-center justify-between gap-2 border-t border-fd-border pt-3 text-xs text-fd-muted-foreground">
-                    <span>
-                      {getStatusLabel(getDefaultVersion(getDefaultFramework(pkg)).status)}
-                    </span>
-                    <span>{pkg.pageCount} pages</span>
-                  </span>
-                </Link>
-              )
-            })}
-          </div>
+        <div id="libraries" className="scroll-mt-24 space-y-10">
+          {groups.map((group) => (
+            <section key={group.id} aria-labelledby={`${group.id}-title`}>
+              <h2
+                id={`${group.id}-title`}
+                className="mb-4 text-sm font-semibold text-fd-foreground"
+              >
+                {group.title}
+              </h2>
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] gap-3">
+                {group.libraries.map((pkg) => {
+                  const Icon = group.id === 'developer-tools' ? Braces : Blocks
+                  return (
+                    <Link
+                      key={pkg.slug}
+                      to="/docs/$package"
+                      params={{ package: pkg.slug }}
+                      className="group flex flex-col rounded-xl border border-fd-border bg-fd-card p-5 text-start transition-colors hover:bg-fd-accent/50"
+                    >
+                      <Icon aria-hidden="true" className="mb-4 size-5 text-fd-primary" />
+                      <h3 className="flex items-center justify-between gap-3 text-sm font-semibold">
+                        {pkg.name}
+                        <ArrowRight
+                          aria-hidden="true"
+                          className="size-3.5 text-fd-muted-foreground transition-transform group-hover:translate-x-1"
+                        />
+                      </h3>
+                      <p className="mt-2 flex-1 text-sm leading-6 text-fd-muted-foreground">
+                        {pkg.description}
+                      </p>
+                      <span className="mt-5 flex items-center justify-between gap-2 border-t border-fd-border pt-3 text-xs text-fd-muted-foreground">
+                        <span>
+                          {getStatusLabel(getDefaultVersion(getDefaultFramework(pkg)).status)}
+                        </span>
+                        <span>{pkg.pageCount} pages</span>
+                      </span>
+                    </Link>
+                  )
+                })}
+              </div>
+            </section>
+          ))}
           <p className="mt-6 text-center text-xs text-fd-muted-foreground">
             TypeScript libraries. Developer tools. Practical guides.
           </p>
-        </section>
+        </div>
       </div>
     </HomeLayout>
   )
