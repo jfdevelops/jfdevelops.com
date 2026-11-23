@@ -3,13 +3,13 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs'
 import { ArrowLeft } from 'lucide-react'
 import type { ReactNode } from 'react'
 import ThemeToggle from '@/components/theme-toggle'
+import { docsLayoutOptions } from '@/routes/docs/-components/layout-options'
 import {
   type DocsFramework,
   type DocsVersion,
   getSwitchTarget,
   type PackageDocs,
 } from '@/routes/docs/-utils/registry'
-import { docsLayoutOptions } from './layout-options'
 import { LibrarySelector } from './library-selector'
 import { Selectors } from './selectors'
 

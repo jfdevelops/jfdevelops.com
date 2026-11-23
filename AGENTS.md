@@ -41,7 +41,7 @@ npx @tanstack/intent@latest list
 ```
 src/
   routes/          # TanStack Router file routes
-    docs/          # Docs routes (-components UI, -utils runtime) with Twoslash snapshots
+    docs/          # Docs routes; shared -components/-utils, package-private under $package
   components/      # Shared site UI
 packages/
   <package>/docs/  # Legacy placeholders; not consumed

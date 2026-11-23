@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { DocPage, loadDocPage } from '../-components/page'
 import { DocsError, DocsNotFound } from '../-components/status'
+import { DocPage } from './-components/page'
+import { loadDocPage } from './-utils/loader'
 
 export const Route = createFileRoute('/docs/$package/')({
   notFoundComponent: DocsNotFound,
