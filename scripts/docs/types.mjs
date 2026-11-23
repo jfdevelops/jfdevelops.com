@@ -1,5 +1,6 @@
 import { access, mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
+import { completeCodeBlocks, publicImports } from './code-context.mjs'
 
 export function annotateCodeBlocks(markdown, context) {
   let fence
@@ -32,37 +33,38 @@ export function annotateCodeBlocks(markdown, context) {
           return match[3] === 'npm' ? line : `${match[1]}${match[2]}bash${match[4]}`
         return `${match[1]}${match[2]}bash${match[4]} tab="${match[3]}" tab-group="package-manager"`
       }
-      if (
-        !['ts', 'tsx', 'typescript', 'js', 'jsx', 'javascript'].includes(match[3]) ||
-        /\b(?:notwoslash|no-twoslash)\b/.test(match[4])
-      )
-        return line
-      // Generated API examples use ^? as prose, without the declarations needed
-      // to execute a Twoslash query. Explicitly opted-in examples retain queries.
-      if (!/\btwoslash\b/.test(match[4])) {
-        const end = lines.findIndex(
-          (candidate, candidateIndex) =>
-            candidateIndex > index &&
-            new RegExp(`^ {0,3}${fence.character}{${fence.length},}\\s*$`).test(candidate),
-        )
-        if (
-          lines
-            .slice(index + 1, end < 0 ? undefined : end)
-            .some((code) => /^\s*\/\/\s*\^\?/.test(code))
-        )
-          return line
-      }
-      return `${line} docs-types=${context}`
+      if (!['ts', 'tsx', 'typescript', 'js', 'jsx', 'javascript'].includes(match[3])) return line
+      return `${line.replace(/\b(?:notwoslash|no-twoslash)\b/g, '').trimEnd()} docs-types=${context}`
     })
     .join('\n')
 }
 
-export async function addTypeContext(directory, context) {
+export async function addTypeContext(
+  directory,
+  context,
+  root = directory,
+  imports = publicImports(context),
+) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     const full = path.join(directory, entry.name)
-    if (entry.isDirectory() && entry.name !== 'assets') await addTypeContext(full, context)
-    else if (entry.name.endsWith('.md'))
-      await writeFile(full, annotateCodeBlocks(await readFile(full, 'utf8'), context))
+    if (entry.isDirectory() && entry.name !== 'assets')
+      await addTypeContext(full, context, root, imports)
+    else if (entry.name.endsWith('.md')) {
+      let prelude = ''
+      const relative = path.relative(root, full).replace(/\\/g, '/').replace(/\.md$/, '.tsx')
+      try {
+        prelude = await readFile(path.join('docs/type-contexts', context.key, relative), 'utf8')
+      } catch (error) {
+        if (error.code !== 'ENOENT') throw error
+      }
+      try {
+        prelude = await readFile(full.replace(/\.md$/, '.context.tsx'), 'utf8')
+      } catch (error) {
+        if (error.code !== 'ENOENT') throw error
+      }
+      const markdown = completeCodeBlocks(await readFile(full, 'utf8'), { imports, prelude })
+      await writeFile(full, annotateCodeBlocks(markdown, context.key))
+    }
   }
 }
 
@@ -96,6 +98,7 @@ export async function prepareTypeContext(projectRoot, checkout, library, framewo
       }
     }
     return {
+      packageName: library.packageName,
       key: `${library.slug}/${framework.id}/${version.id}`,
       cacheKey: `${library.commit}/${library.slug}/${framework.id}/${version.id}`,
       cwd: checkout,
@@ -118,6 +121,7 @@ export async function prepareTypeContext(projectRoot, checkout, library, framewo
   if (version.status === 'current' || version.status === 'next') {
     return {
       key,
+      packageName: library.packageName,
       cacheKey,
       cwd: path.join(checkout, 'tools/docs'),
       compilerOptions: { ...base.compilerOptions, ...tools.compilerOptions },
@@ -167,6 +171,7 @@ export async function prepareTypeContext(projectRoot, checkout, library, framewo
   }
   return {
     key,
+    packageName: library.packageName,
     cacheKey,
     cwd: directory,
     compilerOptions: { ...base.compilerOptions, types: ['react', 'node'] },

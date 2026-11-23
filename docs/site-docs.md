@@ -81,3 +81,18 @@ deployment; editing an existing library's docs only needs a successful automatic
 No extra server or environment setting is required for local docs. An optional
 `VITE_DOCS_SNAPSHOT_ORIGIN` can point to an existing loopback snapshot server.
 This override is available only in development and is ignored in production.
+
+## Type-hover context
+
+Every JavaScript and TypeScript fence is analyzed, including fences that previously
+opted out. The importer resolves public API imports and carries dependencies from
+other snippets on the same page into a hidden compiler prelude. Each displayed
+fragment remains its own module so repeated example variable names do not conflict.
+
+A fragment that relies on application-specific setup needs that real setup to infer
+its types. Libraries can supply a sibling `<page>.context.tsx` file with the imports
+and declarations used by their examples; it refreshes with their docs. Existing
+site compatibility contexts live under `docs/type-contexts/<library>/<framework>/<version>`.
+These are actual public API calls checked by TypeScript, never hand-written tooltip
+labels. Use self-contained examples or context files for accurate inference; an
+undefined identifier has no type information for an editor or the docs to display.

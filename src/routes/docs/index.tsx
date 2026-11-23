@@ -3,9 +3,12 @@ import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import { ArrowRight, Blocks, BookOpen, Braces } from 'lucide-react'
 import { getDocsLibraries } from '@/docs/client'
 import { getDefaultFramework, getDefaultVersion, getStatusLabel } from '@/docs/registry'
+import { DocsError, DocsNotFound } from './-components/docs-status'
 import { docsLayoutOptions } from './-components/layout-options'
 
 export const Route = createFileRoute('/docs/')({
+  notFoundComponent: DocsNotFound,
+  errorComponent: DocsError,
   loader: async () => ({ packages: await getDocsLibraries() }),
   head: () => ({
     meta: [

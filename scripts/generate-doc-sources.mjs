@@ -104,7 +104,7 @@ for (const source of config.libraries) {
         run,
       )
       typeContexts.push(typeContext)
-      await addTypeContext(directory, typeContext.key)
+      await addTypeContext(directory, typeContext)
       const assets = path.join(directory, 'assets')
       if (await exists(assets)) {
         const publicAssets = path.join(

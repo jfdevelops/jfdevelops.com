@@ -19,3 +19,11 @@ export function serializeDocs(value) {
   }
   return { tag: value.type, props, children: [serializeDocs(value.props.children)] }
 }
+
+export function headingText(value) {
+  if (value == null || typeof value === 'boolean') return ''
+  if (typeof value === 'string' || typeof value === 'number') return String(value)
+  if (Array.isArray(value)) return value.map(headingText).join('')
+  if (isValidElement(value)) return headingText(value.props.children)
+  throw new Error('Unsupported heading content')
+}

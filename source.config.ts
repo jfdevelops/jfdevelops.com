@@ -17,8 +17,7 @@ function createTypeTransformer(context: (typeof typeContexts)[number]) {
   function matches(meta: string, language: string) {
     return (
       ['ts', 'tsx', 'typescript', 'js', 'jsx', 'javascript'].includes(language) &&
-      meta.split(/\s+/).includes(`docs-types=${context.key}`) &&
-      !/\b(?:notwoslash|no-twoslash)\b/.test(meta)
+      meta.split(/\s+/).includes(`docs-types=${context.key}`)
     )
   }
   const transformer = transformerTwoslash({
@@ -28,10 +27,8 @@ function createTypeTransformer(context: (typeof typeContexts)[number]) {
       compilerOptions: context.compilerOptions,
       // Partial examples still get inferred types without being presented as compiler tests.
       handbookOptions: { noErrors: true, noErrorValidation: true },
-      filterNode: (node) =>
-        node.type !== 'hover' || !/^(?:any|.*: any)$/.test(node.text.split('\n')[0]),
     },
-    typesCache: createFileSystemTypesCache({ dir: `.docs-cache/twoslash/v2/${context.cacheKey}` }),
+    typesCache: createFileSystemTypesCache({ dir: `.docs-cache/twoslash/v4/${context.cacheKey}` }),
   })
   // Each version owns its analysis and rendering; other versions must not process its hover nodes.
   return {

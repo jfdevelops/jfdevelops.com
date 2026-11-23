@@ -4,12 +4,13 @@ import path from 'node:path'
 import { fumadocsMdx } from 'fumadocs-mdx/vite'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { createServer } from 'vite'
-import { serializeDocs } from './serialize.mjs'
+import { headingText, serializeDocs } from './serialize.mjs'
 
 const output = path.resolve('.docs-snapshots')
 const libraries = JSON.parse(await readFile('src/docs/generated-library-manifests.json', 'utf8'))
 const server = await createServer({
   configFile: false,
+  cacheDir: '.docs-cache/vite-snapshots',
   plugins: [fumadocsMdx()],
   resolve: { tsconfigPaths: true },
   server: { middlewareMode: true, watch: null },
@@ -50,7 +51,7 @@ try {
             id: entry.id,
             title: file.data.title,
             description: file.data.description ?? library.description,
-            toc: content.toc.map((heading) => ({ ...heading, title: String(heading.title) })),
+            toc: content.toc.map((heading) => ({ ...heading, title: headingText(heading.title) })),
             body: serializeDocs(content.body({ components })),
           })
           renderToStaticMarkup(renderDocs(data.body))
