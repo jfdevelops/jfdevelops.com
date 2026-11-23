@@ -1,12 +1,13 @@
 import { access, mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { completeCodeBlocks, publicImports } from './code-context.mjs'
+import { markdownNodes } from './markdown.mjs'
 
 export function annotateCodeBlocks(markdown, context) {
   let fence
   let previousManagerEnd = -1
   const lines = markdown.replace(/\r\n/g, '\n').split('\n')
-  return lines
+  let output = lines
     .map((line, index) => {
       if (fence) {
         if (new RegExp(`^ {0,3}${fence.character}{${fence.length},}\\s*$`).test(line))
@@ -37,6 +38,27 @@ export function annotateCodeBlocks(markdown, context) {
       return `${line.replace(/\b(?:notwoslash|no-twoslash)\b/g, '').trimEnd()} docs-types=${context}`
     })
     .join('\n')
+  // CommonMark containers (lists and blockquotes) can prefix a fence with markers.
+  for (const node of markdownNodes(output).reverse()) {
+    if (
+      node.type !== 'code' ||
+      !['ts', 'tsx', 'typescript', 'js', 'jsx', 'javascript'].includes(node.lang) ||
+      node.meta?.includes('docs-types=')
+    )
+      continue
+    const start = node.position.start.offset
+    const end = output.indexOf('\n', start)
+    if (end < 0) continue
+    const header = output.slice(start, end)
+    if (!/^(`{3,}|~{3,})/.test(header)) continue
+    output =
+      output.slice(0, start) +
+      header.replace(/\b(?:notwoslash|no-twoslash)\b/g, '').trimEnd() +
+      ' docs-types=' +
+      context +
+      output.slice(end)
+  }
+  return output
 }
 
 export async function addTypeContext(

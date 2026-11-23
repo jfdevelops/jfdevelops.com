@@ -40,3 +40,18 @@ it('resolves Windows Markdown fences and ignores script fences nested inside tex
     '\x60\x60\x60\x60text\n\x60\x60\x60ts\nconst page = factory();\n\x60\x60\x60\n\x60\x60\x60\x60'
   expect(completeCodeBlocks(nested, { imports: { factory: 'library' } })).toBe(nested)
 })
+it('preserves list and blockquote containers when inserting hidden context', async () => {
+  const { markdownNodes } = await import('./markdown.mjs')
+  for (const input of [
+    '- ```tsx\n  const page = factory();\n  ```',
+    '> ```tsx\n> const page = factory();\n> ```',
+  ]) {
+    const output = completeCodeBlocks(input, { imports: { factory: 'library' } })
+    const code = markdownNodes(output).find((node) => node.type === 'code')
+    expect(code.value).toContain(
+      'import { factory } from "library";\n// ---cut---\nconst page = factory();',
+    )
+    expect(markdownNodes(output)[1].type).toBe(markdownNodes(input)[1].type)
+    expect(completeCodeBlocks(input)).toBe(input)
+  }
+})

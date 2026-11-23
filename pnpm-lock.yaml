@@ -336,6 +336,9 @@ importers:
       jsdom:
         specifier: ^31.0.1
         version: 31.0.1(@noble/hashes@1.8.0)
+      mdast-util-from-markdown:
+        specifier: 2.1.0
+        version: 2.1.0
       portless:
         specifier: ^0.18.1
         version: 0.18.1

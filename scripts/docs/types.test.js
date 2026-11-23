@@ -42,3 +42,11 @@ describe('type-hover code block preparation', () => {
     ).toContain('```ts twoslash docs-types=library/react/v2')
   })
 })
+it('annotates script fences inside CommonMark list and quote containers', () => {
+  expect(annotateCodeBlocks('- ```tsx\n  const value = 1\n  ```', 'library/react/v1')).toContain(
+    '- ```tsx docs-types=library/react/v1',
+  )
+  expect(annotateCodeBlocks('> ```ts\n> const value = 1\n> ```', 'library/react/v1')).toContain(
+    '> ```ts docs-types=library/react/v1',
+  )
+})

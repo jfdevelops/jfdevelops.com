@@ -1,4 +1,5 @@
 import ts from 'typescript'
+import { markdownNodes } from './markdown.mjs'
 
 function sourceFile(code) {
   return ts.createSourceFile('example.tsx', code, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
@@ -42,25 +43,26 @@ export function missingIdentifiers(code) {
 export function completeCodeBlocks(markdown, { imports = {}, prelude = '' } = {}) {
   markdown = markdown.replace(/\r\n/g, '\n')
   const fences = []
-  const opener = /^ {0,3}(`{3,}|~{3,})([^\n]*)\n/gm
-  for (let match = opener.exec(markdown); match; match = opener.exec(markdown)) {
-    const closing = new RegExp(`^ {0,3}${match[1][0]}{${match[1].length},}[^\\S\\n]*$`, 'gm')
-    closing.lastIndex = opener.lastIndex
-    const end = closing.exec(markdown)
-    if (!end) break
-    const language = /^(ts|tsx|typescript|js|jsx|javascript)(?=\s|$)(.*)$/.exec(match[2])
-    if (language) {
-      const fence = [
-        markdown.slice(match.index, closing.lastIndex),
-        match[1],
-        language[1],
-        language[2],
-        markdown.slice(opener.lastIndex, end.index),
-      ]
-      fence.index = match.index
-      fences.push(fence)
-    }
-    opener.lastIndex = closing.lastIndex
+  for (const node of markdownNodes(markdown)) {
+    if (
+      node.type !== 'code' ||
+      !['ts', 'tsx', 'typescript', 'js', 'jsx', 'javascript'].includes(node.lang)
+    )
+      continue
+    const start = node.position.start.offset
+    const end = node.position.end.offset
+    const raw = markdown.slice(start, end)
+    const newline = raw.indexOf('\n')
+    if (newline < 0 || !/^(`{3,}|~{3,})/.test(raw)) continue
+    const prefix = markdown
+      .slice(markdown.lastIndexOf('\n', start - 1) + 1, start)
+      .replace(/[^\s>]/g, ' ')
+    const fence = [raw, '', node.lang, node.meta ?? '', node.value]
+    fence.index = start
+    fence.opening = raw.slice(0, newline + 1)
+    fence.remainder = raw.slice(newline + 1)
+    fence.prefix = prefix
+    fences.push(fence)
   }
   // Authored prose query markers are comments, not executable Twoslash requests.
   for (const fence of fences) {
@@ -109,17 +111,24 @@ export function completeCodeBlocks(markdown, { imports = {}, prelude = '' } = {}
       }
     }
     resolve(code)
-    if (!selected.size) {
-      const completed = `${fence[1]}${fence[2]}${fence[3]}\n${code}${fence[1]}`
-      markdown =
-        markdown.slice(0, fence.index) + completed + markdown.slice(fence.index + fence[0].length)
-      continue
-    }
     const context = [...selected]
       .reverse()
       .map((statement) => statement.code)
       .join('\n')
-    const completed = `${fence[1]}${fence[2]}${fence[3]}\n${context}\n// ---cut---\n${code}${fence[1]}`
+    // Leave the authored fence and body byte-for-byte intact. Only insert the
+    // hidden setup, using the container's continuation prefix on every line.
+    const hiddenSetup = selected.size
+      ? `${context}\n// ---cut---\n`
+          .split('\n')
+          .slice(0, -1)
+          .map((line) => `${fence.prefix + line}\n`)
+          .join('')
+      : ''
+    const remainder = /\btwoslash\b/.test(fence[3])
+      ? fence.remainder
+      : fence.remainder.replace(/^([\s>]*\/\/\s*)\^\?/gm, '$1Type:')
+    if (!hiddenSetup && remainder === fence.remainder) continue
+    const completed = fence.opening + hiddenSetup + remainder
     markdown =
       markdown.slice(0, fence.index) + completed + markdown.slice(fence.index + fence[0].length)
   }

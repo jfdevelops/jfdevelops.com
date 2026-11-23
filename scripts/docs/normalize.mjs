@@ -1,5 +1,6 @@
 import { access, readdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
+import { markdownNodes } from './markdown.mjs'
 
 // Adapt Markdown-only repositories to the public-site contract in the ignored checkout.
 export async function normalizeRepositoryDocs(
@@ -16,14 +17,32 @@ export async function normalizeRepositoryDocs(
     }
     if (!entry.name.endsWith('.md')) continue
     const input = (await readFile(file, 'utf8')).replace(/\r\n/g, '\n')
-    // The shared content contract represents documentation-file examples as text.
-    let output = input
-      .replace(/^```(?:markdown|md)\s*$/gm, '```text')
-      .replace(
-        /^```(?:bash|sh)\n((?:npm (?:i|install)|pnpm add|yarn add|bun add)[^\n]*\n)```/gm,
-        (_match, command) => `\`\`\`${command.split(' ')[0]}\n${command}\`\`\``,
+    const nodes = markdownNodes(input)
+    const protectedRanges = nodes
+      .filter((node) => node.type === 'code' || node.type === 'inlineCode')
+      .map((node) => [node.position.start.offset, node.position.end.offset])
+    const edits = []
+    for (const node of nodes) {
+      if (node.type !== 'code' || !node.lang) continue
+      let language = ['markdown', 'md'].includes(node.lang) ? 'text' : undefined
+      if (
+        ['bash', 'sh'].includes(node.lang) &&
+        /^(?:npm (?:i|install)|pnpm add|yarn add|bun add)[^\n]*\n?$/.test(node.value)
       )
-    for (const match of output.matchAll(/\]\(([^\s)]+)\)/g)) {
+        language = node.value.split(' ')[0]
+      if (!language) continue
+      const start = node.position.start.offset
+      const marker = /^(`{3,}|~{3,})/.exec(input.slice(start))
+      if (marker)
+        edits.push({
+          start: start + marker[0].length,
+          end: start + marker[0].length + node.lang.length,
+          value: language,
+        })
+    }
+    for (const match of input.matchAll(/\]\(([^\s)]+)\)/g)) {
+      if (protectedRanges.some(([start, end]) => match.index >= start && match.index < end))
+        continue
       const target = match[1]
       if (!target.startsWith('.')) continue
       const [relative, anchor] = target.split('#')
@@ -38,8 +57,11 @@ export async function normalizeRepositoryDocs(
         .map(encodeURIComponent)
         .join('/')
       const url = `${registration.repository}/blob/${registration.commit}/${repoPath}${anchor ? `#${anchor}` : ''}`
-      output = output.replace(`](${target})`, `](${url})`)
+      edits.push({ start: match.index + 2, end: match.index + 2 + target.length, value: url })
     }
+    let output = input
+    for (const edit of edits.sort((left, right) => right.start - left.start))
+      output = output.slice(0, edit.start) + edit.value + output.slice(edit.end)
     if (output !== input) await writeFile(file, output)
   }
 }

@@ -44,6 +44,13 @@ const server = await createServer({
     strictPort: true,
   },
 })
-server.httpServer?.once('close', () => snapshots?.server.close())
+// The snapshot server belongs to the process, not Vite's restartable HTTP server.
+for (const signal of ['SIGINT', 'SIGTERM']) {
+  process.once(signal, async () => {
+    await server.close()
+    snapshots?.server.close()
+    process.exit(0)
+  })
+}
 await server.listen()
 server.printUrls()

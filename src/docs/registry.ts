@@ -91,7 +91,7 @@ export function resolveDocHref(
       if (!relative.startsWith(`${candidate.path}/`)) continue
       const target = relative.slice(candidate.path.length + 1)
       if (image && target.startsWith('assets/'))
-        return `https://raw.githubusercontent.com/${new URL(library.repository).pathname.slice(1)}/${library.commit}/docs/${relative}${resolved.search}${resolved.hash}`
+        return `/docs-assets/${library.slug}/${library.commit}/${relative.split('/').map(encodeURIComponent).join('/')}${resolved.hash}`
       const id = target.replace(/\.md$/, '').replace(/\/index$/, '')
       const page = candidate.pages.find((page) => page.id === id)
       if (page)
