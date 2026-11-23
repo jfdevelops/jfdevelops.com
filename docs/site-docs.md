@@ -65,8 +65,9 @@ pnpm typecheck
 pnpm build
 ```
 
-Normal development, tests and website builds do not generate or bundle library docs.
-The local viewer reads the published GitHub snapshots. To validate snapshot generation:
+Local development serves ignored snapshots automatically. The first `pnpm dev` prepares
+missing snapshots, which can take several minutes; subsequent starts reuse them.
+Tests and website builds do not generate or bundle library docs. To refresh local content:
 
 ```sh
 pnpm docs:snapshot
@@ -77,7 +78,6 @@ owns the GitHub commit. Generated source checkouts, type caches and MDX collecti
 ignored as well. Updating rendering components or runtime behavior needs a site
 deployment; editing an existing library's docs only needs a successful automatic refresh.
 
-To preview a local snapshot before its first GitHub publication, run
-`node scripts/docs/serve.mjs` in another terminal and set
-`VITE_DOCS_SNAPSHOT_ORIGIN=http://127.0.0.1:3031` for `pnpm dev`.
-This loopback override is available only in development and is ignored in production.
+No extra server or environment setting is required for local docs. An optional
+`VITE_DOCS_SNAPSHOT_ORIGIN` can point to an existing loopback snapshot server.
+This override is available only in development and is ignored in production.
