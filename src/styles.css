@@ -640,3 +640,31 @@ body.docs-surface {
     --fd-toc-width: 230px;
   }
 }
+
+/* Native controls, links and third-party Fumadocs controls share the same affordance.
+   Shadcn primitives also declare it directly in their component classes. */
+@layer base {
+  a[href],
+  button:not(:disabled):not([aria-disabled="true"]),
+  summary,
+  [role="button"]:not([aria-disabled="true"]),
+  [role="link"]:not([aria-disabled="true"]),
+  [role="menuitem"]:not([data-disabled]):not([aria-disabled="true"]),
+  [role="menuitemcheckbox"]:not([data-disabled]):not([aria-disabled="true"]),
+  [role="menuitemradio"]:not([data-disabled]):not([aria-disabled="true"]),
+  [role="checkbox"]:not([data-disabled]):not([aria-disabled="true"]),
+  [role="radio"]:not([data-disabled]):not([aria-disabled="true"]),
+  [role="switch"]:not([data-disabled]):not([aria-disabled="true"]),
+  [role="treeitem"]:not([data-disabled]):not([aria-disabled="true"]),
+  [role="option"]:not([data-disabled]):not([aria-disabled="true"]),
+  [role="tab"]:not([data-disabled]):not([aria-disabled="true"]),
+  input[type="file"]:not(:disabled),
+  input[type="button"]:not(:disabled),
+  input[type="submit"]:not(:disabled),
+  input[type="reset"]:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled),
+  label[for] {
+    cursor: pointer;
+  }
+}
