@@ -2,7 +2,9 @@
 
 The website uses Fumadocs HomeLayout, DocsLayout, MDX components, code tabs and
 Twoslash popups. Documentation content is loaded on demand from public GitHub
-snapshots. R2 is not used.
+snapshots. R2 is not used. Route UI, MDX/Twoslash components, and the snapshot
+runtime all live under `src/routes/docs/` (`-components/` for UI, `-utils/` for
+catalog/runtime). Snapshot generate outputs stay under `.docs-cache/generated/`.
 
 ## Repository list
 

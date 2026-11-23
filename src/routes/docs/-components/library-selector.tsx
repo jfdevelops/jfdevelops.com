@@ -9,8 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { getLibraryGroups } from '@/docs/catalog'
-import type { PackageDocs } from '@/docs/registry'
+import { getLibraryGroups } from '@/routes/docs/-utils/catalog'
+import type { PackageDocs } from '@/routes/docs/-utils/registry'
 
 export function LibrarySelector({
   libraries,
@@ -20,6 +20,7 @@ export function LibrarySelector({
   selected: PackageDocs
 }) {
   const navigate = useNavigate()
+
   return (
     <Select
       value={selected.slug}
@@ -57,3 +58,4 @@ export function LibrarySelector({
     </Select>
   )
 }
+

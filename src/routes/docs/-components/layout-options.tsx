@@ -1,8 +1,8 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared'
 import { BookOpen } from 'lucide-react'
 import ThemeToggle from '@/components/theme-toggle'
-import { getLibraryGroups } from '@/docs/catalog'
-import type { PackageDocs } from '@/docs/registry'
+import { getLibraryGroups } from '@/routes/docs/-utils/catalog'
+import type { PackageDocs } from '@/routes/docs/-utils/registry'
 
 export function docsLayoutOptions(libraries: PackageDocs[] = []) {
   return {
@@ -42,3 +42,4 @@ export function docsLayoutOptions(libraries: PackageDocs[] = []) {
     themeSwitch: { enabled: true, component: <ThemeToggle /> },
   } satisfies BaseLayoutProps
 }
+

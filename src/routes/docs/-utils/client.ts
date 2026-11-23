@@ -1,8 +1,8 @@
 import { z } from 'zod'
 import {
-  getDocsLibraries as fetchLibraries,
-  getDocLibrary as fetchLibrary,
   getDocContent as fetchPage,
+  getDocLibrary as fetchLibrary,
+  getDocsLibraries as fetchLibraries,
 } from './queries'
 import { librarySchema, manifestSchema, pageSchema, pointerSchema } from './snapshot'
 
@@ -21,3 +21,4 @@ export async function getDocLibrary(input: Parameters<typeof fetchLibrary>[0]) {
 export async function getDocContent(input: Parameters<typeof fetchPage>[0]) {
   return pageResponse.parse(JSON.parse(await fetchPage(input)))
 }
+

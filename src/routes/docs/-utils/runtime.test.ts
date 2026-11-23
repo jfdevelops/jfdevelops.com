@@ -60,10 +60,13 @@ function fixture() {
   const fetcher = vi.fn(async (input: RequestInfo | URL) => {
     const url = String(input)
     if (url.endsWith('/current.json'))
+
       return Response.json({ schemaVersion: 1, revision, sourceCommit: revision[0].repeat(40) })
     const selected = url.split('/snapshots/')[1]?.split('/')[0] ?? revision
     if (url.endsWith('/manifest.json'))
+
       return Response.json({ schemaVersion: 1, sourceBranch: 'main', library: library(selected) })
+
     return Response.json({
       schemaVersion: 1,
       framework: 'react',
@@ -87,6 +90,7 @@ function fixture() {
     now: () => clock,
     log,
   })
+
   return {
     service,
     cache,
@@ -194,3 +198,4 @@ it('caches public rendered HTML by snapshot and UI deployment, and bypasses priv
   await serveDocsRequest(new Request(request, { headers: { cookie: 'session=private' } }), options)
   expect(render).toHaveBeenCalledTimes(3)
 })
+

@@ -8,7 +8,7 @@ import {
   type DocsVersion,
   getSwitchTarget,
   type PackageDocs,
-} from '@/docs/registry'
+} from '@/routes/docs/-utils/registry'
 import { docsLayoutOptions } from './layout-options'
 import { LibrarySelector } from './library-selector'
 import { Selectors } from './selectors'
@@ -21,6 +21,7 @@ type DocsShellProps = {
   pageId: string
   libraries: PackageDocs[]
 }
+
 export function DocsShell({
   children,
   pkg,
@@ -85,3 +86,4 @@ export function DocsShell({
     </DocsLayout>
   )
 }
+

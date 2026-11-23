@@ -1,6 +1,10 @@
-import sources from '../../docs.sources.json'
+import sources from '../../../../docs.sources.json'
 
-type Registration = { id: string; group?: string }
+type Registration = {
+  id: string
+  group?: string
+}
+
 const groups = [
   { id: 'libraries', title: 'Libraries' },
   { id: 'developer-tools', title: 'Developer tools' },
@@ -15,6 +19,7 @@ export function getLibraryGroups<T extends { slug: string }>(
       ...group,
       libraries: libraries.filter((library) => {
         const registration = registrations.find((source) => source.id === library.slug)
+
         return (
           (registration?.group === 'developer-tools' ? 'developer-tools' : 'libraries') === group.id
         )
@@ -22,3 +27,4 @@ export function getLibraryGroups<T extends { slug: string }>(
     }))
     .filter((group) => group.libraries.length > 0)
 }
+

@@ -1,8 +1,8 @@
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { expect, it } from 'vitest'
-import { getMdxComponents } from '@/components/mdx'
-import { serializeDocs } from '../../scripts/docs/serialize.mjs'
+import { getMdxComponents } from '@/routes/docs/-components/mdx'
+import { serializeDocs } from '../../../../scripts/docs/serialize.mjs'
 import { renderDocs } from './render'
 import { pageSchema } from './snapshot'
 
@@ -60,3 +60,4 @@ it('rejects executable tags, event handlers, and unsafe URLs', () => {
     serializeDocs(createElement('button', { type: 'button', onClick() {} }, 'Run')),
   ).toThrow()
 })
+

@@ -1,10 +1,10 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import { ArrowRight, Blocks, Braces } from 'lucide-react'
-import { getLibraryGroups } from '@/docs/catalog'
-import { getDocsLibraries } from '@/docs/client'
-import { getDefaultFramework, getDefaultVersion, getStatusLabel } from '@/docs/registry'
-import { DocsError, DocsNotFound } from './-components/docs-status'
+import { getLibraryGroups } from '@/routes/docs/-utils/catalog'
+import { getDocsLibraries } from '@/routes/docs/-utils/client'
+import { getDefaultFramework, getDefaultVersion, getStatusLabel } from '@/routes/docs/-utils/registry'
+import { DocsError, DocsNotFound } from './-components/status'
 import { docsLayoutOptions } from './-components/layout-options'
 
 export const Route = createFileRoute('/docs/')({
@@ -74,6 +74,7 @@ function DocsIndex() {
               <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] gap-3">
                 {group.libraries.map((pkg) => {
                   const Icon = group.id === 'developer-tools' ? Braces : Blocks
+
                   return (
                     <Link
                       key={pkg.slug}
@@ -112,3 +113,4 @@ function DocsIndex() {
     </HomeLayout>
   )
 }
+

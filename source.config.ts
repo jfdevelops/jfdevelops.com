@@ -9,8 +9,8 @@ const typeContexts: Array<{
   cacheKey: string
   cwd: string
   compilerOptions: Record<string, unknown>
-}> = existsSync('src/docs/generated-type-contexts.json')
-  ? JSON.parse(readFileSync('src/docs/generated-type-contexts.json', 'utf8'))
+}> = existsSync('.docs-cache/generated/type-contexts.json')
+  ? JSON.parse(readFileSync('.docs-cache/generated/type-contexts.json', 'utf8'))
   : []
 
 function createTypeTransformer(context: (typeof typeContexts)[number]) {

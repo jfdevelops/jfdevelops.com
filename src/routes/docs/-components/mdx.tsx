@@ -7,7 +7,10 @@ import { Children, type ComponentProps, isValidElement, type ReactNode } from 'r
 function textContent(children: ReactNode): string {
   return Children.toArray(children)
     .map((child) => {
-      if (typeof child === 'string' || typeof child === 'number') return String(child)
+      if (typeof child === 'string' || typeof child === 'number') {
+        return String(child)
+      }
+
       return isValidElement<{ children?: ReactNode }>(child)
         ? textContent(child.props.children)
         : ''
@@ -17,9 +20,11 @@ function textContent(children: ReactNode): string {
 
 function DocQuote({ children, ...props }: ComponentProps<'blockquote'>) {
   const text = textContent(children).trim()
+
   if (/^(Note|Tip|Warning):/.test(text)) {
     return <Callout type={text.startsWith('Warning:') ? 'warn' : 'info'}>{children}</Callout>
   }
+
   return <blockquote {...props}>{children}</blockquote>
 }
 
@@ -39,3 +44,4 @@ export const useMDXComponents = getMdxComponents
 declare global {
   type MDXProvidedComponents = ReturnType<typeof getMdxComponents>
 }
+

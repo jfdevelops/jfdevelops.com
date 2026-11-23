@@ -1,10 +1,10 @@
+import { Link } from '@tanstack/react-router'
 import { Menu } from 'lucide-react'
 import { createResourceLinks } from '@/routes/(home)/-sections/definition'
-import { Link } from '@tanstack/react-router'
-import { HeaderLink } from './link'
+import { BrandLogo } from '../brand-logo'
 import { RouterNavLink } from '../ui/nav-link'
 import { PageWrap } from '../ui/page-wrap'
-import { BrandLogo } from '../brand-logo'
+import { HeaderLink } from './link'
 
 const sectionLinks = createResourceLinks({
   services: {
@@ -31,27 +31,7 @@ const sectionLinks = createResourceLinks({
 
 export default function Header() {
   return (
-    <header
-      ref={(element) => {
-        if (!element) {
-          return
-        }
-
-        const updateHeight = () => {
-          document.documentElement.style.setProperty(
-            '--site-header-height',
-            `${element.getBoundingClientRect().height}px`,
-          )
-        }
-        const observer = new ResizeObserver(updateHeight)
-
-        updateHeight()
-        observer.observe(element)
-
-        return () => observer.disconnect()
-      }}
-      className="sticky top-0 z-50 border-b border-(--line) bg-(--header-bg) px-4 backdrop-blur-lg"
-    >
+    <header className="sticky top-0 z-50 border-b border-(--line) bg-(--header-bg) px-4 backdrop-blur-lg">
       <PageWrap as="nav" className="flex flex-wrap items-center gap-x-3 gap-y-2 py-3 sm:py-4">
         <div className="shrink-0">
           <Link
@@ -68,7 +48,7 @@ export default function Header() {
               {label}
             </HeaderLink>
           ))}
-          <RouterNavLink to="/docs">Docs</RouterNavLink>
+          <RouterNavLink to="/docs">For developers</RouterNavLink>
         </div>
 
         <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
@@ -86,7 +66,7 @@ export default function Header() {
             <nav className="mobile-nav-panel" aria-label="Mobile navigation">
               {[
                 ...sectionLinks.map(({ href, label }) => ({ href: href.full, label })),
-                { href: '/docs', label: 'Docs' },
+                { href: '/docs', label: 'For developers' },
                 { href: '/#contact', label: 'Get in touch' },
               ].map(({ href, label }) => (
                 <a
@@ -106,3 +86,4 @@ export default function Header() {
     </header>
   )
 }
+

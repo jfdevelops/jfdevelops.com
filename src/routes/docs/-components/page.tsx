@@ -1,27 +1,35 @@
 import { notFound, redirect } from '@tanstack/react-router'
 import FumadocsLink from 'fumadocs-core/link'
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/page'
-import { getMdxComponents } from '@/components/mdx'
-import { getDocContent, getDocLibrary, getDocsLibraries } from '@/docs/client'
+import { getMdxComponents } from '@/routes/docs/-components/mdx'
+import { getDocContent, getDocLibrary, getDocsLibraries } from '@/routes/docs/-utils/client'
 import {
   getDefaultFramework,
   getDefaultVersion,
   getPageUrl,
   resolveDocContext,
   resolveDocHref,
-} from '@/docs/registry'
-import { renderDocs } from '@/docs/render'
-import { DocsShell } from './docs-shell'
+} from '@/routes/docs/-utils/registry'
+import { renderDocs } from '@/routes/docs/-utils/render'
+import { DocsShell } from './shell'
 
 export async function loadDocPage(packageSlug: string, slugs: string[]) {
   const summary = await getDocLibrary({ data: packageSlug })
   const pkg = summary?.library
-  if (!pkg) throw notFound()
+
+  if (!pkg) {
+    throw notFound()
+  }
+
   if (slugs.length < 2) {
     const framework = slugs[0]
-      ? pkg.frameworks.find((framework) => framework.id === slugs[0])
+      ? pkg.frameworks.find((entry) => entry.id === slugs[0])
       : getDefaultFramework(pkg)
-    if (!framework) throw notFound()
+
+    if (!framework) {
+      throw notFound()
+    }
+
     throw redirect({
       to: '/docs/$package/$',
       params: { package: pkg.slug, _splat: `${framework.id}/${framework.defaultVersion}` },
@@ -29,8 +37,13 @@ export async function loadDocPage(packageSlug: string, slugs: string[]) {
       statusCode: 302,
     })
   }
+
   const context = resolveDocContext(pkg, slugs)
-  if (!context) throw notFound()
+
+  if (!context) {
+    throw notFound()
+  }
+
   const content = await getDocContent({
     data: {
       library: pkg.slug,
@@ -39,22 +52,44 @@ export async function loadDocPage(packageSlug: string, slugs: string[]) {
       page: context.pageId,
     },
   })
-  if (!content) throw notFound()
+
+  if (!content) {
+    throw notFound()
+  }
+
   const libraries = await getDocsLibraries()
-  return { ...content, libraries, title: content.page.title, description: content.page.description }
+
+  return {
+    ...content,
+    libraries,
+    title: content.page.title,
+    description: content.page.description,
+  }
 }
 
-type DocPageProps = { data: Awaited<ReturnType<typeof loadDocPage>>; missingPage?: boolean }
+type DocPageProps = {
+  data: Awaited<ReturnType<typeof loadDocPage>>
+  missingPage?: boolean
+}
+
 export function DocPage({ data, missingPage }: DocPageProps) {
   const { pkg, page, libraries } = data
-  const framework = pkg.frameworks.find((framework) => framework.id === page.framework)
-  if (!framework) throw new Error('Missing docs framework')
-  const version = framework.versions.find((version) => version.id === page.version)
-  if (!version) throw new Error('Missing docs version')
+  const framework = pkg.frameworks.find((entry) => entry.id === page.framework)
+
+  if (!framework) {
+    throw new Error('Missing docs framework')
+  }
+
+  const version = framework.versions.find((entry) => entry.id === page.version)
+
+  if (!version) {
+    throw new Error('Missing docs version')
+  }
+
   const pageId = page.id
   const toc = page.toc
   const currentVersion = getDefaultVersion(framework)
-  const currentPage = currentVersion.pages.find((page) => page.id === pageId)
+  const currentPage = currentVersion.pages.find((entry) => entry.id === pageId)
 
   return (
     <DocsShell
@@ -93,6 +128,7 @@ export function DocPage({ data, missingPage }: DocPageProps) {
             getMdxComponents({
               a: function DocLink({ href, ...props }) {
                 const target = href ? resolveDocHref(pkg, version, pageId, href) : href
+
                 return (
                   <FumadocsLink
                     {...props}
@@ -121,3 +157,4 @@ export function DocPage({ data, missingPage }: DocPageProps) {
     </DocsShell>
   )
 }
+

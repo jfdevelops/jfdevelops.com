@@ -56,3 +56,4 @@ export function DocsNotFound() {
 export function DocsError({ reset }: { reset: () => void }) {
   return <DocsStatus unavailable retry={reset} />
 }
+

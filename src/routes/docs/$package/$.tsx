@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { DocPage, loadDocPage } from '../-components/doc-page'
-import { DocsError, DocsNotFound } from '../-components/docs-status'
+import { DocPage, loadDocPage } from '../-components/page'
+import { DocsError, DocsNotFound } from '../-components/status'
 
 function getSlugs(splat: string | undefined) {
   return splat?.split('/').filter(Boolean) ?? []
@@ -33,3 +33,4 @@ function PackageDocPage() {
 
   return <DocPage data={data} missingPage={docsNotice === 'missing-page'} />
 }
+

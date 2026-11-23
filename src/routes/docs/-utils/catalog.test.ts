@@ -22,3 +22,4 @@ it('groups the docs catalog consistently without dropping unclassified libraries
   ])
   expect(getLibraryGroups([])).toEqual([])
 })
+

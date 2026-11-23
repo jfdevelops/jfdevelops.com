@@ -12,7 +12,7 @@ import {
   type DocsVersion,
   getDefaultVersion,
   getStatusLabel,
-} from '@/docs/registry'
+} from '@/routes/docs/-utils/registry'
 
 const frameworkLogos: Record<string, string> = {
   react: 'react',
@@ -27,6 +27,7 @@ const frameworkLogos: Record<string, string> = {
 
 function FrameworkValue({ framework }: { framework: DocsFramework }) {
   const logo = frameworkLogos[framework.id]
+
   return (
     <span className="flex items-center gap-2">
       {logo ? (
@@ -154,3 +155,4 @@ export function Selectors({ frameworks, framework, version, onSwitch }: Selector
     </div>
   )
 }
+
