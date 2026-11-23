@@ -35,7 +35,8 @@
       "id": "skills",
       "repository": "https://github.com/jfdevelops/skills",
       "branch": "main",
-      "description": "Portable agent skills, shared conventions, and package-owned skill discovery."
+      "description": "Portable agent skills, shared conventions, and package-owned skill discovery.",
+      "group": "developer-tools"
     }
   ]
 }
