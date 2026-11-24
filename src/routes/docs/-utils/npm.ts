@@ -5,20 +5,24 @@ const npmLatestSchema = z.object({
 })
 
 export async function getLatestNpmVersion(packageName: string) {
-  const response = await fetch(
-    `https://registry.npmjs.org/${encodeURIComponent(packageName)}/latest`,
-    {
-      headers: { accept: 'application/json' },
-    },
-  )
+  try {
+    const response = await fetch(
+      `https://registry.npmjs.org/${encodeURIComponent(packageName)}/latest`,
+      {
+        headers: { accept: 'application/json' },
+      },
+    )
 
-  if (!response.ok) {
+    if (!response.ok) {
+      return null
+    }
+
+    const parsed = npmLatestSchema.safeParse(await response.json())
+
+    return parsed.success ? parsed.data.version : null
+  } catch {
     return null
   }
-
-  const parsed = npmLatestSchema.safeParse(await response.json())
-
-  return parsed.success ? parsed.data.version : null
 }
 
 export async function getLatestNpmVersions(packageNames: readonly string[]) {

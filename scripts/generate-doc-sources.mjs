@@ -37,6 +37,24 @@ async function exists(file) {
   }
 }
 
+function bindCatalogSlug(value, sourceSlug, catalogId) {
+  if (sourceSlug === catalogId) {
+    return value
+  }
+
+  return JSON.parse(JSON.stringify(value).replaceAll(`/docs/${sourceSlug}`, `/docs/${catalogId}`))
+}
+
+function toRegisteredLibrary(library, registration) {
+  const bound = bindCatalogSlug(library, library.slug, registration.id)
+
+  return {
+    ...bound,
+    slug: registration.id,
+    name: registration.docs?.name ?? bound.name,
+  }
+}
+
 const libraries = []
 const declarations = []
 const sources = []
@@ -82,11 +100,10 @@ for (const source of config.libraries) {
   if (needsWorkspace) await writeFile(workspaceFile, "packages:\n  - '.'\n")
   await prepareLibrary(checkout, registration, run, needsWorkspace || !(await exists(ready)))
   const manifest = JSON.parse(await readFile(path.join(checkout, 'docs/docs.json'), 'utf8'))
-  const library = await collectLibrary(checkout, manifest, registration)
-  if (library.slug !== registration.id)
-    throw new Error(
-      `Generated library identity changed: ${library.slug}; registered as ${registration.id}`,
-    )
+  const library = toRegisteredLibrary(
+    await collectLibrary(checkout, manifest, registration),
+    registration,
+  )
   if (libraryIds.has(library.slug)) throw new Error(`Duplicate docs library: ${library.slug}`)
   libraryIds.add(library.slug)
   const destination = path.join(projectRoot, '.docs-content', library.slug, registration.commit)

@@ -35,6 +35,12 @@ it('returns null when the npm registry request fails', async () => {
   await expect(getLatestNpmVersion('@jfdevelops/missing')).resolves.toBeNull()
 })
 
+it('returns null when the npm registry request throws', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network down')))
+
+  await expect(getLatestNpmVersion('@jfdevelops/react-layout')).resolves.toBeNull()
+})
+
 it('loads latest versions for each package name', async () => {
   vi.stubGlobal(
     'fetch',
