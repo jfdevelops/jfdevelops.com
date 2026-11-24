@@ -1,19 +1,31 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { DocsError, DocsNotFound } from '../-components/status'
-import { DocPage } from './-components/page'
-import { loadDocPage } from './-utils/loader'
-
-function getSlugs(splat: string | undefined) {
-  return splat?.split('/').filter(Boolean) ?? []
-}
+import { createFileRoute, notFound } from '@tanstack/react-router'
+import { DocPage } from '@/routes/docs/-components/page'
+import { DocsError, DocsNotFound } from '@/routes/docs/-components/status'
+import { resources } from '@/routes/docs/-utils/definition'
+import { getDocSlugs, loadDocPage } from '@/routes/docs/-utils/loader'
+import { docsSearchSchema } from '@/routes/docs/-utils/search'
 
 export const Route = createFileRoute('/docs/$package/$')({
   notFoundComponent: DocsNotFound,
   errorComponent: DocsError,
-  validateSearch: (search: Record<string, unknown>) => ({
-    docsNotice: search.docsNotice === 'missing-page' ? ('missing-page' as const) : undefined,
-  }),
-  loader: ({ params }) => loadDocPage(params.package, getSlugs(params._splat)),
+  validateSearch: docsSearchSchema,
+  params: {
+    parse: ({ package: packageId, _splat }) => {
+      if (!resources.isResource(packageId)) {
+        throw notFound()
+      }
+
+      return {
+        package: packageId,
+        _splat,
+      }
+    },
+    stringify: ({ package: packageId, _splat }) => ({
+      package: packageId,
+      _splat: _splat ?? '',
+    }),
+  },
+  loader: ({ params }) => loadDocPage(params.package, getDocSlugs(params._splat)),
   head: ({ loaderData }) => ({
     meta: [
       {
@@ -25,13 +37,5 @@ export const Route = createFileRoute('/docs/$package/$')({
       },
     ],
   }),
-  component: PackageDocPage,
+  component: DocPage,
 })
-
-function PackageDocPage() {
-  const data = Route.useLoaderData()
-  const { docsNotice } = Route.useSearch()
-
-  return <DocPage data={data} missingPage={docsNotice === 'missing-page'} />
-}
-

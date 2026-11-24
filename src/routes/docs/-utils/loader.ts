@@ -1,9 +1,17 @@
 import { notFound, redirect } from '@tanstack/react-router'
-import { getDocContent, getDocLibrary, getDocsLibraries } from '@/routes/docs/-utils/client'
+import { getDocContent, getDocLibrary } from '@/routes/docs/-utils/client'
+import type { DocsPackageId } from '@/routes/docs/-utils/definition'
+import { getDocsLibrary } from '@/routes/docs/-utils/libraries'
 import { getDefaultFramework, resolveDocContext } from '@/routes/docs/-utils/registry'
 
-export async function loadDocPage(packageSlug: string, slugs: string[]) {
-  const summary = await getDocLibrary({ data: packageSlug })
+export async function loadDocPage(libraryId: DocsPackageId, slugs: string[]) {
+  const catalog = getDocsLibrary(libraryId)
+
+  if (!catalog) {
+    throw notFound()
+  }
+
+  const summary = await getDocLibrary({ data: libraryId })
   const pkg = summary?.library
 
   if (!pkg) {
@@ -21,7 +29,10 @@ export async function loadDocPage(packageSlug: string, slugs: string[]) {
 
     throw redirect({
       to: '/docs/$package/$',
-      params: { package: pkg.slug, _splat: `${framework.id}/${framework.defaultVersion}` },
+      params: {
+        package: catalog.id,
+        _splat: `${framework.id}/${framework.defaultVersion}`,
+      },
       search: { docsNotice: undefined },
       statusCode: 302,
     })
@@ -35,7 +46,7 @@ export async function loadDocPage(packageSlug: string, slugs: string[]) {
 
   const content = await getDocContent({
     data: {
-      library: pkg.slug,
+      library: catalog.id,
       framework: context.framework.id,
       version: context.version.id,
       page: context.pageId,
@@ -46,13 +57,13 @@ export async function loadDocPage(packageSlug: string, slugs: string[]) {
     throw notFound()
   }
 
-  const libraries = await getDocsLibraries()
-
   return {
     ...content,
-    libraries,
     title: content.page.title,
     description: content.page.description,
   }
 }
 
+export function getDocSlugs(splat: string | undefined) {
+  return splat?.split('/').filter(Boolean) ?? []
+}

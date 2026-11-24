@@ -23,16 +23,41 @@ const frameworkLogos: Record<string, string> = {
   solid: 'solid',
   'solid-js': 'solid',
   qwik: 'qwik',
+  javascript: 'javascript',
+  vanilla: 'javascript',
+  agnostic: 'javascript',
+  core: 'javascript',
+}
+
+function resolveFrameworkPresentation(framework: DocsFramework) {
+  const id = framework.id.toLowerCase()
+  const title = framework.title.toLowerCase()
+  const isVanilla =
+    id === 'agnostic' ||
+    id === 'core' ||
+    id === 'vanilla' ||
+    title === 'agnostic' ||
+    title === 'core' ||
+    title === 'vanilla'
+
+  if (isVanilla) {
+    return { title: 'Vanilla', logo: 'javascript' }
+  }
+
+  return {
+    title: framework.title,
+    logo: frameworkLogos[id] ?? null,
+  }
 }
 
 function FrameworkValue({ framework }: { framework: DocsFramework }) {
-  const logo = frameworkLogos[framework.id]
+  const presentation = resolveFrameworkPresentation(framework)
 
   return (
     <span className="flex items-center gap-2">
-      {logo ? (
+      {presentation.logo ? (
         <img
-          src={`/brand/frameworks/${logo}.svg`}
+          src={`/brand/frameworks/${presentation.logo}.svg`}
           alt=""
           aria-hidden="true"
           className="size-4 shrink-0"
@@ -42,7 +67,7 @@ function FrameworkValue({ framework }: { framework: DocsFramework }) {
       ) : (
         <Blocks aria-hidden="true" className="size-4 shrink-0 text-fd-muted-foreground" />
       )}
-      <span>{framework.title}</span>
+      <span>{presentation.title}</span>
     </span>
   )
 }
@@ -83,21 +108,27 @@ export function Selectors({ frameworks, framework, version, onSwitch }: Selector
   return (
     <div className="flex flex-col gap-2 pb-2">
       <Select
+        readOnly={frameworks.length === 1}
         value={framework.id}
-        items={frameworks.map((framework) => ({ value: framework.id, label: framework.title }))}
+        items={frameworks.map((entry) => ({
+          value: entry.id,
+          label: resolveFrameworkPresentation(entry).title,
+        }))}
         onValueChange={(value) => {
-          const selected = frameworks.find((framework) => framework.id === value)
-          if (selected)
+          const selected = frameworks.find((entry) => entry.id === value)
+
+          if (selected) {
             onSwitch(
               selected,
               selected.versions.find((candidate) => candidate.id === version.id) ??
                 getDefaultVersion(selected),
             )
+          }
         }}
       >
         <SelectTrigger
           aria-label="Framework"
-          className="h-9 w-full data-[size=default]:h-9 border-fd-border bg-fd-background text-sm text-fd-foreground"
+          className="h-9 w-full border-fd-border bg-fd-background text-sm text-fd-foreground data-[size=default]:h-9"
         >
           <SelectValue>
             <FrameworkValue framework={framework} />
@@ -107,31 +138,35 @@ export function Selectors({ frameworks, framework, version, onSwitch }: Selector
           alignItemWithTrigger={false}
           className="border border-fd-border bg-fd-popover p-1 text-fd-popover-foreground"
         >
-          {frameworks.map((framework) => (
+          {frameworks.map((entry) => (
             <SelectItem
-              key={framework.id}
-              value={framework.id}
+              key={entry.id}
+              value={entry.id}
               className="py-2 text-sm data-highlighted:bg-fd-accent data-highlighted:text-fd-accent-foreground"
             >
-              <FrameworkValue framework={framework} />
+              <FrameworkValue framework={entry} />
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
+
       <Select
         value={version.id}
-        items={framework.versions.map((version) => ({
-          value: version.id,
-          label: `${version.label} ${getStatusLabel(version.status)}`,
+        items={framework.versions.map((entry) => ({
+          value: entry.id,
+          label: `${entry.label} ${getStatusLabel(entry.status)}`,
         }))}
         onValueChange={(value) => {
-          const selected = framework.versions.find((version) => version.id === value)
-          if (selected) onSwitch(framework, selected)
+          const selected = framework.versions.find((entry) => entry.id === value)
+
+          if (selected) {
+            onSwitch(framework, selected)
+          }
         }}
       >
         <SelectTrigger
           aria-label="Version"
-          className="h-9 w-full data-[size=default]:h-9 border-fd-border bg-fd-background text-sm text-fd-foreground"
+          className="h-9 w-full border-fd-border bg-fd-background text-sm text-fd-foreground data-[size=default]:h-9"
         >
           <SelectValue>
             <VersionValue version={version} />
@@ -141,13 +176,13 @@ export function Selectors({ frameworks, framework, version, onSwitch }: Selector
           alignItemWithTrigger={false}
           className="border border-fd-border bg-fd-popover p-1 text-fd-popover-foreground"
         >
-          {framework.versions.map((version) => (
+          {framework.versions.map((entry) => (
             <SelectItem
-              key={version.id}
-              value={version.id}
+              key={entry.id}
+              value={entry.id}
               className="py-2 text-sm data-highlighted:bg-fd-accent data-highlighted:text-fd-accent-foreground"
             >
-              <VersionValue version={version} />
+              <VersionValue version={entry} />
             </SelectItem>
           ))}
         </SelectContent>
@@ -155,4 +190,3 @@ export function Selectors({ frameworks, framework, version, onSwitch }: Selector
     </div>
   )
 }
-

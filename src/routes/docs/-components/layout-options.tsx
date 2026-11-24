@@ -1,10 +1,9 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared'
 import { BookOpen } from 'lucide-react'
 import ThemeToggle from '@/components/theme-toggle'
-import { getLibraryGroups } from '@/routes/docs/-utils/catalog'
-import type { PackageDocs } from '@/routes/docs/-utils/registry'
+import { libraryGroups } from '@/routes/docs/-utils/libraries'
 
-export function docsLayoutOptions(libraries: PackageDocs[] = []) {
+export function docsLayoutOptions() {
   return {
     nav: {
       url: '/docs',
@@ -20,7 +19,7 @@ export function docsLayoutOptions(libraries: PackageDocs[] = []) {
         type: 'menu',
         text: 'Documentation',
         on: 'nav',
-        items: getLibraryGroups(libraries).flatMap((group) => [
+        items: libraryGroups.flatMap((group) => [
           {
             type: 'custom' as const,
             children: (
@@ -29,10 +28,10 @@ export function docsLayoutOptions(libraries: PackageDocs[] = []) {
               </p>
             ),
           },
-          ...group.libraries.map((pkg) => ({
-            text: pkg.name,
-            description: pkg.description,
-            url: `/docs/${pkg.slug}`,
+          ...group.libraries.map((library) => ({
+            text: library.title,
+            description: library.description,
+            url: library.url,
           })),
         ]),
       },
@@ -42,4 +41,3 @@ export function docsLayoutOptions(libraries: PackageDocs[] = []) {
     themeSwitch: { enabled: true, component: <ThemeToggle /> },
   } satisfies BaseLayoutProps
 }
-

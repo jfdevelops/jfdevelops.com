@@ -41,7 +41,7 @@ npx @tanstack/intent@latest list
 ```
 src/
   routes/          # TanStack Router file routes
-    docs/          # Docs routes; shared -components/-utils, package-private under $package
+    docs/          # Docs routes; shared -components/-utils, $package dynamic route
   components/      # Shared site UI
 packages/
   <package>/docs/  # Legacy placeholders; not consumed
@@ -51,7 +51,7 @@ public/
 
 ## Docs architecture
 
-Library repositories are registered in `docs.sources.json` with their main branch. A scheduled
+Library repositories are registered in `src/routes/docs/-utils/libraries.ts` with their main branch. A scheduled
 GitHub workflow generates Fumadocs snapshots and publishes them to the docs-content branch.
 The deployed Worker loads library metadata and requested pages on demand, serves cached HTML,
 and refreshes pointers in the background. R2 is not used. Normal dev/test/build commands do

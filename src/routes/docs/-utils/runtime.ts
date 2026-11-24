@@ -7,6 +7,16 @@ export type Repository = {
   description: string
 }
 
+function bindCatalogSlug<T>(value: T, sourceSlug: string, catalogId: string) {
+  if (sourceSlug === catalogId) {
+    return value
+  }
+
+  return JSON.parse(
+    JSON.stringify(value).replaceAll(`/docs/${sourceSlug}`, `/docs/${catalogId}`),
+  ) as T
+}
+
 export type SnapshotCache = {
   match(request: Request): Promise<Response | undefined>
   put(request: Request, response: Response): Promise<void>
@@ -119,7 +129,6 @@ export function createRuntimeDocs(options: Options) {
       const value = manifestSchema.parse(input)
 
       if (
-        value.library.slug !== id ||
         value.library.repository !== registered.repository ||
         value.library.commit !== pointer.sourceCommit ||
         registered.branch !== 'main'
@@ -127,7 +136,15 @@ export function createRuntimeDocs(options: Options) {
         throw new Error('Documentation snapshot does not match the registered repository')
       }
 
-      return value
+      const bound = bindCatalogSlug(value, value.library.slug, id)
+
+      return {
+        ...bound,
+        library: {
+          ...bound.library,
+          slug: id,
+        },
+      }
     })
   }
 
@@ -258,4 +275,3 @@ export function createRuntimeDocs(options: Options) {
 
   return { library, libraries, page }
 }
-

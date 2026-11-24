@@ -8,7 +8,8 @@ const environment = loadEnv('development', process.cwd(), '')
 let snapshots
 
 if (!(process.env.VITE_DOCS_SNAPSHOT_ORIGIN ?? environment.VITE_DOCS_SNAPSHOT_ORIGIN)) {
-  const config = JSON.parse(await readFile('docs.sources.json', 'utf8'))
+  const { loadDocsSources } = await import('./docs/load-sources.mjs')
+  const config = await loadDocsSources()
   let missingSnapshot = false
   for (const library of config.libraries) {
     try {

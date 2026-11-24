@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['docs.sources.json', 'docs/type-contexts/**', 'scripts/docs/**', 'scripts/generate-doc-sources.mjs', 'source.config.ts', 'src/components/mdx.tsx', 'src/docs/snapshot.ts', 'package.json', 'pnpm-lock.yaml', '.github/workflows/refresh-docs.yml']
+    paths: ['src/routes/docs/-utils/libraries.ts', 'docs/type-contexts/**', 'scripts/docs/**', 'scripts/generate-doc-sources.mjs', 'source.config.ts', 'src/components/mdx.tsx', 'src/docs/snapshot.ts', 'package.json', 'pnpm-lock.yaml', '.github/workflows/refresh-docs.yml']
   pull_request:
-    paths: ['docs.sources.json', 'docs/type-contexts/**', 'scripts/docs/**', 'scripts/generate-doc-sources.mjs', 'source.config.ts', 'src/components/mdx.tsx', 'src/docs/snapshot.ts', 'package.json', 'pnpm-lock.yaml', '.github/workflows/refresh-docs.yml']
+    paths: ['src/routes/docs/-utils/libraries.ts', 'docs/type-contexts/**', 'scripts/docs/**', 'scripts/generate-doc-sources.mjs', 'source.config.ts', 'src/components/mdx.tsx', 'src/docs/snapshot.ts', 'package.json', 'pnpm-lock.yaml', '.github/workflows/refresh-docs.yml']
 
 concurrency:
   group: docs-snapshots-${{ github.event_name == 'pull_request' && github.ref || 'main' }}

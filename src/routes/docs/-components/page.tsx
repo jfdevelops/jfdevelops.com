@@ -1,22 +1,18 @@
+import { getRouteApi } from '@tanstack/react-router'
 import FumadocsLink from 'fumadocs-core/link'
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/page'
 import { getMdxComponents } from '@/routes/docs/-components/mdx'
-import {
-  getDefaultVersion,
-  getPageUrl,
-  resolveDocHref,
-} from '@/routes/docs/-utils/registry'
+import { DocsShell } from '@/routes/docs/-components/shell'
+import { getDefaultVersion, getPageUrl, resolveDocHref } from '@/routes/docs/-utils/registry'
 import { renderDocs } from '@/routes/docs/-utils/render'
-import type { loadDocPage } from '../-utils/loader'
-import { DocsShell } from './shell'
 
-type DocPageProps = {
-  data: Awaited<ReturnType<typeof loadDocPage>>
-  missingPage?: boolean
-}
+const docsRouteApi = getRouteApi('/docs/$package/$')
 
-export function DocPage({ data, missingPage }: DocPageProps) {
-  const { pkg, page, libraries } = data
+export function DocPage() {
+  const data = docsRouteApi.useLoaderData()
+  const { docsNotice } = docsRouteApi.useSearch()
+  const missingPage = docsNotice === 'missing-page'
+  const { pkg, page } = data
   const framework = pkg.frameworks.find((entry) => entry.id === page.framework)
 
   if (!framework) {
@@ -35,13 +31,7 @@ export function DocPage({ data, missingPage }: DocPageProps) {
   const currentPage = currentVersion.pages.find((entry) => entry.id === pageId)
 
   return (
-    <DocsShell
-      pkg={pkg}
-      framework={framework}
-      version={version}
-      pageId={pageId}
-      libraries={libraries}
-    >
+    <DocsShell pkg={pkg} framework={framework} version={version} pageId={pageId}>
       <DocsPage toc={toc}>
         {missingPage ? (
           <div role="status" className="rounded-lg border border-fd-border bg-fd-muted p-4 text-sm">
@@ -100,4 +90,3 @@ export function DocPage({ data, missingPage }: DocPageProps) {
     </DocsShell>
   )
 }
-

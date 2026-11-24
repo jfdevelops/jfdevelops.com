@@ -1,5 +1,5 @@
 import { waitUntil } from 'cloudflare:workers'
-import config from '../../../../docs.sources.json'
+import { docsSources } from './libraries'
 import { createRuntimeDocs } from './runtime'
 
 export async function getRuntimeDocs() {
@@ -10,10 +10,10 @@ export async function getRuntimeDocs() {
   }
 
   return createRuntimeDocs({
-    repositories: config.libraries,
+    repositories: docsSources.libraries,
     origin:
       localOrigin ??
-      `https://raw.githubusercontent.com/${config.snapshotRepository}/${config.snapshotBranch}`,
+      `https://raw.githubusercontent.com/${docsSources.snapshotRepository}/${docsSources.snapshotBranch}`,
     cache: await caches.open('docs-snapshots-v1'),
     fetch: (input, init) => fetch(input, init),
     waitUntil,
@@ -22,4 +22,3 @@ export async function getRuntimeDocs() {
     },
   })
 }
-

@@ -1,15 +1,15 @@
 import { env } from 'cloudflare:workers'
 import handler, { createServerEntry } from '@tanstack/react-start/server-entry'
-import docsConfig from '../docs.sources.json'
 import { serveDocsAsset } from './routes/docs/-utils/assets.server'
 import { serveDocsRequest } from './routes/docs/-utils/edge'
+import { docsSources } from './routes/docs/-utils/libraries'
 import { getRuntimeDocs } from './routes/docs/-utils/source.server'
 
 export default createServerEntry({
   async fetch(request, options) {
     if (new URL(request.url).pathname.startsWith('/docs-assets/')) {
       return serveDocsAsset(request, {
-        repositories: docsConfig.libraries,
+        repositories: docsSources.libraries,
         cache: await caches.open('docs-assets-v1'),
         fetch: (input, init) => fetch(input, init),
       })
@@ -23,4 +23,3 @@ export default createServerEntry({
     })
   },
 })
-

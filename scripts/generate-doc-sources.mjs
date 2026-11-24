@@ -8,7 +8,8 @@ import { prepareLibrary } from './docs/prepare.mjs'
 import { addTypeContext, prepareTypeContext } from './docs/types.mjs'
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const config = JSON.parse(await readFile(path.join(projectRoot, 'docs.sources.json'), 'utf8'))
+const { loadDocsSources } = await import('./docs/load-sources.mjs')
+const config = await loadDocsSources()
 
 function run(command, args, cwd) {
   return new Promise((resolve, reject) => {

@@ -1,10 +1,18 @@
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 
-export const getDocsLibraries = createServerFn({ method: 'GET' }).handler(async () => {
-  const { getRuntimeDocs } = await import('./source.server')
+export const getDocsLibraryVersions = createServerFn({ method: 'GET' }).handler(async () => {
+  const { docsLibraries } = await import('./libraries')
+  const { getLatestNpmVersion } = await import('./npm')
+  const entries = await Promise.all(
+    docsLibraries.map(async (library) => {
+      const version = await getLatestNpmVersion(library.packageName)
 
-  return JSON.stringify(await (await getRuntimeDocs()).libraries())
+      return [library.id, version] as const
+    }),
+  )
+
+  return JSON.stringify(Object.fromEntries(entries))
 })
 
 export const getDocLibrary = createServerFn({ method: 'GET' })
@@ -27,9 +35,12 @@ export const getDocContent = createServerFn({ method: 'GET' })
   .handler(async ({ data }) => {
     const { getRuntimeDocs } = await import('./source.server')
     const { setResponseHeader } = await import('@tanstack/react-start/server')
-    const content = await (
-      await getRuntimeDocs()
-    ).page(data.library, data.framework, data.version, data.page)
+    const content = await (await getRuntimeDocs()).page(
+      data.library,
+      data.framework,
+      data.version,
+      data.page,
+    )
 
     if (content) {
       setResponseHeader('x-docs-revision', content.revision)
@@ -37,4 +48,3 @@ export const getDocContent = createServerFn({ method: 'GET' })
 
     return JSON.stringify(content)
   })
-
