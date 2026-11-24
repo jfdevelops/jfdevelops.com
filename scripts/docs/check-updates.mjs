@@ -1,8 +1,9 @@
 import { execFile } from 'node:child_process'
 import { appendFile, readFile } from 'node:fs/promises'
 import { promisify } from 'node:util'
+import { loadDocsSources } from './load-sources.mjs'
 
-const config = JSON.parse(await readFile('docs.sources.json', 'utf8'))
+const config = await loadDocsSources()
 let changed = false
 for (const source of config.libraries) {
   const { stdout } = await promisify(execFile)(

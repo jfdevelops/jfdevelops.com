@@ -64,6 +64,7 @@ function fixture() {
     const selected = url.split('/snapshots/')[1]?.split('/')[0] ?? revision
     if (url.endsWith('/manifest.json'))
       return Response.json({ schemaVersion: 1, sourceBranch: 'main', library: library(selected) })
+
     return Response.json({
       schemaVersion: 1,
       framework: 'react',
@@ -87,6 +88,7 @@ function fixture() {
     now: () => clock,
     log,
   })
+
   return {
     service,
     cache,
@@ -114,6 +116,41 @@ describe('on-demand GitHub docs', () => {
     expect(await f.service.page('unregistered', 'react', 'v1', 'overview')).toBeNull()
     expect(await f.service.page('sample', 'react', 'v1', '../../secret')).toBeNull()
     expect(f.fetcher).toHaveBeenCalledTimes(3)
+  })
+
+  it('rewrites package-derived snapshot slugs to the registered catalog id', async () => {
+    const f = fixture()
+    const fetcher = f.fetcher.getMockImplementation()
+
+    if (!fetcher) {
+      throw new Error('Missing fetch fixture')
+    }
+
+    f.fetcher.mockImplementation(async (url, ...args) => {
+      const response = await fetcher(url, ...args)
+
+      if (!String(url).endsWith('/manifest.json')) {
+        return response
+      }
+
+      const manifest = (await response.json()) as {
+        schemaVersion: number
+        sourceBranch: string
+        library: ReturnType<typeof f.library>
+      }
+
+      manifest.library.slug = 'sample-core'
+      manifest.library.frameworks[0].versions[0].tree.children[0].url = '/docs/sample-core/react/v1'
+
+      return Response.json(manifest)
+    })
+
+    const library = await f.service.library('sample')
+
+    expect(library?.library.slug).toBe('sample')
+    expect(library?.library.frameworks[0]?.versions[0]?.tree.children[0]).toMatchObject({
+      url: '/docs/sample/react/v1',
+    })
   })
 
   it('serves stale content while validating a new main snapshot in the background', async () => {

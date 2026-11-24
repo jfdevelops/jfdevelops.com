@@ -7,7 +7,7 @@ import { createServer } from 'vite'
 import { headingText, serializeDocs } from './serialize.mjs'
 
 const output = path.resolve('.docs-snapshots')
-const libraries = JSON.parse(await readFile('src/docs/generated-library-manifests.json', 'utf8'))
+const libraries = JSON.parse(await readFile('.docs-cache/generated/library-manifests.json', 'utf8'))
 const server = await createServer({
   configFile: false,
   cacheDir: '.docs-cache/vite-snapshots',
@@ -16,10 +16,10 @@ const server = await createServer({
   server: { middlewareMode: true, watch: null },
 })
 try {
-  const { getDocSource } = await server.ssrLoadModule('/src/docs/generated-sources.ts')
-  const { getMdxComponents } = await server.ssrLoadModule('/src/components/mdx.tsx')
-  const { manifestSchema, pageSchema } = await server.ssrLoadModule('/src/docs/snapshot.ts')
-  const { renderDocs } = await server.ssrLoadModule('/src/docs/render.tsx')
+  const { getDocSource } = await server.ssrLoadModule('/.docs-cache/generated/sources.ts')
+  const { getMdxComponents } = await server.ssrLoadModule('/src/routes/docs/-components/mdx.tsx')
+  const { manifestSchema, pageSchema } = await server.ssrLoadModule('/src/routes/docs/-utils/snapshot.ts')
+  const { renderDocs } = await server.ssrLoadModule('/src/routes/docs/-utils/render.tsx')
   const components = Object.fromEntries(
     Object.keys(getMdxComponents()).map((name) => [name, `mdx:${name}`]),
   )

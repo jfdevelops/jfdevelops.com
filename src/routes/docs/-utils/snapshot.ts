@@ -10,13 +10,16 @@ function isTree(value: unknown): value is Root {
     !('children' in value) ||
     !Array.isArray(value.children)
   )
+
     return false
   function node(value: unknown): boolean {
     if (!value || typeof value !== 'object' || !('type' in value)) return false
     if ('name' in value && typeof value.name !== 'string') return false
     if (value.type === 'page')
+
       return 'url' in value && typeof value.url === 'string' && value.url.startsWith('/docs/')
     if (value.type === 'separator') return true
+
     return (
       value.type === 'folder' &&
       'children' in value &&
@@ -25,6 +28,7 @@ function isTree(value: unknown): value is Root {
       (!('index' in value) || value.index == null || node(value.index))
     )
   }
+
   return value.children.every(node)
 }
 
@@ -108,3 +112,4 @@ export const pageSchema = z.object({
   toc: z.array(z.object({ title: z.string(), url: z.string(), depth: z.number() })),
 })
 export type SnapshotPage = z.infer<typeof pageSchema>
+

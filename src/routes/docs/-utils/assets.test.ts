@@ -9,6 +9,7 @@ function setup() {
         headers: { 'content-type': 'text/plain', 'x-content-type-options': 'nosniff' },
       }),
   )
+
   return {
     repositories: [{ id: 'library', repository: 'https://github.com/example/library' }],
     fetch: fetcher,
@@ -60,3 +61,4 @@ it('does not cache origin failures', async () => {
   expect((await serveDocsAsset(new Request(url), options)).status).toBe(200)
   expect(options.fetch).toHaveBeenCalledTimes(2)
 })
+

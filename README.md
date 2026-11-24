@@ -130,7 +130,7 @@ More information on layouts can be found in the [Layouts documentation](https://
 ## Library documentation
 
 Documentation uses runtime GitHub snapshots and Fumadocs. Register library repositories in
-`docs.sources.json`; the refresh workflow follows each main branch without deploying the site.
+`src/routes/docs/-utils/libraries.ts`; the refresh workflow follows each main branch without deploying the site.
 Pages are fetched on demand and cached at the edge. See [the docs architecture](docs/site-docs.md)
 for snapshot generation, type hovers, freshness and failure behavior.
 

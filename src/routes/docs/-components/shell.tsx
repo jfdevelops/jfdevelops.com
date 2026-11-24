@@ -3,15 +3,16 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs'
 import { ArrowLeft } from 'lucide-react'
 import type { ReactNode } from 'react'
 import ThemeToggle from '@/components/theme-toggle'
+import { docsLayoutOptions } from '@/routes/docs/-components/layout-options'
+import { LibrarySelector } from '@/routes/docs/-components/library-selector'
+import { Selectors } from '@/routes/docs/-components/selectors'
+import { resources } from '@/routes/docs/-utils/definition'
 import {
   type DocsFramework,
   type DocsVersion,
   getSwitchTarget,
   type PackageDocs,
-} from '@/docs/registry'
-import { docsLayoutOptions } from './layout-options'
-import { LibrarySelector } from './library-selector'
-import { Selectors } from './selectors'
+} from '@/routes/docs/-utils/registry'
 
 type DocsShellProps = {
   children: ReactNode
@@ -19,25 +20,23 @@ type DocsShellProps = {
   framework: DocsFramework
   version: DocsVersion
   pageId: string
-  libraries: PackageDocs[]
 }
-export function DocsShell({
-  children,
-  pkg,
-  framework,
-  version,
-  pageId,
-  libraries,
-}: DocsShellProps) {
+
+export function DocsShell({ children, pkg, framework, version, pageId }: DocsShellProps) {
   const navigate = useNavigate()
   const hash = useLocation({ select: (location) => location.hash })
 
   function switchDocs(nextFramework: DocsFramework, nextVersion: DocsVersion) {
     const target = getSwitchTarget(pkg, nextFramework, nextVersion, pageId, hash)
+    const splat = target.url.split('/').slice(3).join('/')
+    const packageId = resources.parse(pkg.slug)
+
     void navigate({
       to: '/docs/$package/$',
-      params: { package: pkg.slug, _splat: target.url.split('/').slice(3).join('/') },
-      search: { docsNotice: target.missing ? 'missing-page' : undefined },
+      params: { package: packageId, _splat: splat },
+      search: {
+        docsNotice: target.missing ? ('missing-page' as const) : undefined,
+      },
       hash: target.hash,
     })
   }
@@ -45,7 +44,7 @@ export function DocsShell({
   return (
     <DocsLayout
       key={`${pkg.slug}/${framework.id}/${version.id}`}
-      {...docsLayoutOptions(libraries)}
+      {...docsLayoutOptions()}
       themeSwitch={{ enabled: false }}
       tree={version.tree ?? { name: pkg.name, children: [] }}
       containerProps={{ className: 'docs-reader' }}
@@ -53,7 +52,7 @@ export function DocsShell({
       sidebar={{
         banner: (
           <div className="flex flex-col gap-2">
-            <LibrarySelector libraries={libraries} selected={pkg} />
+            <LibrarySelector selectedId={pkg.slug} />
             <Selectors
               frameworks={pkg.frameworks}
               framework={framework}

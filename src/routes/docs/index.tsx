@@ -1,16 +1,16 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { HomeLayout } from 'fumadocs-ui/layouts/home'
-import { ArrowRight, Blocks, Braces } from 'lucide-react'
-import { getLibraryGroups } from '@/docs/catalog'
-import { getDocsLibraries } from '@/docs/client'
-import { getDefaultFramework, getDefaultVersion, getStatusLabel } from '@/docs/registry'
-import { DocsError, DocsNotFound } from './-components/docs-status'
+import { ArrowRight } from 'lucide-react'
+import { getDocsLibraryVersions } from '@/routes/docs/-utils/client'
+import { docsLibraries, libraryGroups } from '@/routes/docs/-utils/libraries'
 import { docsLayoutOptions } from './-components/layout-options'
+import { LibraryCard } from './-components/library-card'
+import { DocsError, DocsNotFound } from './-components/status'
 
 export const Route = createFileRoute('/docs/')({
   notFoundComponent: DocsNotFound,
   errorComponent: DocsError,
-  loader: async () => ({ packages: await getDocsLibraries() }),
+  loader: () => getDocsLibraryVersions(),
   head: () => ({
     meta: [
       { title: 'Documentation — JF Develops' },
@@ -25,88 +25,57 @@ export const Route = createFileRoute('/docs/')({
 })
 
 function DocsIndex() {
-  const { packages } = Route.useLoaderData()
-  const groups = getLibraryGroups(packages)
-  const firstPackage = groups[0]?.libraries[0]
+  const versions = Route.useLoaderData()
+  const firstLibrary = docsLibraries[0]
 
   return (
-    <HomeLayout {...docsLayoutOptions(packages)} className="docs-home">
-      <div className="mx-auto w-full max-w-5xl px-6 pb-20">
-        <section className="flex flex-col items-center pb-14 pt-20 text-center sm:pb-16 sm:pt-24">
-          <p className="mb-4 text-xs font-medium uppercase tracking-widest text-fd-primary">
-            JF Develops · Documentation
-          </p>
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            Build with better building blocks.
-          </h1>
-          <p className="mt-4 max-w-lg text-sm leading-7 text-fd-muted-foreground">
+    <HomeLayout {...docsLayoutOptions()} className="docs-home">
+      <div className="mx-auto w-full max-w-5xl px-6 pb-24">
+        <section className="docs-home-hero">
+          <p className="docs-home-kicker">JF Develops · Documentation</p>
+          <h1 className="docs-home-title">Build with better building blocks.</h1>
+          <p className="docs-home-lede">
             Type-safe libraries, developer tools, practical guides, and API references.
             <br className="hidden sm:block" /> Everything you need to start putting the pieces
             together.
           </p>
-          <div className="mt-6 flex items-center gap-3">
-            {firstPackage ? (
+          <div className="docs-home-actions">
+            {firstLibrary ? (
               <Link
                 to="/docs/$package"
-                params={{ package: firstPackage.slug }}
-                className="inline-flex items-center gap-2 rounded-full bg-fd-primary px-4 py-2 text-sm font-medium text-fd-primary-foreground transition-opacity hover:opacity-85"
+                params={{ package: firstLibrary.id }}
+                className="docs-home-action-primary"
               >
                 Get started <ArrowRight aria-hidden="true" className="size-3.5" />
               </Link>
             ) : null}
-            <a
-              href="#libraries"
-              className="rounded-full border border-fd-border bg-fd-secondary px-4 py-2 text-sm font-medium transition-colors hover:bg-fd-accent"
-            >
+            <a href="#libraries" className="docs-home-action-secondary">
               Browse libraries
             </a>
           </div>
         </section>
-        <div id="libraries" className="scroll-mt-24 space-y-10">
-          {groups.map((group) => (
-            <section key={group.id} aria-labelledby={`${group.id}-title`}>
-              <h2
-                id={`${group.id}-title`}
-                className="mb-4 text-sm font-semibold text-fd-foreground"
-              >
+        <div id="libraries" className="docs-home-catalog">
+          {libraryGroups.map((group) => (
+            <section
+              key={group.id}
+              aria-labelledby={`${group.id}-title`}
+              className="docs-home-group"
+            >
+              <h2 id={`${group.id}-title`} className="docs-home-group-title">
                 {group.title}
               </h2>
-              <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] gap-3">
-                {group.libraries.map((pkg) => {
-                  const Icon = group.id === 'developer-tools' ? Braces : Blocks
-                  return (
-                    <Link
-                      key={pkg.slug}
-                      to="/docs/$package"
-                      params={{ package: pkg.slug }}
-                      className="group flex flex-col rounded-xl border border-fd-border bg-fd-card p-5 text-start transition-colors hover:bg-fd-accent/50"
-                    >
-                      <Icon aria-hidden="true" className="mb-4 size-5 text-fd-primary" />
-                      <h3 className="flex items-center justify-between gap-3 text-sm font-semibold">
-                        {pkg.name}
-                        <ArrowRight
-                          aria-hidden="true"
-                          className="size-3.5 text-fd-muted-foreground transition-transform group-hover:translate-x-1"
-                        />
-                      </h3>
-                      <p className="mt-2 flex-1 text-sm leading-6 text-fd-muted-foreground">
-                        {pkg.description}
-                      </p>
-                      <span className="mt-5 flex items-center justify-between gap-2 border-t border-fd-border pt-3 text-xs text-fd-muted-foreground">
-                        <span>
-                          {getStatusLabel(getDefaultVersion(getDefaultFramework(pkg)).status)}
-                        </span>
-                        <span>{pkg.pageCount} pages</span>
-                      </span>
-                    </Link>
-                  )
-                })}
+              <div className="docs-home-grid">
+                {group.libraries.map((library, index) => (
+                  <LibraryCard
+                    key={library.id}
+                    library={library}
+                    version={versions[library.id]}
+                    index={index}
+                  />
+                ))}
               </div>
             </section>
           ))}
-          <p className="mt-6 text-center text-xs text-fd-muted-foreground">
-            TypeScript libraries. Developer tools. Practical guides.
-          </p>
         </div>
       </div>
     </HomeLayout>

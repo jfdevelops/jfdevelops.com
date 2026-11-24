@@ -2,15 +2,20 @@
 
 The website uses Fumadocs HomeLayout, DocsLayout, MDX components, code tabs and
 Twoslash popups. Documentation content is loaded on demand from public GitHub
-snapshots. R2 is not used.
+snapshots. R2 is not used. Route UI, MDX/Twoslash components, and the snapshot runtime live under
+`src/routes/docs/`: shared pieces in `-components/` / `-utils/`, plus a single
+`$package` dynamic route whose package param is validated against the
+react-layout docs resource vocabulary. Snapshot generate outputs stay under
+`.docs-cache/generated/`.
 
 ## Repository list
 
-`docs.sources.json` registers each public library repository, its generated library
-ID, the `main` branch, and the website description. Frameworks, versions, defaults,
-navigation and page titles come from the library-generated schema-v2 manifest.
-Adding a repository changes this allowlist and requires a website deployment.
-New pages and versions in an existing repository do not.
+`src/routes/docs/-utils/libraries.ts` is the single registry for docs libraries:
+presentation metadata, npm package name, GitHub repository, and snapshot wiring.
+Frameworks, versions, defaults, navigation and page titles come from the
+library-generated schema-v2 manifest. Adding a repository changes this allowlist
+and requires a website deployment. New pages and versions in an existing
+repository do not.
 
 ## What happens on a page request
 
@@ -97,12 +102,14 @@ These are actual public API calls checked by TypeScript, never hand-written tool
 labels. Use self-contained examples or context files for accurate inference; an
 undefined identifier has no type information for an editor or the docs to display.
 
-## Catalog groups
+## Catalog presentation
 
-Registrations in `docs.sources.json` may set `group` to `developer-tools` for CLI
-and agent tooling. Other registrations default to `libraries`. The docs home,
-navbar menu, and library switcher use the same groups. These are site presentation
-settings; frameworks, versions, and page navigation still come from library docs.
+Register docs libraries in `src/routes/docs/-utils/libraries.ts` with
+`registerLibraryGroups` / `addLibrary` (`packageName`, `title`, `description`,
+`icon`, `repository`, optional `docs`). Library ids and urls are derived from
+`packageName`. Card version labels use each package's npm `latest` dist-tag at
+request time. Frameworks, versions, and page navigation still come from library
+docs snapshots.
 
 Documentation images use commit-addressed `/docs-assets/` URLs. The Worker caches
 public repository image bytes and serves their correct MIME type, including SVG;
