@@ -131,10 +131,19 @@ undefined identifier has no type information for an editor or the docs to displa
 
 ## Catalog presentation
 
-Register docs libraries in `src/routes/docs/-utils/libraries.ts` with
-`registerLibraryGroups` / `addLibrary` (`packageName`, `title`, `description`,
-`icon`, `repository`, optional `docs`). Library ids and urls are derived from
-`packageName`.
+Register a library with one command:
+
+```sh
+pnpm docs:add https://github.com/jfdevelops/<repo> --group developerTools --icon TerminalIcon
+```
+
+It reads the package name and description from the repository's `package.json`, adds
+the id to the docs resources in `-utils/definition.tsx`, and adds a `groups.<group>.addLibrary`
+call (with its lucide icon import) to `-utils/libraries.ts`. Pass `--docs-package
+packages/core` for a monorepo package and `--title` / `--description` to override the
+card text; `--dry-run` prints the result without writing. Library ids and urls are derived
+from `packageName`. Then add the "Notify docs" workflow to the library repository and
+merge; the refresh workflow publishes the first snapshot.
 
 Version labels come from the library repository's git tags, read at request time and
 cached for five minutes: `<packageName>@<version>` tags in monorepos, `v<version>`
