@@ -1,3 +1,4 @@
+import type { SnapshotReader } from './reader'
 import { manifestSchema, pageSchema, pointerSchema } from './snapshot'
 
 export type Repository = {
@@ -23,95 +24,40 @@ export type SnapshotCache = {
 }
 
 type Pointer = ReturnType<typeof pointerSchema.parse>
-type StoredPointer = { pointer: Pointer; previous?: Pointer; checkedAt: number }
+type StoredPointer = { pointer: Pointer; previous?: Pointer }
 type Options = {
   repositories: Repository[]
-  origin: string
+  read: SnapshotReader
   cache: SnapshotCache
-  fetch: typeof fetch
-  waitUntil: (promise: Promise<unknown>) => void
-  now?: () => number
   log?: (error: unknown) => void
 }
 
-export function createRuntimeDocs(options: Options) {
-  const now = options.now ?? Date.now
-  const origin = options.origin.replace(/\/$/, '')
+// Cache keys only; snapshots are read through `options.read`.
+const cacheOrigin = 'https://docs-snapshots.invalid'
 
-  function key(url: string) {
-    return new Request(url)
+export function createRuntimeDocs(options: Options) {
+  function key(path: string) {
+    return new Request(`${cacheOrigin}/${path}`)
   }
 
-  function snapshotUrl(id: string, revision: string) {
-    return `${origin}/${id}/snapshots/${revision}`
+  function snapshotPath(id: string, revision: string) {
+    return `${id}/snapshots/${revision}`
   }
 
   function repository(id: string) {
     return options.repositories.find((entry) => entry.id === id)
   }
 
-  async function download(url: string) {
-    const response = await options.fetch(url, {
-      signal: AbortSignal.timeout(10000),
-      redirect: 'manual',
-    })
-
-    if (!response.ok) {
-      throw new Error(`Documentation origin returned ${response.status}`)
-    }
-
-    if (Number(response.headers.get('content-length') ?? 0) > 8 * 1024 * 1024) {
-      throw new Error('Documentation response is too large')
-    }
-
-    const reader = response.body?.getReader()
-
-    if (!reader) {
-      throw new Error('Empty documentation response')
-    }
-
-    let size = 0
-    const chunks: Uint8Array[] = []
-
-    while (true) {
-      const result = await reader.read()
-
-      if (result.done) {
-        break
-      }
-
-      size += result.value.byteLength
-
-      if (size > 8 * 1024 * 1024) {
-        await reader.cancel()
-
-        throw new Error('Documentation response is too large')
-      }
-
-      chunks.push(result.value)
-    }
-
-    const bytes = new Uint8Array(size)
-    let offset = 0
-
-    for (const chunk of chunks) {
-      bytes.set(chunk, offset)
-      offset += chunk.length
-    }
-
-    return JSON.parse(new TextDecoder().decode(bytes))
-  }
-
-  async function immutable<T>(url: string, parse: (value: unknown) => T): Promise<T> {
-    const cached = await options.cache.match(key(url))
+  async function immutable<T>(path: string, parse: (value: unknown) => T): Promise<T> {
+    const cached = await options.cache.match(key(path))
 
     if (cached) {
       return parse(await cached.json())
     }
 
-    const value = parse(await download(url))
+    const value = parse(await options.read(path))
     await options.cache.put(
-      key(url),
+      key(path),
       Response.json(value, { headers: { 'cache-control': 'public, max-age=31536000' } }),
     )
 
@@ -125,7 +71,7 @@ export function createRuntimeDocs(options: Options) {
       return null
     }
 
-    return immutable(`${snapshotUrl(id, pointer.revision)}/manifest.json`, (input) => {
+    return immutable(`${snapshotPath(id, pointer.revision)}/manifest.json`, (input) => {
       const value = manifestSchema.parse(input)
 
       if (
@@ -148,13 +94,15 @@ export function createRuntimeDocs(options: Options) {
     })
   }
 
+  // The pointer is read on every request so a published snapshot is live at once.
+  // The cached copy is only a fallback for when the store cannot be read.
   async function pointer(id: string): Promise<StoredPointer | null> {
     if (!repository(id)) {
       return null
     }
 
-    const url = `${origin}/${id}/current.json`
-    const cached = await options.cache.match(key(url))
+    const path = `${id}/current.json`
+    const cached = await options.cache.match(key(path))
     let stored: StoredPointer | undefined
 
     if (cached) {
@@ -162,35 +110,34 @@ export function createRuntimeDocs(options: Options) {
       stored = {
         pointer: pointerSchema.parse(raw.pointer),
         previous: raw.previous ? pointerSchema.parse(raw.previous) : undefined,
-        checkedAt: raw.checkedAt,
       }
     }
 
-    async function refresh() {
-      const next = pointerSchema.parse(await download(url))
-      await manifest(id, next)
-      const value: StoredPointer = {
-        pointer: next,
-        checkedAt: now(),
-        previous: next.revision !== stored?.pointer.revision ? stored?.pointer : stored?.previous,
+    try {
+      const next = pointerSchema.parse(await options.read(path))
+
+      if (stored && next.revision === stored.pointer.revision) {
+        return stored
       }
+
+      // Validate the new snapshot before promoting its pointer.
+      await manifest(id, next)
+      const value: StoredPointer = { pointer: next, previous: stored?.pointer }
       await options.cache.put(
-        key(url),
+        key(path),
         Response.json(value, { headers: { 'cache-control': 'public, max-age=604800' } }),
       )
 
       return value
-    }
+    } catch (error) {
+      if (!stored) {
+        throw error
+      }
 
-    if (!stored) {
-      return refresh()
-    }
+      options.log?.(error)
 
-    if (now() - stored.checkedAt >= 60000) {
-      options.waitUntil(refresh().catch((error) => options.log?.(error)))
+      return stored
     }
-
-    return stored
   }
 
   async function library(id: string) {
@@ -245,7 +192,7 @@ export function createRuntimeDocs(options: Options) {
 
       const file = pageId.split('/').map(encodeURIComponent).join('/')
       const content = await immutable(
-        `${snapshotUrl(id, current.revision)}/pages/${framework}/${version}/${file}.json`,
+        `${snapshotPath(id, current.revision)}/pages/${framework}/${version}/${file}.json`,
         (input) => {
           const value = pageSchema.parse(input)
 

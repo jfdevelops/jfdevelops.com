@@ -16,5 +16,5 @@ docs/
 
 Each library folder is a thin binder that hardcodes the library id and reuses the
 shared loader/page. Catalog metadata stays in `-utils/libraries.ts`. Snapshots
-keep Twoslash hover types and load from the `docs-content` branch. See
+keep Twoslash hover types and load from the `jfdevelops-docs` R2 bucket. See
 [docs/site-docs.md](../../../docs/site-docs.md).

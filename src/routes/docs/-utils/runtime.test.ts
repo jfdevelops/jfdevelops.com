@@ -3,11 +3,8 @@ import { serveDocsRequest } from './edge'
 import { createRuntimeDocs, type SnapshotCache } from './runtime'
 
 function fixture() {
-  let clock = 0
   let revision = 'a'.repeat(64)
-  const origin = 'https://raw.githubusercontent.com/example/site/docs-content'
   const records = new Map<string, Response>()
-  const pending: Promise<unknown>[] = []
   const cache: SnapshotCache = {
     async match(request) {
       return records.get(request.url)?.clone()
@@ -57,15 +54,14 @@ function fixture() {
       ],
     }
   }
-  const fetcher = vi.fn(async (input: RequestInfo | URL) => {
-    const url = String(input)
-    if (url.endsWith('/current.json'))
-      return Response.json({ schemaVersion: 1, revision, sourceCommit: revision[0].repeat(40) })
-    const selected = url.split('/snapshots/')[1]?.split('/')[0] ?? revision
-    if (url.endsWith('/manifest.json'))
-      return Response.json({ schemaVersion: 1, sourceBranch: 'main', library: library(selected) })
+  const read = vi.fn(async (path: string): Promise<unknown> => {
+    if (path.endsWith('/current.json'))
+      return { schemaVersion: 1, revision, sourceCommit: revision[0].repeat(40) }
+    const selected = path.split('/snapshots/')[1]?.split('/')[0] ?? revision
+    if (path.endsWith('/manifest.json'))
+      return { schemaVersion: 1, sourceBranch: 'main', library: library(selected) }
 
-    return Response.json({
+    return {
       schemaVersion: 1,
       framework: 'react',
       version: 'v1',
@@ -74,75 +70,62 @@ function fixture() {
       description: 'Read docs.',
       toc: [],
       body: [{ tag: 'p', props: {}, children: [selected] }],
-    })
+    }
   })
   const log = vi.fn()
-  const service = createRuntimeDocs({
-    repositories,
-    origin,
-    cache,
-    fetch: fetcher,
-    waitUntil(promise) {
-      pending.push(promise)
-    },
-    now: () => clock,
-    log,
-  })
+  const service = createRuntimeDocs({ repositories, read, cache, log })
 
   return {
     service,
     cache,
-    fetcher,
-    pending,
+    read,
     log,
     library,
-    setClock(value: number) {
-      clock = value
-    },
     update() {
       revision = 'b'.repeat(64)
     },
   }
 }
 
-describe('on-demand GitHub docs', () => {
-  it('fetches metadata and only the requested page, then uses immutable cached data', async () => {
+function pointerReads(read: ReturnType<typeof fixture>['read']) {
+  return read.mock.calls.filter(([path]) => path.endsWith('/current.json')).length
+}
+
+describe('runtime docs snapshots', () => {
+  it('reads the pointer per request but immutable metadata and pages only once', async () => {
     const f = fixture()
     const first = await f.service.page('sample', 'react', 'v1', 'overview')
     expect(first?.page.title).toBe('Overview')
-    expect(f.fetcher).toHaveBeenCalledTimes(3)
+    expect(f.read).toHaveBeenCalledTimes(3)
     expect(await f.service.page('sample', 'react', 'v1', 'overview')).toEqual(first)
-    expect(f.fetcher).toHaveBeenCalledTimes(3)
+    expect(f.read).toHaveBeenCalledTimes(4)
+    expect(pointerReads(f.read)).toBe(2)
     expect(await f.service.page('unregistered', 'react', 'v1', 'overview')).toBeNull()
     expect(await f.service.page('sample', 'react', 'v1', '../../secret')).toBeNull()
-    expect(f.fetcher).toHaveBeenCalledTimes(3)
+    expect(f.read).toHaveBeenCalledTimes(5)
   })
 
   it('rewrites package-derived snapshot slugs to the registered catalog id', async () => {
     const f = fixture()
-    const fetcher = f.fetcher.getMockImplementation()
+    const read = f.read.getMockImplementation()
 
-    if (!fetcher) {
-      throw new Error('Missing fetch fixture')
+    if (!read) {
+      throw new Error('Missing read fixture')
     }
 
-    f.fetcher.mockImplementation(async (url, ...args) => {
-      const response = await fetcher(url, ...args)
+    f.read.mockImplementation(async (path) => {
+      const value = await read(path)
 
-      if (!String(url).endsWith('/manifest.json')) {
-        return response
+      if (!path.endsWith('/manifest.json')) {
+        return value
       }
 
-      const manifest = (await response.json()) as {
-        schemaVersion: number
-        sourceBranch: string
-        library: ReturnType<typeof f.library>
-      }
+      const manifest = value as { library: ReturnType<typeof f.library> }
 
       manifest.library.slug = 'sample-core'
       manifest.library.frameworks[0].versions[0].tree.children[0].url = '/docs/sample-core/react/v1'
 
-      return Response.json(manifest)
+      return manifest
     })
 
     const library = await f.service.library('sample')
@@ -153,27 +136,21 @@ describe('on-demand GitHub docs', () => {
     })
   })
 
-  it('serves stale content while validating a new main snapshot in the background', async () => {
+  it('serves a newly published snapshot on the very next request', async () => {
     const f = fixture()
     const first = await f.service.page('sample', 'react', 'v1', 'overview')
     f.update()
-    f.setClock(61000)
-    const stale = await f.service.page('sample', 'react', 'v1', 'overview')
-    expect(stale?.revision).toBe(first?.revision)
-    expect(f.pending).toHaveLength(1)
-    await Promise.all(f.pending)
     const current = await f.service.page('sample', 'react', 'v1', 'overview')
+    expect(first?.revision).toBe('a'.repeat(64))
     expect(current?.revision).toBe('b'.repeat(64))
     expect(current?.pkg.commit).toBe('b'.repeat(40))
   })
 
-  it('keeps the last good snapshot when the refresh origin fails', async () => {
+  it('keeps the last good snapshot when the store cannot be read', async () => {
     const f = fixture()
     const first = await f.service.page('sample', 'react', 'v1', 'overview')
-    f.setClock(61000)
-    f.fetcher.mockRejectedValue(new Error('GitHub unavailable'))
+    f.read.mockRejectedValue(new Error('R2 unavailable'))
     expect(await f.service.page('sample', 'react', 'v1', 'overview')).toEqual(first)
-    await Promise.all(f.pending)
     expect(f.log).toHaveBeenCalled()
   })
 
@@ -181,34 +158,29 @@ describe('on-demand GitHub docs', () => {
     const f = fixture()
     const first = await f.service.library('sample')
     f.update()
-    f.setClock(61000)
-    const fetcher = f.fetcher.getMockImplementation()
-    if (!fetcher) throw new Error('Missing fetch fixture')
-    f.fetcher.mockImplementation(async (url, ...args) =>
-      String(url).endsWith('manifest.json')
-        ? Response.json({ schemaVersion: 999 })
-        : fetcher(url, ...args),
+    const read = f.read.getMockImplementation()
+    if (!read) throw new Error('Missing read fixture')
+    f.read.mockImplementation(async (path) =>
+      path.endsWith('manifest.json') ? { schemaVersion: 999 } : read(path),
     )
     expect((await f.service.library('sample'))?.revision).toBe(first?.revision)
-    await Promise.all(f.pending)
     expect(f.log).toHaveBeenCalled()
-    expect((await f.service.library('sample'))?.revision).toBe(first?.revision)
   })
 
   it('uses previous page data after a transient failure in a promoted snapshot', async () => {
     const f = fixture()
     const first = await f.service.page('sample', 'react', 'v1', 'overview')
     f.update()
-    f.setClock(61000)
     await f.service.library('sample')
-    await Promise.all(f.pending)
-    const fetcher = f.fetcher.getMockImplementation()
-    if (!fetcher) throw new Error('Missing fetch fixture')
-    f.fetcher.mockImplementation(async (url, ...args) =>
-      String(url).includes(`/${'b'.repeat(64)}/pages/`)
-        ? new Response('Unavailable', { status: 503 })
-        : fetcher(url, ...args),
-    )
+    const read = f.read.getMockImplementation()
+    if (!read) throw new Error('Missing read fixture')
+    f.read.mockImplementation(async (path) => {
+      if (path.includes(`/${'b'.repeat(64)}/pages/`)) {
+        throw new Error('Unavailable')
+      }
+
+      return read(path)
+    })
     expect(await f.service.page('sample', 'react', 'v1', 'overview')).toEqual(first)
   })
 })

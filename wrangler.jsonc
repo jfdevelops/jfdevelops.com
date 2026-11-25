@@ -8,5 +8,12 @@
   "main": "src/server.ts",
   "version_metadata": {
     "binding": "VERSION_METADATA"
-  }
+  },
+  // Published by .github/workflows/refresh-docs.yml.
+  "r2_buckets": [
+    {
+      "binding": "DOCS_SNAPSHOTS",
+      "bucket_name": "jfdevelops-docs"
+    }
+  ]
 }

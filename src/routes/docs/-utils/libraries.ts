@@ -27,8 +27,6 @@ export type DocsLibrary = {
 }
 
 export type DocsSourcesConfig = {
-  snapshotRepository: string
-  snapshotBranch: string
   libraries: Array<{
     id: string
     repository: string
@@ -168,8 +166,6 @@ export const libraryGroups = groups
 export const docsLibraries = libraryGroups.flatMap((group) => group.libraries)
 
 export const docsSources = {
-  snapshotRepository: 'jfdevelops/jfdevelops.com',
-  snapshotBranch: 'docs-content',
   libraries: docsLibraries.map((library) => ({
     id: library.id,
     repository: library.repository,

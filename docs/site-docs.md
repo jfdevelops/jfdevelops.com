@@ -1,8 +1,8 @@
 # Runtime documentation
 
 The website uses Fumadocs HomeLayout, DocsLayout, MDX components, code tabs and
-Twoslash popups. Documentation content is loaded on demand from public GitHub
-snapshots. R2 is not used. Route UI, MDX/Twoslash components, and the snapshot runtime live under
+Twoslash popups. Documentation content is loaded on demand from snapshots in the
+`jfdevelops-docs` R2 bucket (Worker binding `DOCS_SNAPSHOTS`). Route UI, MDX/Twoslash components, and the snapshot runtime live under
 `src/routes/docs/`: shared pieces in `-components/` / `-utils/`, plus a single
 `$package` dynamic route whose package param is validated against the
 react-layout docs resource vocabulary. Snapshot generate outputs stay under
@@ -21,10 +21,12 @@ repository do not.
 
 The Worker loads a small current-snapshot pointer, that library's metadata, and the
 requested page. It does not fetch every documentation page, install dependencies,
-run library scripts, or execute downloaded JavaScript. Pointer checks are cached
-for 60 seconds. Stale pointers remain usable for seven days while a refresh runs
-through `waitUntil`. A failed refresh keeps the last validated pointer. A temporary
-page fetch failure can fall back to the previous snapshot.
+run library scripts, or execute downloaded JavaScript. The pointer is read from R2
+on every request, so a newly published snapshot is live on the next request. R2 reads
+are strongly consistent, unlike a CDN or KV. A new pointer's manifest is validated
+before it is used. If R2 cannot be read or the new snapshot is invalid, the last
+validated pointer from the cache is used. A temporary page read failure can fall back
+to the previous snapshot.
 
 Immutable metadata and page JSON are cached by content revision. Complete public
 HTML is cached by URL, snapshot and UI deployment ID. Browsers revalidate HTML.
@@ -33,15 +35,17 @@ the shared HTML cache. Unknown repositories and pages are never fetched as arbit
 URLs.
 
 Cloudflare caches are data-center-local and may be evicted. A genuinely cold request
-still needs GitHub access; a cache is not permanent offline storage. Normal warm
+still needs R2 access; a cache is not permanent offline storage. Normal warm
 requests serve server-rendered content without a browser loading spinner.
 
 ## How snapshots update
 
-`Refresh GitHub docs snapshots` checks the repository list on a five-minute GitHub
-Actions schedule, on relevant site changes, and through workflow_dispatch. Scheduled
-runs can be delayed by GitHub. It resolves each repository's exact main SHA and skips
-unchanged sources. It never deploys the website or publishes to R2.
+`Refresh GitHub docs snapshots` runs when a library repository sends a `docs-updated`
+repository dispatch on push to main, on relevant site changes, through
+workflow_dispatch, and on a five-minute schedule as a backstop. GitHub delays and
+drops scheduled runs, so the dispatch is what makes updates prompt. The workflow reads
+the published pointers from R2, resolves each repository's exact main SHA and skips
+unchanged sources. It never deploys the website.
 
 When content changes, the workflow runs the library's docs generator/checker and
 Fumadocs MDX compiler. TypeScript inference runs against the library source and
@@ -50,15 +54,37 @@ React render tree: component names, text, safe props, highlighted tokens, and ty
 information. The deployed viewer maps those names to its own Fumadocs components.
 It does not evaluate MDX code in a request.
 
-All immutable pages and metadata are committed together to the website repository's
-`docs-content` branch. A current pointer identifies the complete snapshot and its
-source commit. The site checks this pointer at runtime, independently of its own
-deployment. Old snapshots stay available for readers and fallback. Pull requests
-generate and upload a test artifact but cannot publish pointers.
+Immutable pages and metadata are uploaded to R2 first, under
+`<library>/snapshots/<revision>/`. Each library's `<library>/current.json` pointer is
+written last, so readers never see a pointer to a partial snapshot. The site reads the
+pointer at runtime, independently of its own deployment. Old snapshots stay available
+for readers and fallback. Pull requests generate and upload a test artifact but cannot
+publish pointers.
 
-The first merged run bootstraps the docs-content branch. Until a registered library
-has a successful snapshot, its docs are unavailable rather than served from fabricated
-metadata. GitHub outages at a cold location may also make docs temporarily unavailable.
+Until a registered library has a successful snapshot, its docs are unavailable rather
+than served from fabricated metadata.
+
+### One-time setup
+
+- Create the `jfdevelops-docs` R2 bucket.
+- Add repository secrets `R2_ACCESS_KEY_ID` and `R2_SECRET_ACCESS_KEY` (an R2 API token
+  with Object Read & Write on that bucket) beside the existing `CLOUDFLARE_ACCOUNT_ID`.
+- In each library repository, add a workflow that sends the dispatch on push to main,
+  with a `DOCS_DISPATCH_TOKEN` secret that can trigger workflows in this repository:
+
+```yaml
+name: Notify docs
+on:
+  push:
+    branches: [main]
+jobs:
+  notify-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - run: gh api repos/jfdevelops/jfdevelops.com/dispatches -f event_type=docs-updated
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_DISPATCH_TOKEN }}
+```
 
 ## Development and checks
 
@@ -70,16 +96,17 @@ pnpm typecheck
 pnpm build
 ```
 
-Local development serves ignored snapshots automatically. The first `pnpm dev` prepares
-missing snapshots, which can take several minutes; subsequent starts reuse them.
+Local development serves ignored snapshots automatically over a loopback server instead
+of R2. `pnpm dev` prepares snapshots that are missing or behind their library's main
+branch, which can take several minutes; otherwise it reuses them.
 Tests and website builds do not generate or bundle library docs. To refresh local content:
 
 ```sh
 pnpm docs:snapshot
 ```
 
-This writes ignored .docs-snapshots files. It does not push them. The publishing workflow
-owns the GitHub commit. Generated source checkouts, type caches and MDX collections stay
+This writes ignored .docs-snapshots files. It does not publish them. The refresh workflow
+owns publishing to R2. Generated source checkouts, type caches and MDX collections stay
 ignored as well. Updating rendering components or runtime behavior needs a site
 deployment; editing an existing library's docs only needs a successful automatic refresh.
 
