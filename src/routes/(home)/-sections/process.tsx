@@ -1,5 +1,3 @@
-import { FeatureCard } from '@/components/ui/island-shell'
-
 import { createResourceLayout } from './definition'
 
 const ProcessSection = createResourceLayout({
@@ -60,15 +58,15 @@ const steps = [
 
 export function Process() {
   return (
-    <ProcessSection className="process-grid grid list-none gap-0 p-0 sm:grid-cols-2 lg:grid-cols-3">
+    <ProcessSection className="grid list-none gap-0 p-0 sm:grid-cols-2 lg:grid-cols-3">
       {steps.map(({ title, description }, index) => (
-        <FeatureCard as="li" key={title} className="process-step rounded-none p-6">
-          <span className="font-display mb-2 block text-2xl font-bold text-[var(--sea-ink)]">
+        <li key={title} className="border-t border-line py-[26px] pr-6">
+          <span className="mb-2 block font-display text-[32px] leading-[calc(2/1.5)] font-medium text-sea-ink">
             {String(index + 1).padStart(2, '0')}
           </span>
-          <h3 className="mb-1.5 text-base font-semibold text-[var(--sea-ink)]">{title}</h3>
-          <p className="m-0 text-sm leading-relaxed text-[var(--sea-ink-soft)]">{description}</p>
-        </FeatureCard>
+          <h3 className="mb-1.5 text-base font-semibold text-sea-ink">{title}</h3>
+          <p className="m-0 text-sm leading-relaxed text-sea-ink-soft">{description}</p>
+        </li>
       ))}
     </ProcessSection>
   )

@@ -1,6 +1,7 @@
-import { SoftwarePreview } from './software-preview'
 import { IslandShell } from '@/components/ui/island-shell'
 import { Kicker } from '@/components/ui/kicker'
+import { Pill } from '../-components/pill'
+import { SoftwarePreview } from '../-components/software-preview/software-preview'
 import { createResourceLayout } from './definition'
 
 const CaseStudiesSection = createResourceLayout({
@@ -46,52 +47,41 @@ export function CaseStudies() {
   return (
     <CaseStudiesSection className="space-y-6">
       {caseStudies.map((study, index) => (
-        <IslandShell
-          as="article"
-          key={study.title}
-          className="project-card overflow-hidden rounded-2xl"
-        >
+        <IslandShell as="article" key={study.title} className="overflow-hidden rounded-2xl">
           <div className="grid gap-0 lg:grid-cols-2">
             <div className={`order-1 ${index % 2 === 1 ? 'lg:order-2' : 'lg:order-1'}`}>
-              <div className="project-visual">
-                <SoftwarePreview variant={study.variant} />
+              <div className="flex h-full min-h-[370px] items-center justify-center bg-brand-tint p-[34px] max-[900px]:min-h-[340px] max-md:p-5">
+                <SoftwarePreview
+                  variant={study.variant}
+                  className="w-full shadow-[0_12px_24px_#00000012]"
+                />
               </div>
             </div>
             <div className={`order-2 p-6 sm:p-8 ${index % 2 === 1 ? 'lg:order-1' : 'lg:order-2'}`}>
-              <h3 className="font-display mb-4 text-2xl font-bold text-[var(--sea-ink)]">
-                {study.title}
-              </h3>
+              <h3 className="font-display mb-4 text-2xl font-bold text-sea-ink">{study.title}</h3>
               <dl className="space-y-3 text-sm">
                 <div>
                   <Kicker as="dt" className="mb-1">
                     Problem
                   </Kicker>
-                  <dd className="m-0 leading-relaxed text-[var(--sea-ink-soft)]">
-                    {study.problem}
-                  </dd>
+                  <dd className="m-0 leading-relaxed text-sea-ink-soft">{study.problem}</dd>
                 </div>
                 <div>
                   <Kicker as="dt" className="mb-1">
                     Solution
                   </Kicker>
-                  <dd className="m-0 leading-relaxed text-[var(--sea-ink-soft)]">
-                    {study.solution}
-                  </dd>
+                  <dd className="m-0 leading-relaxed text-sea-ink-soft">{study.solution}</dd>
                 </div>
                 <div>
                   <Kicker as="dt" className="mb-1">
                     Capabilities
                   </Kicker>
-                  <dd className="m-0 leading-relaxed text-[var(--sea-ink-soft)]">
-                    {study.outcome}
-                  </dd>
+                  <dd className="m-0 leading-relaxed text-sea-ink-soft">{study.outcome}</dd>
                 </div>
               </dl>
               <ul className="mt-4 flex flex-wrap gap-2">
                 {study.tech.map((tech) => (
-                  <li key={tech} className="demo-pill">
-                    {tech}
-                  </li>
+                  <Pill key={tech}>{tech}</Pill>
                 ))}
               </ul>
             </div>

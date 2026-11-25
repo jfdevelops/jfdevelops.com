@@ -29,8 +29,8 @@ it('uses the device preference before hydration and follows preference changes i
   render(<ThemeToggle />)
   expect(screen.getByRole('button').textContent).toBe('Auto')
   expect(screen.getByRole('button').className).not.toContain('hover:bg-primary/80')
-  expect(screen.getByRole('button').className).toContain('hover:bg-[var(--chip-bg)]')
-  expect(screen.getByRole('button').className).toContain('hover:text-[var(--sea-ink)]')
+  expect(screen.getByRole('button').className).toContain('hover:bg-chip-bg')
+  expect(screen.getByRole('button').className).toContain('hover:text-sea-ink')
   act(() => {
     dark = false
     listener?.()

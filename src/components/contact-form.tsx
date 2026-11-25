@@ -35,10 +35,10 @@ export function ContactForm() {
   if (submitted) {
     return (
       <FeatureCard className="rounded-xl p-6 text-center">
-        <h3 className="font-display mb-2 text-xl font-bold text-(--sea-ink)">
+        <h3 className="font-display mb-2 text-xl font-bold text-sea-ink">
           Thanks &mdash; message received
         </h3>
-        <p className="mb-4 text-sm leading-relaxed text-(--sea-ink-soft)">
+        <p className="mb-4 text-sm leading-relaxed text-sea-ink-soft">
           I&apos;ll get back to you shortly. You can also email me directly using the option nearby.
         </p>
         <button
@@ -47,7 +47,7 @@ export function ContactForm() {
             form.reset()
             setSubmitted(false)
           }}
-          className="inline-flex min-h-11 items-center rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-5 py-2.5 text-sm font-semibold text-[var(--sea-ink)] transition hover:-translate-y-0.5 hover:bg-[var(--link-bg-hover)]"
+          className="inline-flex min-h-11 items-center rounded-full border border-chip-line bg-chip-bg px-5 py-2.5 text-sm font-semibold text-sea-ink transition hover:-translate-y-0.5 hover:bg-link-bg-hover"
         >
           Send another message
         </button>
@@ -67,10 +67,10 @@ export function ContactForm() {
       <div className="grid gap-4 sm:grid-cols-2">
         <form.Field name="name">
           {(field) => (
-            <label className="block text-sm font-semibold text-[var(--sea-ink)]">
+            <label className="block text-sm font-semibold text-sea-ink">
               Name
               <input
-                className="mt-2 min-h-11 w-full rounded-xl border border-[var(--line)] bg-[var(--surface-strong)] px-4 py-2.5 text-base text-[var(--sea-ink)]"
+                className="mt-2 min-h-11 w-full rounded-xl border border-line bg-surface-strong px-4 py-2.5 text-base text-sea-ink"
                 type="text"
                 value={field.state.value}
                 onBlur={field.handleBlur}
@@ -84,10 +84,10 @@ export function ContactForm() {
 
         <form.Field name="email">
           {(field) => (
-            <label className="block text-sm font-semibold text-[var(--sea-ink)]">
+            <label className="block text-sm font-semibold text-sea-ink">
               Email
               <input
-                className="mt-2 min-h-11 w-full rounded-xl border border-[var(--line)] bg-[var(--surface-strong)] px-4 py-2.5 text-base text-[var(--sea-ink)]"
+                className="mt-2 min-h-11 w-full rounded-xl border border-line bg-surface-strong px-4 py-2.5 text-base text-sea-ink"
                 type="email"
                 value={field.state.value}
                 onBlur={field.handleBlur}
@@ -102,10 +102,10 @@ export function ContactForm() {
 
       <form.Field name="projectType">
         {(field) => (
-          <label className="block text-sm font-semibold text-[var(--sea-ink)]">
+          <label className="block text-sm font-semibold text-sea-ink">
             Project type
             <select
-              className="mt-2 min-h-11 w-full rounded-xl border border-[var(--line)] bg-[var(--surface-strong)] px-4 py-2.5 text-base text-[var(--sea-ink)]"
+              className="mt-2 min-h-11 w-full rounded-xl border border-line bg-surface-strong px-4 py-2.5 text-base text-sea-ink"
               value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(event) => field.handleChange(event.target.value)}
@@ -124,10 +124,10 @@ export function ContactForm() {
 
       <form.Field name="message">
         {(field) => (
-          <label className="block text-sm font-semibold text-[var(--sea-ink)]">
+          <label className="block text-sm font-semibold text-sea-ink">
             Message
             <textarea
-              className="mt-2 min-h-28 w-full rounded-xl border border-[var(--line)] bg-[var(--surface-strong)] px-4 py-2.5 text-base text-[var(--sea-ink)]"
+              className="mt-2 min-h-28 w-full rounded-xl border border-line bg-surface-strong px-4 py-2.5 text-base text-sea-ink"
               value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(event) => field.handleChange(event.target.value)}
@@ -149,7 +149,7 @@ export function ContactForm() {
           <button
             type="submit"
             disabled={!canSubmit}
-            className="inline-flex min-h-11 items-center rounded-full border border-[var(--lagoon-deep)] bg-[var(--lagoon-deep)] px-5 py-2.5 text-sm font-semibold !text-[var(--foam)] transition hover:-translate-y-0.5 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-11 items-center rounded-full border border-lagoon-deep bg-lagoon-deep px-5 py-2.5 text-sm font-semibold !text-foam transition hover:-translate-y-0.5 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isSubmitting ? 'Sending...' : 'Send message'}
           </button>

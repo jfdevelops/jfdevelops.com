@@ -14,6 +14,8 @@ function Title() {
 }
 
 export const DocsHome = createComponent(HomeLayout)({
+  // Fumadocs reads its layout width from this variable.
+  className: '[--fd-layout-width:72rem]',
   nav: {
     url: '/docs',
     title: <Title />,

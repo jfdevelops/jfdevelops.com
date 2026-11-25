@@ -38,7 +38,7 @@ export function DocPage() {
       pageId={pageId}
       libraryVersion={libraryVersion}
     >
-      <DocsPage toc={toc}>
+      <DocsPage toc={toc} className="max-w-3xl pt-10 md:pt-10 xl:pt-10">
         {missingPage ? (
           <div role="status" className="rounded-lg border border-fd-border bg-fd-muted p-4 text-sm">
             This page does not exist in this version. Showing the first page instead.
@@ -59,9 +59,9 @@ export function DocPage() {
             </FumadocsLink>
           </div>
         ) : null}
-        <DocsTitle>{page.title}</DocsTitle>
-        <DocsDescription>{page.description}</DocsDescription>
-        <DocsBody>
+        <DocsTitle className="mb-0 text-[1.875rem] tracking-[-0.035em]">{page.title}</DocsTitle>
+        <DocsDescription className="mb-2">{page.description}</DocsDescription>
+        <DocsBody className="text-[0.9375rem]">
           {renderDocs(
             page.body,
             getMdxComponents({

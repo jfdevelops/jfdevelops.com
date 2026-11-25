@@ -23,8 +23,8 @@ type DocsShellProps = {
   libraryVersion: string | null
 }
 
-// Home slots do not fit the docs layout; the sidebar footer renders its own theme toggle.
-const { slots: _slots, ...sharedLayoutOptions } = docsLayoutOptions
+// Home slots and width do not fit the docs layout; the sidebar footer renders its own theme toggle.
+const { slots: _slots, className: _className, ...sharedLayoutOptions } = docsLayoutOptions
 
 export function DocsShell({
   children,
@@ -70,9 +70,11 @@ export function DocsShell({
       {...sharedLayoutOptions}
       themeSwitch={{ enabled: false }}
       tree={version.tree ?? { name: pkg.name, children: [] }}
-      containerProps={{ className: 'docs-reader' }}
       tabs={false}
       sidebar={{
+        // Fumadocs reads its grid sizes from these variables through its `layout:` variant.
+        className:
+          'layout:[--fd-layout-width:100vw]! md:layout:[--fd-sidebar-width:250px]! xl:layout:[--fd-toc-width:230px]!',
         banner: (
           <div className="flex flex-col gap-2">
             <LibrarySelector selectedId={pkg.slug} />

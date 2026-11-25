@@ -46,17 +46,15 @@ export function FAQ() {
           key={faq.question}
           className="group rounded-2xl p-5 [&_summary::-webkit-details-marker]:hidden"
         >
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-semibold text-[var(--sea-ink)]">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-semibold text-sea-ink">
             {faq.question}
-            <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] text-[var(--sea-ink)] transition group-open:rotate-45">
+            <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-chip-line bg-chip-bg text-sea-ink transition group-open:rotate-45">
               <span aria-hidden="true" className="text-lg leading-none">
                 +
               </span>
             </span>
           </summary>
-          <p className="mb-0 mt-3 text-sm leading-relaxed text-[var(--sea-ink-soft)]">
-            {faq.answer}
-          </p>
+          <p className="mb-0 mt-3 text-sm leading-relaxed text-sea-ink-soft">{faq.answer}</p>
         </IslandShell>
       ))}
     </FAQSection>

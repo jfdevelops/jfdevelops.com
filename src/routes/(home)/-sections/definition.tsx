@@ -90,7 +90,7 @@ function SectionTitle({ className, ...props }: ComponentPropsWithRef<'h2'>) {
   return (
     <h2
       className={cn(
-        'font-display mb-3 max-w-2xl text-3xl font-medium tracking-tight text-(--sea-ink) sm:text-4xl',
+        'font-display mb-3 max-w-2xl text-3xl font-medium tracking-tight text-sea-ink sm:text-4xl',
         className,
       )}
       {...props}
@@ -100,9 +100,6 @@ function SectionTitle({ className, ...props }: ComponentPropsWithRef<'h2'>) {
 
 function SectionDescription({ className, ...props }: ComponentPropsWithRef<'div'>) {
   return (
-    <div
-      className={cn('mb-6 text-sm leading-relaxed text-(--sea-ink-soft)', className)}
-      {...props}
-    />
+    <div className={cn('mb-6 text-sm leading-relaxed text-sea-ink-soft', className)} {...props} />
   )
 }
