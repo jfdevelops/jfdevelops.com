@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
-import ThemeToggle from '@/components/theme-toggle'
+import { ThemeToggle } from '@/components/theme-toggle'
 import { getInitialMode, themeInitScript } from './theme'
 
 afterEach(() => {

@@ -1,11 +1,10 @@
 import { Link } from '@tanstack/react-router'
-import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import { BookOpen, FileQuestion } from 'lucide-react'
-import { docsLayoutOptions } from './layout-options'
+import { DocsHome } from './layout'
 
 function DocsStatus({ unavailable = false, retry }: { unavailable?: boolean; retry?: () => void }) {
   return (
-    <HomeLayout {...docsLayoutOptions()}>
+    <DocsHome>
       <main className="mx-auto flex min-h-[65vh] max-w-xl flex-col items-center justify-center px-6 py-20 text-center">
         <FileQuestion aria-hidden="true" className="mb-6 size-12 text-fd-muted-foreground" />
         <p className="mb-3 text-sm font-medium text-fd-primary">
@@ -45,7 +44,7 @@ function DocsStatus({ unavailable = false, retry }: { unavailable?: boolean; ret
           )}
         </div>
       </main>
-    </HomeLayout>
+    </DocsHome>
   )
 }
 
@@ -56,4 +55,3 @@ export function DocsNotFound() {
 export function DocsError({ reset }: { reset: () => void }) {
   return <DocsStatus unavailable retry={reset} />
 }
-

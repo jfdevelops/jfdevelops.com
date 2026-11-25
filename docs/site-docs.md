@@ -107,9 +107,13 @@ undefined identifier has no type information for an editor or the docs to displa
 Register docs libraries in `src/routes/docs/-utils/libraries.ts` with
 `registerLibraryGroups` / `addLibrary` (`packageName`, `title`, `description`,
 `icon`, `repository`, optional `docs`). Library ids and urls are derived from
-`packageName`. Card version labels use each package's npm `latest` dist-tag at
-request time. Frameworks, versions, and page navigation still come from library
-docs snapshots.
+`packageName`.
+
+Version labels come from the library repository's git tags, read at request time and
+cached for five minutes: `<packageName>@<version>` tags in monorepos, `v<version>`
+otherwise. Cards show the latest release; the sidebar shows the latest release in the
+selected major. A library with no matching tags shows no version. Frameworks, versions,
+and page navigation still come from library docs snapshots.
 
 Documentation images use commit-addressed `/docs-assets/` URLs. The Worker caches
 public repository image bytes and serves their correct MIME type, including SVG;

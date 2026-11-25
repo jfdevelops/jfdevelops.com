@@ -15,6 +15,11 @@ export default createServerEntry({
       })
     }
 
+    // The dev viewer id never changes, so cached HTML would outlive code edits.
+    if (import.meta.env.DEV) {
+      return handler.fetch(request, options)
+    }
+
     return serveDocsRequest(request, {
       docs: await getRuntimeDocs(),
       cache: await caches.open('docs-html'),

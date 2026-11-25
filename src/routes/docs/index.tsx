@@ -1,9 +1,8 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { HomeLayout } from 'fumadocs-ui/layouts/home'
 import { ArrowRight } from 'lucide-react'
 import { getDocsLibraryVersions } from '@/routes/docs/-utils/client'
 import { docsLibraries, libraryGroups } from '@/routes/docs/-utils/libraries'
-import { docsLayoutOptions } from './-components/layout-options'
+import { DocsHome } from './-components/layout'
 import { LibraryCard } from './-components/library-card'
 import { DocsError, DocsNotFound } from './-components/status'
 
@@ -29,7 +28,7 @@ function DocsIndex() {
   const firstLibrary = docsLibraries[0]
 
   return (
-    <HomeLayout {...docsLayoutOptions()} className="docs-home">
+    <DocsHome className="docs-home">
       <div className="mx-auto w-full max-w-5xl px-6 pb-24">
         <section className="docs-home-hero">
           <p className="docs-home-kicker">JF Develops · Documentation</p>
@@ -78,6 +77,6 @@ function DocsIndex() {
           ))}
         </div>
       </div>
-    </HomeLayout>
+    </DocsHome>
   )
 }

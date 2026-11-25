@@ -1,8 +1,8 @@
 import { Link } from '@tanstack/react-router'
+import { BrandLogo } from './brand-logo'
+import { ThemeToggle } from './theme-toggle'
 import { Kicker } from './ui/kicker'
 import { PageWrap } from './ui/page-wrap'
-import { BrandLogo } from './brand-logo'
-import ThemeToggle from './theme-toggle'
 
 const columns = [
   {

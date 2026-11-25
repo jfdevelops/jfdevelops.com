@@ -12,7 +12,7 @@ export function DocPage() {
   const data = docsRouteApi.useLoaderData()
   const { docsNotice } = docsRouteApi.useSearch()
   const missingPage = docsNotice === 'missing-page'
-  const { pkg, page } = data
+  const { pkg, page, libraryVersion } = data
   const framework = pkg.frameworks.find((entry) => entry.id === page.framework)
 
   if (!framework) {
@@ -31,7 +31,13 @@ export function DocPage() {
   const currentPage = currentVersion.pages.find((entry) => entry.id === pageId)
 
   return (
-    <DocsShell pkg={pkg} framework={framework} version={version} pageId={pageId}>
+    <DocsShell
+      pkg={pkg}
+      framework={framework}
+      version={version}
+      pageId={pageId}
+      libraryVersion={libraryVersion}
+    >
       <DocsPage toc={toc}>
         {missingPage ? (
           <div role="status" className="rounded-lg border border-fd-border bg-fd-muted p-4 text-sm">
