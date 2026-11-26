@@ -1,5 +1,11 @@
-import { Link, useLocation } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { Menu } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { createResourceLinks } from '@/routes/(home)/-sections/definition'
 import { BrandLogo } from '../brand-logo'
 import { NavLink } from '../ui/nav-link'
@@ -30,9 +36,6 @@ const sectionLinks = createResourceLinks({
 })
 
 export default function Header() {
-  // Re-mounting the menu on navigation closes it.
-  const location = useLocation({ select: ({ pathname, hash }) => `${pathname}#${hash}` })
-
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-header-bg px-4 backdrop-blur-lg">
       <PageWrap as="nav" className="flex flex-wrap items-center gap-x-3 gap-y-2 py-3 sm:py-4">
@@ -62,16 +65,23 @@ export default function Header() {
           >
             Get in touch
           </NavLink>
-          <details key={location} className="relative lg:hidden">
-            <summary
-              aria-label="Navigation menu"
-              className="grid size-11 cursor-pointer list-none place-items-center rounded-[6px] border border-line [&::-webkit-details-marker]:hidden"
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  variant="outline"
+                  size="icon"
+                  aria-label="Navigation menu"
+                  className="size-11 rounded-[6px] border-line bg-transparent text-sea-ink lg:hidden dark:bg-transparent"
+                />
+              }
             >
               <Menu size={19} aria-hidden="true" />
-            </summary>
-            <nav
-              aria-label="Mobile navigation"
-              className="absolute top-[52px] right-0 w-[220px] rounded-[8px] border border-line bg-foam p-2.5 shadow-[0_12px_30px_#06241826]"
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              sideOffset={8}
+              className="w-[220px] rounded-[8px] border border-line bg-foam p-2.5 text-sea-ink shadow-[0_12px_30px_#06241826] ring-0"
             >
               {sectionLinks.map(({ href, label }) => (
                 <MenuLink key={href.full} to={href.given} hash={href.hash}>
@@ -82,8 +92,8 @@ export default function Header() {
               <MenuLink to="/" hash="contact">
                 Get in touch
               </MenuLink>
-            </nav>
-          </details>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </PageWrap>
     </header>

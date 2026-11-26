@@ -1,12 +1,14 @@
 import { createLink } from '@tanstack/react-router'
 import type { ComponentPropsWithRef } from 'react'
+import { DropdownMenuLinkItem } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 
-function MenuLinkAnchor({ className, ...props }: ComponentPropsWithRef<'a'>) {
+function MenuLinkItem({ className, ...props }: ComponentPropsWithRef<'a'>) {
   return (
-    <a
+    <DropdownMenuLinkItem
+      closeOnClick
       className={cn(
-        'block rounded-[4px] p-3 text-[14px] text-sea-ink no-underline hover:bg-brand-tint hover:text-brand-accent',
+        'block rounded-[4px] p-3 text-[14px] text-sea-ink no-underline focus:bg-brand-tint focus:text-brand-accent',
         className,
       )}
       {...props}
@@ -15,4 +17,4 @@ function MenuLinkAnchor({ className, ...props }: ComponentPropsWithRef<'a'>) {
 }
 
 /** Type-safe router link for the small-screen menu. */
-export const MenuLink = createLink(MenuLinkAnchor)
+export const MenuLink = createLink(MenuLinkItem)

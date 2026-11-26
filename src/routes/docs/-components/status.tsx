@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { BookOpen, FileQuestion } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { DocsHome } from './layout'
 
 function DocsStatus({ unavailable = false, retry }: { unavailable?: boolean; retry?: () => void }) {
@@ -27,13 +28,13 @@ function DocsStatus({ unavailable = false, retry }: { unavailable?: boolean; ret
             Browse documentation
           </Link>
           {retry ? (
-            <button
-              type="button"
+            <Button
+              variant="outline"
               onClick={retry}
-              className="rounded-full border border-fd-border px-5 py-2.5 text-sm font-medium"
+              className="h-auto rounded-full border-fd-border bg-transparent px-5 py-2.5 text-sm font-medium dark:bg-transparent"
             >
               Try again
-            </button>
+            </Button>
           ) : (
             <Link
               to="/"
