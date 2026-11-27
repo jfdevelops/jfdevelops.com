@@ -1,13 +1,13 @@
 import { Link, useLocation, useNavigate } from '@tanstack/react-router'
 import { GlassLayout } from 'fumadocs-ui/layouts/glass'
 import { LibraryBig } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { type ReactNode, useMemo } from 'react'
 import { BrandLogo } from '@/components/brand-logo'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { cn } from '@/lib/utils'
 import { LibrarySelector } from '@/routes/docs/-components/library-selector'
 import { Selectors } from '@/routes/docs/-components/selectors'
-import { sidebarSlots } from '@/routes/docs/-components/sidebar'
+import { collapseFolders, sidebarSlots } from '@/routes/docs/-components/sidebar'
 import { resources } from '@/routes/docs/-utils/definition'
 import {
   type DocsFramework,
@@ -43,6 +43,10 @@ export function DocsShell({
 }: DocsShellProps) {
   const navigate = useNavigate()
   const hash = useLocation({ select: (location) => location.hash })
+  const tree = useMemo(
+    () => collapseFolders(version.tree ?? { name: pkg.name, children: [] }),
+    [version.tree, pkg.name],
+  )
 
   function switchDocs(nextFramework: DocsFramework, nextVersion: DocsVersion) {
     const packageId = resources.parse(pkg.slug)
@@ -74,7 +78,7 @@ export function DocsShell({
   return (
     <GlassLayout
       key={`${pkg.slug}/${framework.id}/${version.id}`}
-      tree={version.tree ?? { name: pkg.name, children: [] }}
+      tree={tree}
       tabs={false}
       searchToggle={{ enabled: false }}
       slots={{ navTitle: NavTitle, themeSwitch: ThemeToggle, sidebar: sidebarSlots }}
