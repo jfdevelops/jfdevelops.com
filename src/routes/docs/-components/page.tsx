@@ -1,6 +1,6 @@
 import { getRouteApi } from '@tanstack/react-router'
 import FumadocsLink from 'fumadocs-core/link'
-import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/page'
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/glass/page'
 import { getMdxComponents } from '@/routes/docs/-components/mdx'
 import { DocsShell } from '@/routes/docs/-components/shell'
 import { getDefaultVersion, getPageUrl, resolveDocHref } from '@/routes/docs/-utils/registry'
@@ -38,7 +38,7 @@ export function DocPage() {
       pageId={pageId}
       libraryVersion={libraryVersion}
     >
-      <DocsPage toc={toc} className="max-w-3xl pt-10 md:pt-10 xl:pt-10">
+      <DocsPage toc={toc}>
         {missingPage ? (
           <div role="status" className="rounded-lg border border-fd-border bg-fd-muted p-4 text-sm">
             This page does not exist in this version. Showing the first page instead.

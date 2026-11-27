@@ -1,10 +1,11 @@
-import { Link, useLocation, useNavigate } from '@tanstack/react-router'
-import { DocsLayout } from 'fumadocs-ui/layouts/docs'
-import { ArrowLeft } from 'lucide-react'
+import { useLocation, useNavigate } from '@tanstack/react-router'
+import { GlassLayout } from 'fumadocs-ui/layouts/glass'
+import { LibraryBig } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { LibrarySelector } from '@/routes/docs/-components/library-selector'
 import { Selectors } from '@/routes/docs/-components/selectors'
+import { sidebarSlots } from '@/routes/docs/-components/sidebar'
 import { resources } from '@/routes/docs/-utils/definition'
 import {
   type DocsFramework,
@@ -12,7 +13,10 @@ import {
   getSwitchTarget,
   type PackageDocs,
 } from '@/routes/docs/-utils/registry'
-import { docsLayoutOptions } from './layout'
+
+function Title() {
+  return <span className="font-display text-base font-bold tracking-tight">JF Develops</span>
+}
 
 type DocsShellProps = {
   children: ReactNode
@@ -22,9 +26,6 @@ type DocsShellProps = {
   pageId: string
   libraryVersion: string | null
 }
-
-// Home slots and width do not fit the docs layout; the sidebar footer renders its own theme toggle.
-const { slots: _slots, className: _className, ...sharedLayoutOptions } = docsLayoutOptions
 
 export function DocsShell({
   children,
@@ -65,45 +66,45 @@ export function DocsShell({
   }
 
   return (
-    <DocsLayout
+    <GlassLayout
       key={`${pkg.slug}/${framework.id}/${version.id}`}
-      {...sharedLayoutOptions}
-      themeSwitch={{ enabled: false }}
       tree={version.tree ?? { name: pkg.name, children: [] }}
       tabs={false}
-      sidebar={{
-        // Fumadocs reads its grid sizes from these variables through its `layout:` variant.
-        className:
-          'layout:[--fd-layout-width:100vw]! md:layout:[--fd-sidebar-width:250px]! xl:layout:[--fd-toc-width:230px]!',
-        banner: (
-          <div className="flex flex-col gap-2">
-            <LibrarySelector selectedId={pkg.slug} />
-            <Selectors
-              frameworks={pkg.frameworks}
-              framework={framework}
-              version={version}
-              onSwitch={switchDocs}
-            />
-          </div>
-        ),
-        footer: (
-          <div className="flex flex-col gap-4 border-t border-fd-border pt-4">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-xs text-fd-muted-foreground">{libraryVersion}</span>
-              <ThemeToggle />
+      nav={{ title: <Title />, url: '/' }}
+      searchToggle={{ enabled: false }}
+      slots={{ themeSwitch: ThemeToggle, sidebar: sidebarSlots }}
+      links={[
+        {
+          type: 'icon',
+          on: 'menu',
+          url: '/docs',
+          label: 'All libraries',
+          text: 'All libraries',
+          icon: <LibraryBig />,
+        },
+        {
+          type: 'custom',
+          on: 'menu',
+          children: (
+            <div className="mb-4 flex flex-col gap-2">
+              <LibrarySelector selectedId={pkg.slug} />
+              <Selectors
+                frameworks={pkg.frameworks}
+                framework={framework}
+                version={version}
+                onSwitch={switchDocs}
+              />
+              {libraryVersion ? (
+                <p className="m-0 px-1 text-xs text-fd-muted-foreground">
+                  Latest release {libraryVersion}
+                </p>
+              ) : null}
             </div>
-            <Link
-              to="/docs"
-              className="inline-flex items-center gap-2 text-xs text-fd-muted-foreground hover:text-fd-foreground"
-            >
-              <ArrowLeft aria-hidden="true" className="size-3.5" />
-              All libraries
-            </Link>
-          </div>
-        ),
-      }}
+          ),
+        },
+      ]}
     >
       {children}
-    </DocsLayout>
+    </GlassLayout>
   )
 }

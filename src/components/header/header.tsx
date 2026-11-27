@@ -10,6 +10,7 @@ import { createResourceLinks } from '@/routes/(home)/-sections/definition'
 import { BrandLogo } from '../brand-logo'
 import { NavLink } from '../ui/nav-link'
 import { PageWrap } from '../ui/page-wrap'
+import { DocsMenu } from './docs-menu'
 import { MenuLink } from './menu-link'
 
 const sectionLinks = createResourceLinks({
@@ -59,7 +60,7 @@ export default function Header() {
               {label}
             </NavLink>
           ))}
-          <NavLink to="/docs">For developers</NavLink>
+          <DocsMenu />
         </div>
 
         <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
