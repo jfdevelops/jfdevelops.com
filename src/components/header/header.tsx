@@ -50,7 +50,12 @@ export default function Header() {
 
         <div className="order-3 hidden w-full flex-wrap items-center gap-x-4 gap-y-1 pb-1 text-sm font-semibold lg:order-0 lg:flex lg:w-auto lg:flex-nowrap lg:pb-0">
           {sectionLinks.map(({ href, label }) => (
-            <NavLink key={href.full} to={href.given} hash={href.hash}>
+            <NavLink
+              key={href.full}
+              to={href.given}
+              hash={href.hash}
+              activeOptions={{ includeHash: true }}
+            >
               {label}
             </NavLink>
           ))}
@@ -58,13 +63,13 @@ export default function Header() {
         </div>
 
         <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
-          <NavLink
+          <Link
             to="/"
             className="hidden min-h-11 items-center rounded-full border border-lagoon-deep bg-lagoon-deep px-4 py-2 text-sm font-semibold text-foam! no-underline transition hover:-translate-y-0.5 hover:opacity-90 lg:inline-flex"
             hash="contact"
           >
             Get in touch
-          </NavLink>
+          </Link>
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
