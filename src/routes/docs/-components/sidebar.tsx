@@ -6,8 +6,9 @@ import {
 } from 'fumadocs-ui/layouts/glass/slots/sidebar'
 import type { ComponentProps } from 'react'
 import { cn } from '@/lib/utils'
+import { SidebarFooter } from '@/routes/docs/-components/sidebar-footer'
 
-function Sidebar({ className, ...props }: ComponentProps<typeof GlassSidebar>) {
+function Sidebar({ className, children, ...props }: ComponentProps<typeof GlassSidebar>) {
   return (
     <GlassSidebar
       className={cn(
@@ -18,7 +19,10 @@ function Sidebar({ className, ...props }: ComponentProps<typeof GlassSidebar>) {
         className,
       )}
       {...props}
-    />
+    >
+      <SidebarFooter />
+      {children}
+    </GlassSidebar>
   )
 }
 
