@@ -1,18 +1,21 @@
-import { GithubIcon, NpmIcon } from '@hugeicons/core-free-icons'
+import { GithubIcon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { getRouteApi } from '@tanstack/react-router'
+import { NpmLogo } from '@/components/npm-logo'
 import { Button } from '@/components/ui/button'
 
 const docsRouteApi = getRouteApi('/docs/$package/$')
 
 /** Repository and npm links for the current library, at the bottom of the docs sidebar. */
 export function SidebarFooter() {
-  const {repository, packageName} = docsRouteApi.useLoaderData({ select: ({pkg}) => {
-    return {
-      repository: pkg.repository,
-      packageName: pkg.packageName,
-    }
-  } })
+  const { repository, packageName } = docsRouteApi.useLoaderData({
+    select: ({ pkg }) => {
+      return {
+        repository: pkg.repository,
+        packageName: pkg.packageName,
+      }
+    },
+  })
 
   return (
     <div className="flex items-center gap-1 border-t px-3 py-2">
@@ -20,7 +23,6 @@ export function SidebarFooter() {
         variant="ghost"
         size="icon-lg"
         nativeButton={false}
-        className="text-fd-muted-foreground hover:text-fd-foreground"
         render={
           <a
             href={repository}
@@ -30,13 +32,12 @@ export function SidebarFooter() {
           />
         }
       >
-        <HugeiconsIcon icon={GithubIcon} />
+        <HugeiconsIcon icon={GithubIcon} strokeWidth={1.5} />
       </Button>
       <Button
         variant="ghost"
         size="icon-lg"
         nativeButton={false}
-        className="text-fd-muted-foreground hover:text-fd-foreground"
         render={
           <a
             href={`https://www.npmjs.com/package/${packageName}`}
@@ -46,7 +47,7 @@ export function SidebarFooter() {
           />
         }
       >
-        <HugeiconsIcon icon={NpmIcon} />
+        <NpmLogo />
       </Button>
     </div>
   )
