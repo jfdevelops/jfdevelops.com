@@ -1,4 +1,3 @@
-import type { Node, Root } from 'fumadocs-core/page-tree'
 import {
   Sidebar as GlassSidebar,
   SidebarDrawer,
@@ -29,22 +28,4 @@ export const sidebarSlots = {
   drawer: SidebarDrawer,
   provider: SidebarProvider,
   use: useSidebar,
-}
-
-function collapseNode(node: Node): Node {
-  if (node.type !== 'folder') return node
-
-  return {
-    ...node,
-    defaultOpen: node.defaultOpen ?? false,
-    children: node.children.map(collapseNode),
-  }
-}
-
-/**
- * Closes folders without an explicit `defaultOpen`. The glass sidebar opens them by default;
- * the folder holding the current page still opens.
- */
-export function collapseFolders(tree: Root): Root {
-  return { ...tree, children: tree.children.map(collapseNode) }
 }

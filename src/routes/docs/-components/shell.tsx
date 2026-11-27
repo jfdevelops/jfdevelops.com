@@ -1,13 +1,12 @@
-import { Link, useLocation, useNavigate } from '@tanstack/react-router'
+import { useLocation, useNavigate } from '@tanstack/react-router'
 import { GlassLayout } from 'fumadocs-ui/layouts/glass'
 import { LibraryBig } from 'lucide-react'
 import { type ReactNode, useMemo } from 'react'
-import { BrandLogo } from '@/components/brand-logo'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { cn } from '@/lib/utils'
 import { LibrarySelector } from '@/routes/docs/-components/library-selector'
+import { NavTitle } from '@/routes/docs/-components/nav-title'
 import { Selectors } from '@/routes/docs/-components/selectors'
-import { collapseFolders, sidebarSlots } from '@/routes/docs/-components/sidebar'
+import { sidebarSlots } from '@/routes/docs/-components/sidebar'
 import { resources } from '@/routes/docs/-utils/definition'
 import {
   type DocsFramework,
@@ -15,14 +14,7 @@ import {
   getSwitchTarget,
   type PackageDocs,
 } from '@/routes/docs/-utils/registry'
-
-function NavTitle({ className }: { className?: string }) {
-  return (
-    <Link to="/" className={cn('no-underline', className)}>
-      <BrandLogo className="h-9" />
-    </Link>
-  )
-}
+import { collapseFolders } from '@/routes/docs/-utils/tree'
 
 type DocsShellProps = {
   children: ReactNode
