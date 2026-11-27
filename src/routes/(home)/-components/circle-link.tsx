@@ -6,7 +6,7 @@ function CircleLinkAnchor({ className, ...props }: ComponentPropsWithRef<'a'>) {
   return (
     <a
       className={cn(
-        'grid size-9 place-items-center rounded-full border border-line hover:bg-brand-accent',
+        'grid size-9 place-items-center rounded-full border border-line hover:bg-brand-accent hover:text-foam',
         className,
       )}
       {...props}
