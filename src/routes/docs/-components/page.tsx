@@ -1,6 +1,6 @@
 import { getRouteApi } from '@tanstack/react-router'
 import FumadocsLink from 'fumadocs-core/link'
-import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/page'
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/glass/page'
 import { getMdxComponents } from '@/routes/docs/-components/mdx'
 import { DocsShell } from '@/routes/docs/-components/shell'
 import { getDefaultVersion, getPageUrl, resolveDocHref } from '@/routes/docs/-utils/registry'
@@ -12,7 +12,7 @@ export function DocPage() {
   const data = docsRouteApi.useLoaderData()
   const { docsNotice } = docsRouteApi.useSearch()
   const missingPage = docsNotice === 'missing-page'
-  const { pkg, page } = data
+  const { pkg, page, libraryVersion } = data
   const framework = pkg.frameworks.find((entry) => entry.id === page.framework)
 
   if (!framework) {
@@ -31,7 +31,13 @@ export function DocPage() {
   const currentPage = currentVersion.pages.find((entry) => entry.id === pageId)
 
   return (
-    <DocsShell pkg={pkg} framework={framework} version={version} pageId={pageId}>
+    <DocsShell
+      pkg={pkg}
+      framework={framework}
+      version={version}
+      pageId={pageId}
+      libraryVersion={libraryVersion}
+    >
       <DocsPage toc={toc}>
         {missingPage ? (
           <div role="status" className="rounded-lg border border-fd-border bg-fd-muted p-4 text-sm">
@@ -53,9 +59,9 @@ export function DocPage() {
             </FumadocsLink>
           </div>
         ) : null}
-        <DocsTitle>{page.title}</DocsTitle>
-        <DocsDescription>{page.description}</DocsDescription>
-        <DocsBody>
+        <DocsTitle className="mb-0 text-[1.875rem] tracking-[-0.035em]">{page.title}</DocsTitle>
+        <DocsDescription className="mb-2">{page.description}</DocsDescription>
+        <DocsBody className="text-[0.9375rem]">
           {renderDocs(
             page.body,
             getMdxComponents({

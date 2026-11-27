@@ -5,10 +5,17 @@ import { librarySchema, manifestSchema, pageSchema, pointerSchema } from './snap
 const revision = pointerSchema.shape.revision
 const libraryResponse = manifestSchema.extend({ revision }).nullable()
 const pageResponse = z.object({ pkg: librarySchema, page: pageSchema, revision }).nullable()
-const libraryVersions = z.record(z.string(), z.string().nullable())
+const libraryVersion = z.string().nullable()
+const libraryVersions = z.record(z.string(), libraryVersion)
 
 export async function getDocsLibraryVersions() {
   return libraryVersions.parse(JSON.parse(await queries.getDocsLibraryVersions()))
+}
+
+export async function getDocsLibraryVersion(
+  input: Parameters<typeof queries.getDocsLibraryVersion>[0],
+) {
+  return libraryVersion.parse(JSON.parse(await queries.getDocsLibraryVersion(input)))
 }
 
 export async function getDocLibrary(input: Parameters<typeof queries.getDocLibrary>[0]) {

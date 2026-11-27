@@ -51,12 +51,12 @@ public/
 
 ## Docs architecture
 
-Library repositories are registered in `src/routes/docs/-utils/libraries.ts` with their main branch. A scheduled
-GitHub workflow generates Fumadocs snapshots and publishes them to the docs-content branch.
-The deployed Worker loads library metadata and requested pages on demand, serves cached HTML,
-and refreshes pointers in the background. R2 is not used. Normal dev/test/build commands do
-not generate docs. Only UI/runtime changes and repository-list changes require deployment.
-See docs/site-docs.md. Frameworks, versions and navigation come from library metadata.
+Library repositories are registered in `src/routes/docs/-utils/libraries.ts` with their main branch. A
+GitHub workflow, triggered by library pushes, generates Fumadocs snapshots and publishes them to
+the `jfdevelops-docs` R2 bucket. The deployed Worker reads each library's pointer from R2 on every
+request, loads metadata and requested pages on demand, and serves cached HTML. Normal
+dev/test/build commands do not generate docs. Only UI/runtime changes and repository-list changes
+require deployment. See docs/site-docs.md. Frameworks, versions and navigation come from library metadata.
 Keep Framework above Version; companion packages remain ordinary plugin/devtools pages.
 
 ## Partner integrations

@@ -3,17 +3,43 @@ import { z } from 'zod'
 
 export const getDocsLibraryVersions = createServerFn({ method: 'GET' }).handler(async () => {
   const { docsLibraries } = await import('./libraries')
-  const { getLatestNpmVersion } = await import('./npm')
+  const { getLatestReleaseVersion } = await import('./release')
+  const cache = await caches.open('docs-release-tags-v1')
   const entries = await Promise.all(
-    docsLibraries.map(async (library) => {
-      const version = await getLatestNpmVersion(library.packageName)
-
-      return [library.id, version] as const
-    }),
+    docsLibraries.map(
+      async (library) =>
+        [
+          library.id,
+          await getLatestReleaseVersion(library.repository, library.packageName, { cache }),
+        ] as const,
+    ),
   )
 
   return JSON.stringify(Object.fromEntries(entries))
 })
+
+export const getDocsLibraryVersion = createServerFn({ method: 'GET' })
+  .validator(
+    z.object({
+      library: z.string().regex(/^[a-z0-9-]+$/),
+      major: z.number().int().nonnegative(),
+    }),
+  )
+  .handler(async ({ data }) => {
+    const { getDocsLibrary } = await import('./libraries')
+    const { getLatestReleaseVersion } = await import('./release')
+    const library = getDocsLibrary(data.library)
+    const cache = await caches.open('docs-release-tags-v1')
+
+    return JSON.stringify(
+      library
+        ? await getLatestReleaseVersion(library.repository, library.packageName, {
+            cache,
+            major: data.major,
+          })
+        : null,
+    )
+  })
 
 export const getDocLibrary = createServerFn({ method: 'GET' })
   .validator(z.string().regex(/^[a-z0-9-]+$/))

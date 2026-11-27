@@ -1,24 +1,29 @@
-import { waitUntil } from 'cloudflare:workers'
+import { env } from 'cloudflare:workers'
 import { docsSources } from './libraries'
+import { createBucketReader, createHttpReader } from './reader'
 import { createRuntimeDocs } from './runtime'
 
-export async function getRuntimeDocs() {
+function snapshotReader() {
   const localOrigin = import.meta.env.DEV ? import.meta.env.VITE_DOCS_SNAPSHOT_ORIGIN : undefined
 
-  if (localOrigin && !/^http:\/\/(?:127\.0\.0\.1|localhost):[0-9]+$/.test(localOrigin)) {
+  if (!localOrigin) {
+    return createBucketReader(env.DOCS_SNAPSHOTS)
+  }
+
+  if (!/^http:\/\/(?:127\.0\.0\.1|localhost):[0-9]+$/.test(localOrigin)) {
     throw new Error('Local docs snapshots must use a loopback origin')
   }
 
+  return createHttpReader(localOrigin, (input, init) => fetch(input, init))
+}
+
+export async function getRuntimeDocs() {
   return createRuntimeDocs({
     repositories: docsSources.libraries,
-    origin:
-      localOrigin ??
-      `https://raw.githubusercontent.com/${docsSources.snapshotRepository}/${docsSources.snapshotBranch}`,
-    cache: await caches.open('docs-snapshots-v1'),
-    fetch: (input, init) => fetch(input, init),
-    waitUntil,
+    read: snapshotReader(),
+    cache: await caches.open('docs-snapshots-v2'),
     log(error) {
-      console.error('Docs refresh failed', error)
+      console.error('Docs snapshot read failed', error)
     },
   })
 }

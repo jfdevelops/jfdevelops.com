@@ -1,3 +1,9 @@
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
 import { IslandShell } from '@/components/ui/island-shell'
 import { createResourceLayout } from './definition'
 
@@ -39,26 +45,28 @@ const faqs = [
 
 export function FAQ() {
   return (
-    <FAQSection className="space-y-3">
-      {faqs.map((faq) => (
-        <IslandShell
-          as="details"
-          key={faq.question}
-          className="group rounded-2xl p-5 [&_summary::-webkit-details-marker]:hidden"
-        >
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-semibold text-[var(--sea-ink)]">
-            {faq.question}
-            <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] text-[var(--sea-ink)] transition group-open:rotate-45">
-              <span aria-hidden="true" className="text-lg leading-none">
-                +
+    <FAQSection>
+      <Accordion className="gap-3 overflow-visible rounded-none border-0">
+        {faqs.map((faq) => (
+          <AccordionItem
+            key={faq.question}
+            render={<IslandShell />}
+            className="rounded-2xl p-5 data-open:bg-surface-strong"
+          >
+            <AccordionTrigger className="items-center gap-4 p-0 text-base font-semibold text-sea-ink hover:no-underline **:data-[slot=accordion-trigger-icon]:hidden">
+              {faq.question}
+              <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-full border border-chip-line bg-chip-bg text-sea-ink transition group-aria-expanded/accordion-trigger:rotate-45">
+                <span aria-hidden="true" className="text-lg leading-none">
+                  +
+                </span>
               </span>
-            </span>
-          </summary>
-          <p className="mb-0 mt-3 text-sm leading-relaxed text-[var(--sea-ink-soft)]">
-            {faq.answer}
-          </p>
-        </IslandShell>
-      ))}
+            </AccordionTrigger>
+            <AccordionContent className="px-0 pt-3 pb-0 text-sm leading-relaxed text-sea-ink-soft">
+              {faq.answer}
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
     </FAQSection>
   )
 }

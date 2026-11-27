@@ -1,4 +1,5 @@
 import { AppWindow, ArrowUpRight, Plug, Workflow, Wrench } from 'lucide-react'
+import { CircleLink } from '../-components/circle-link'
 import { createResourceLayout } from './definition'
 
 const ServicesSection = createResourceLayout({
@@ -42,20 +43,25 @@ const services = [
 ]
 export function Services() {
   return (
-    <ServicesSection className="services-grid">
+    <ServicesSection className="grid grid-cols-2 gap-[18px] max-md:grid-cols-1">
       {services.map(({ icon: Icon, title, description, detail }, index) => (
-        <article className="service-card" key={title}>
-          <div className="service-top">
+        <article
+          key={title}
+          className="rounded-[10px] border border-line bg-surface-strong p-[30px] first:bg-brand-tint max-md:p-[25px]"
+        >
+          <div className="flex items-center justify-between text-sea-ink">
             <Icon size={27} strokeWidth={1.5} aria-hidden="true" />
-            <span>0{index + 1}</span>
+            <span className="font-[monospace] text-[11px] opacity-65">0{index + 1}</span>
           </div>
-          <h3>{title}</h3>
-          <p>{description}</p>
-          <div className="service-bottom">
+          <h3 className="mt-[25px] mb-3 font-display text-[25px] font-medium tracking-[-0.03em]">
+            {title}
+          </h3>
+          <p className="max-w-[420px] text-[14px] leading-[1.8] text-sea-ink-soft">{description}</p>
+          <div className="mt-6 flex items-center justify-between gap-2.5 border-t border-line pt-5 text-[10px] text-sea-ink-soft">
             <span>{detail}</span>
-            <a href="#contact" aria-label={`Discuss ${title.toLowerCase()}`}>
+            <CircleLink to="/" hash="contact" aria-label={`Discuss ${title.toLowerCase()}`}>
               <ArrowUpRight size={20} />
-            </a>
+            </CircleLink>
           </div>
         </article>
       ))}

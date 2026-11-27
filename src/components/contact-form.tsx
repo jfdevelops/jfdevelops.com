@@ -3,7 +3,23 @@ import { useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 import { api } from '../../convex/_generated/api'
+import { FormInput } from './form/form-input'
+import { FormLabel } from './form/form-label'
+import { FormSelectTrigger } from './form/form-select-trigger'
+import { FormTextarea } from './form/form-textarea'
+import { PillButton } from './pill-button'
 import { FeatureCard } from './ui/island-shell'
+import { Select, SelectContent, SelectItem, SelectValue } from './ui/select'
+
+const projectTypes = [
+  'Custom web application',
+  'Internal business tool',
+  'Admin dashboard',
+  'Customer portal',
+  'API / integration',
+  'Maintenance & support',
+  'Something else',
+]
 
 export function ContactForm() {
   const [submitted, setSubmitted] = useState(false)
@@ -35,22 +51,21 @@ export function ContactForm() {
   if (submitted) {
     return (
       <FeatureCard className="rounded-xl p-6 text-center">
-        <h3 className="font-display mb-2 text-xl font-bold text-(--sea-ink)">
+        <h3 className="font-display mb-2 text-xl font-bold text-sea-ink">
           Thanks &mdash; message received
         </h3>
-        <p className="mb-4 text-sm leading-relaxed text-(--sea-ink-soft)">
+        <p className="mb-4 text-sm leading-relaxed text-sea-ink-soft">
           I&apos;ll get back to you shortly. You can also email me directly using the option nearby.
         </p>
-        <button
-          type="button"
+        <PillButton
+          variant="secondary"
           onClick={() => {
             form.reset()
             setSubmitted(false)
           }}
-          className="inline-flex min-h-11 items-center rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-5 py-2.5 text-sm font-semibold text-[var(--sea-ink)] transition hover:-translate-y-0.5 hover:bg-[var(--link-bg-hover)]"
         >
           Send another message
-        </button>
+        </PillButton>
       </FeatureCard>
     )
   }
@@ -67,10 +82,10 @@ export function ContactForm() {
       <div className="grid gap-4 sm:grid-cols-2">
         <form.Field name="name">
           {(field) => (
-            <label className="block text-sm font-semibold text-[var(--sea-ink)]">
-              Name
-              <input
-                className="mt-2 min-h-11 w-full rounded-xl border border-[var(--line)] bg-[var(--surface-strong)] px-4 py-2.5 text-base text-[var(--sea-ink)]"
+            <div>
+              <FormLabel htmlFor="contact-name">Name</FormLabel>
+              <FormInput
+                id="contact-name"
                 type="text"
                 value={field.state.value}
                 onBlur={field.handleBlur}
@@ -78,16 +93,16 @@ export function ContactForm() {
                 placeholder="Your name"
                 required
               />
-            </label>
+            </div>
           )}
         </form.Field>
 
         <form.Field name="email">
           {(field) => (
-            <label className="block text-sm font-semibold text-[var(--sea-ink)]">
-              Email
-              <input
-                className="mt-2 min-h-11 w-full rounded-xl border border-[var(--line)] bg-[var(--surface-strong)] px-4 py-2.5 text-base text-[var(--sea-ink)]"
+            <div>
+              <FormLabel htmlFor="contact-email">Email</FormLabel>
+              <FormInput
+                id="contact-email"
                 type="email"
                 value={field.state.value}
                 onBlur={field.handleBlur}
@@ -95,46 +110,55 @@ export function ContactForm() {
                 placeholder="you@company.com"
                 required
               />
-            </label>
+            </div>
           )}
         </form.Field>
       </div>
 
       <form.Field name="projectType">
         {(field) => (
-          <label className="block text-sm font-semibold text-[var(--sea-ink)]">
-            Project type
-            <select
-              className="mt-2 min-h-11 w-full rounded-xl border border-[var(--line)] bg-[var(--surface-strong)] px-4 py-2.5 text-base text-[var(--sea-ink)]"
+          <div>
+            <FormLabel htmlFor="contact-project-type">Project type</FormLabel>
+            <Select
               value={field.state.value}
-              onBlur={field.handleBlur}
-              onChange={(event) => field.handleChange(event.target.value)}
+              items={projectTypes.map((projectType) => ({
+                value: projectType,
+                label: projectType,
+              }))}
+              onValueChange={(value) => {
+                if (value) {
+                  field.handleChange(value)
+                }
+              }}
             >
-              <option>Custom web application</option>
-              <option>Internal business tool</option>
-              <option>Admin dashboard</option>
-              <option>Customer portal</option>
-              <option>API / integration</option>
-              <option>Maintenance & support</option>
-              <option>Something else</option>
-            </select>
-          </label>
+              <FormSelectTrigger id="contact-project-type" onBlur={field.handleBlur}>
+                <SelectValue />
+              </FormSelectTrigger>
+              <SelectContent alignItemWithTrigger={false}>
+                {projectTypes.map((projectType) => (
+                  <SelectItem key={projectType} value={projectType}>
+                    {projectType}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         )}
       </form.Field>
 
       <form.Field name="message">
         {(field) => (
-          <label className="block text-sm font-semibold text-[var(--sea-ink)]">
-            Message
-            <textarea
-              className="mt-2 min-h-28 w-full rounded-xl border border-[var(--line)] bg-[var(--surface-strong)] px-4 py-2.5 text-base text-[var(--sea-ink)]"
+          <div>
+            <FormLabel htmlFor="contact-message">Message</FormLabel>
+            <FormTextarea
+              id="contact-message"
               value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(event) => field.handleChange(event.target.value)}
               placeholder="Tell me about your project, timeline, and goals"
               required
             />
-          </label>
+          </div>
         )}
       </form.Field>
 
@@ -146,13 +170,9 @@ export function ContactForm() {
 
       <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
         {([canSubmit, isSubmitting]) => (
-          <button
-            type="submit"
-            disabled={!canSubmit}
-            className="inline-flex min-h-11 items-center rounded-full border border-[var(--lagoon-deep)] bg-[var(--lagoon-deep)] px-5 py-2.5 text-sm font-semibold !text-[var(--foam)] transition hover:-translate-y-0.5 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-          >
+          <PillButton type="submit" disabled={!canSubmit}>
             {isSubmitting ? 'Sending...' : 'Send message'}
-          </button>
+          </PillButton>
         )}
       </form.Subscribe>
     </form>

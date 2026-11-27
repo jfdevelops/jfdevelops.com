@@ -84,9 +84,10 @@ export const Route = createRootRouteWithContext<{
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   const { queryClient } = Route.useRouteContext()
-  const isDocs = useRouterState({
-    select: (state) => /^\/docs(?:\/|$)/.test(state.location.pathname),
-  })
+  const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const isDocs = /^\/docs(?:\/|$)/.test(pathname)
+  // Library docs pages use the Fumadocs glass layout instead of the site header and footer.
+  const isDocsPage = /^\/docs\/./.test(pathname)
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -100,9 +101,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       >
         <QueryClientProvider client={queryClient}>
           <RootProvider search={{ enabled: false }} theme={{ enabled: false }}>
-            {isDocs ? null : <Header />}
+            {isDocsPage ? null : <Header />}
             {children}
-            {isDocs ? null : <Footer />}
+            {isDocsPage ? null : <Footer />}
           </RootProvider>
         </QueryClientProvider>
         <TanStackDevtools

@@ -1,4 +1,4 @@
-import { type ComponentPropsWithRef, type ElementType } from 'react'
+import type { ComponentPropsWithRef, ElementType } from 'react'
 import { cn } from '@/lib/utils'
 
 type AsProp<T extends ElementType> = { as?: T }
@@ -14,10 +14,7 @@ export function Kicker<T extends ElementType = 'p'>({
   const Comp = (as ?? 'p') as ElementType
   return (
     <Comp
-      className={cn(
-        'text-[0.69rem] font-bold uppercase tracking-[0.16em] text-[var(--kicker)]',
-        className,
-      )}
+      className={cn('text-[0.69rem] font-bold uppercase tracking-[0.16em] text-kicker', className)}
       {...(props as {})}
     />
   )

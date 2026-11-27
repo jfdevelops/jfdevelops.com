@@ -1,14 +1,9 @@
-import { ContactForm } from '@/components/contact-form'
-
-import { FeatureCard, IslandShell } from '@/components/ui/island-shell'
-
-import { Kicker } from '@/components/ui/kicker'
-
-import { cn } from '@/lib/utils'
-
 import { Mail } from 'lucide-react'
-
 import type { ComponentPropsWithRef } from 'react'
+import { ContactForm } from '@/components/contact-form'
+import { FeatureCard, IslandShell } from '@/components/ui/island-shell'
+import { Kicker } from '@/components/ui/kicker'
+import { cn } from '@/lib/utils'
 
 import { createResourceLayout } from './definition'
 
@@ -47,10 +42,12 @@ export function Contact() {
           <ContactForm />
         </Content>
 
-        <Content className="contact-aside lg:col-span-2 flex flex-col gap-4">
+        <Content className="flex flex-col gap-4 bg-brand-tint shadow-none lg:col-span-2">
           <Kicker>Let’s make it happen</Kicker>
-          <h3 className="contact-invitation">A good project starts with a conversation.</h3>
-          <p className="text-sm leading-relaxed text-(--sea-ink-soft)">
+          <h3 className="font-display text-[32px] leading-[1.2] tracking-[-0.03em]">
+            A good project starts with a conversation.
+          </h3>
+          <p className="text-sm leading-relaxed text-sea-ink-soft">
             Tell me what’s slowing you down, what you’re imagining, or where you want to go next.
             We’ll work out the right next step together.
           </p>
@@ -61,12 +58,12 @@ export function Contact() {
               href={`mailto:${email}`}
               className="flex min-h-11 items-start gap-3 rounded-xl p-4 no-underline"
             >
-              <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-(--chip-line) bg-(--chip-bg) text-(--sea-ink)">
+              <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-chip-line bg-chip-bg text-sea-ink">
                 <Mail className="h-5 w-5" aria-hidden="true" />
               </span>
               <span>
-                <span className="block text-sm font-semibold text-(--sea-ink)">Email me</span>
-                <span className="block break-all text-xs text-(--sea-ink-soft)">{email}</span>
+                <span className="block text-sm font-semibold text-sea-ink">Email me</span>
+                <span className="block break-all text-xs text-sea-ink-soft">{email}</span>
               </span>
             </FeatureCard>
           </div>

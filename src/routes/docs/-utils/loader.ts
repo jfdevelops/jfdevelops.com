@@ -1,5 +1,5 @@
 import { notFound, redirect } from '@tanstack/react-router'
-import { getDocContent, getDocLibrary } from '@/routes/docs/-utils/client'
+import { getDocContent, getDocLibrary, getDocsLibraryVersion } from '@/routes/docs/-utils/client'
 import type { DocsPackageId } from '@/routes/docs/-utils/definition'
 import { getDocsLibrary } from '@/routes/docs/-utils/libraries'
 import { getDefaultFramework, resolveDocContext } from '@/routes/docs/-utils/registry'
@@ -44,14 +44,19 @@ export async function loadDocPage(libraryId: DocsPackageId, slugs: string[]) {
     throw notFound()
   }
 
-  const content = await getDocContent({
-    data: {
-      library: catalog.id,
-      framework: context.framework.id,
-      version: context.version.id,
-      page: context.pageId,
-    },
-  })
+  const [content, libraryVersion] = await Promise.all([
+    getDocContent({
+      data: {
+        library: catalog.id,
+        framework: context.framework.id,
+        version: context.version.id,
+        page: context.pageId,
+      },
+    }),
+    getDocsLibraryVersion({
+      data: { library: catalog.id, major: Number(context.version.id.slice(1)) },
+    }),
+  ])
 
   if (!content) {
     throw notFound()
@@ -59,6 +64,7 @@ export async function loadDocPage(libraryId: DocsPackageId, slugs: string[]) {
 
   return {
     ...content,
+    libraryVersion,
     title: content.page.title,
     description: content.page.description,
   }

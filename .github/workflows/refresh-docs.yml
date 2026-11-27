@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: "*/5 * * * *"
   workflow_dispatch:
+  # Library repositories send this on push to main, so docs do not wait for the throttled cron.
+  repository_dispatch:
+    types: [docs-updated]
   push:
     branches: [main]
     paths:
@@ -43,8 +46,15 @@ jobs:
   snapshots:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    permissions:
-      contents: write
+    env:
+      # R2's S3-compatible API. Pull requests without these secrets build everything from scratch.
+      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: auto
+      AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+      AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+      R2_ENDPOINT: https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com
+      R2_BUCKET: jfdevelops-docs
     steps:
       - uses: actions/checkout@v6
         with:
@@ -54,12 +64,12 @@ jobs:
           node-version-file: .nvmrc
       - uses: pnpm/action-setup@v4
       - run: pnpm install --frozen-lockfile
-      - name: Read prior public snapshots
+      - name: Read published pointers from R2
         shell: bash
         run: |
           mkdir -p .docs-snapshots
-          if curl --fail --location --retry 2 "https://github.com/${GITHUB_REPOSITORY}/archive/refs/heads/docs-content.tar.gz" -o /tmp/docs-content.tar.gz; then
-            tar -xzf /tmp/docs-content.tar.gz --strip-components=1 -C .docs-snapshots
+          if [ -n "$AWS_ACCESS_KEY_ID" ]; then
+            aws s3 sync "s3://$R2_BUCKET" .docs-snapshots --endpoint-url "$R2_ENDPOINT"               --exclude '*' --include '*/current.json' --only-show-errors
           fi
       - id: changes
         run: node scripts/docs/check-updates.mjs
@@ -73,25 +83,13 @@ jobs:
           name: docs-snapshots
           path: .docs-snapshots
           include-hidden-files: true
-      - uses: actions/checkout@v6
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && steps.changes.outputs.changed == 'true'
-        with:
-          path: .docs-publish
-      - name: Atomically publish snapshots to GitHub
+      - name: Publish snapshots to R2
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && steps.changes.outputs.changed == 'true'
         shell: bash
         run: |
-          cd .docs-publish
-          if git fetch --depth=1 origin docs-content; then
-            git checkout -B docs-content FETCH_HEAD
-          else
-            git checkout --orphan docs-content
-            git rm -rf --ignore-unmatch .
-          fi
-          cp -a ../.docs-snapshots/. .
-          git add .
-          if git diff --cached --quiet; then exit 0; fi
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'docs(snapshot): refresh generated main content'
-          git push origin HEAD:docs-content
+          # Snapshot files are immutable and addressed by revision, so upload them first.
+          aws s3 sync .docs-snapshots "s3://$R2_BUCKET" --endpoint-url "$R2_ENDPOINT"             --exclude '*/current.json' --content-type application/json --only-show-errors
+          # Pointers go last: the site reads them on every request, so each one is live once written.
+          for pointer in .docs-snapshots/*/current.json; do
+            aws s3 cp "$pointer" "s3://$R2_BUCKET/${pointer#.docs-snapshots/}" --endpoint-url "$R2_ENDPOINT"               --content-type application/json --cache-control no-store --only-show-errors
+          done

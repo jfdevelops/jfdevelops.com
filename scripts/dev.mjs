@@ -1,6 +1,21 @@
-import { spawn } from 'node:child_process'
+import { execFile, spawn } from 'node:child_process'
 import { readFile } from 'node:fs/promises'
+import { promisify } from 'node:util'
 import { serveDocsSnapshots } from './docs/serve.mjs'
+
+async function mainCommit(repository) {
+  try {
+    const { stdout } = await promisify(execFile)(
+      'git',
+      ['ls-remote', repository, 'refs/heads/main'],
+      { timeout: 30000 },
+    )
+    return stdout.split(/\s+/)[0] || null
+  } catch {
+    // Offline: keep the existing snapshot instead of blocking dev startup.
+    return null
+  }
+}
 
 process.env.CI = 'true'
 const { createServer, loadEnv } = await import('vite')
@@ -10,19 +25,25 @@ let snapshots
 if (!(process.env.VITE_DOCS_SNAPSHOT_ORIGIN ?? environment.VITE_DOCS_SNAPSHOT_ORIGIN)) {
   const { loadDocsSources } = await import('./docs/load-sources.mjs')
   const config = await loadDocsSources()
-  let missingSnapshot = false
+  // Rebuild when a snapshot is missing or its library's main branch has moved on.
+  let refreshSnapshots = false
   for (const library of config.libraries) {
     try {
       const pointer = JSON.parse(
         await readFile(`.docs-snapshots/${library.id}/current.json`, 'utf8'),
       )
       await readFile(`.docs-snapshots/${library.id}/snapshots/${pointer.revision}/manifest.json`)
+      const latest = await mainCommit(library.repository)
+      if (latest && pointer.sourceCommit !== latest) {
+        console.log(`Docs for ${library.id} are behind main.`)
+        refreshSnapshots = true
+      }
     } catch {
-      missingSnapshot = true
+      refreshSnapshots = true
     }
   }
-  if (missingSnapshot) {
-    console.log('Preparing local docs snapshots for the first run. This may take several minutes.')
+  if (refreshSnapshots) {
+    console.log('Preparing local docs snapshots. This may take several minutes.')
     for (const script of ['scripts/generate-doc-sources.mjs', 'scripts/docs/export.mjs']) {
       await new Promise((resolve, reject) => {
         const child = spawn(process.execPath, [script], { stdio: 'inherit', env: process.env })

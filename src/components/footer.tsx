@@ -1,38 +1,20 @@
 import { Link } from '@tanstack/react-router'
+import { BrandLogo } from './brand-logo'
+import { FooterLink } from './footer-link'
+import { ThemeToggle } from './theme-toggle'
 import { Kicker } from './ui/kicker'
 import { PageWrap } from './ui/page-wrap'
-import { BrandLogo } from './brand-logo'
-import ThemeToggle from './theme-toggle'
-
-const columns = [
-  {
-    title: 'Services',
-    links: [
-      { href: '/#services', label: 'What I build' },
-      { href: '/#case-studies', label: 'Case studies' },
-      { href: '/#process', label: 'Process' },
-    ],
-  },
-  {
-    title: 'Company',
-    links: [
-      { href: '/#about', label: 'About' },
-      { href: '/#faq', label: 'FAQ' },
-      { href: '/#contact', label: 'Contact' },
-    ],
-  },
-]
 
 export default function Footer() {
   const year = new Date().getFullYear()
 
   return (
-    <footer className="mt-24 border-t border-[var(--line)] px-4 pb-14 pt-12 text-[var(--sea-ink-soft)]">
+    <footer className="mt-24 border-t border-line px-4 pb-14 pt-12 text-sea-ink-soft">
       <PageWrap className="grid gap-10 sm:grid-cols-3">
         <div>
           <Link
             to="/"
-            className="inline-flex min-h-11 items-center rounded-sm no-underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--sea-ink)"
+            className="inline-flex min-h-11 items-center rounded-sm no-underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sea-ink"
           >
             <BrandLogo />
           </Link>
@@ -42,26 +24,49 @@ export default function Footer() {
           </p>
         </div>
 
-        {columns.map((column) => (
-          <nav key={column.title} aria-label={column.title}>
-            <Kicker className="mb-3">{column.title}</Kicker>
-            <ul className="space-y-2 p-0">
-              {column.links.map((link) => (
-                <li key={link.href}>
-                  <a
-                    href={link.href}
-                    className="text-sm text-[var(--sea-ink-soft)] no-underline transition hover:text-[var(--sea-ink)]"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        ))}
+        <nav aria-label="Services">
+          <Kicker className="mb-3">Services</Kicker>
+          <ul className="space-y-2 p-0">
+            <li>
+              <FooterLink to="/" hash="services">
+                What I build
+              </FooterLink>
+            </li>
+            <li>
+              <FooterLink to="/" hash="case-studies">
+                Case studies
+              </FooterLink>
+            </li>
+            <li>
+              <FooterLink to="/" hash="process">
+                Process
+              </FooterLink>
+            </li>
+          </ul>
+        </nav>
+        <nav aria-label="Company">
+          <Kicker className="mb-3">Company</Kicker>
+          <ul className="space-y-2 p-0">
+            <li>
+              <FooterLink to="/" hash="about">
+                About
+              </FooterLink>
+            </li>
+            <li>
+              <FooterLink to="/" hash="faq">
+                FAQ
+              </FooterLink>
+            </li>
+            <li>
+              <FooterLink to="/" hash="contact">
+                Contact
+              </FooterLink>
+            </li>
+          </ul>
+        </nav>
       </PageWrap>
 
-      <PageWrap className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-[var(--line)] pt-6 text-center sm:flex-row sm:text-left">
+      <PageWrap className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-line pt-6 text-center sm:flex-row sm:text-left">
         <p className="m-0 text-sm">&copy; {year} JF Develops. All rights reserved.</p>
         <div className="flex items-center gap-3">
           <span className="text-xs">Appearance</span>

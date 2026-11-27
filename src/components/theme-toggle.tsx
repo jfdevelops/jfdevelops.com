@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 
 import { applyThemeMode, getInitialMode, type ThemeMode } from '@/lib/theme'
+import { cn } from '@/lib/utils'
 
-export default function ThemeToggle() {
+export function ThemeToggle({ className }: { className?: string }) {
   const [mode, setMode] = useState<ThemeMode>('auto')
 
   useEffect(() => {
@@ -48,7 +49,10 @@ export default function ThemeToggle() {
       onClick={toggleMode}
       aria-label={label}
       title={label}
-      className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink)] shadow-[0_8px_22px_rgba(30,90,72,0.08)] transition hover:-translate-y-0.5 hover:bg-[var(--chip-bg)] hover:text-[var(--sea-ink)] dark:hover:bg-[var(--chip-bg)]"
+      className={cn(
+        'rounded-full border border-chip-line bg-chip-bg px-3 py-1.5 text-sm font-semibold text-sea-ink shadow-[0_8px_22px_rgba(30,90,72,0.08)] transition hover:-translate-y-0.5 hover:bg-chip-bg hover:text-sea-ink dark:hover:bg-chip-bg',
+        className,
+      )}
     >
       {mode === 'auto' ? 'Auto' : mode === 'dark' ? 'Dark' : 'Light'}
     </Button>
