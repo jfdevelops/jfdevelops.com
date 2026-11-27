@@ -1,8 +1,10 @@
-import { useLocation, useNavigate } from '@tanstack/react-router'
+import { Link, useLocation, useNavigate } from '@tanstack/react-router'
 import { GlassLayout } from 'fumadocs-ui/layouts/glass'
 import { LibraryBig } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { BrandLogo } from '@/components/brand-logo'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { cn } from '@/lib/utils'
 import { LibrarySelector } from '@/routes/docs/-components/library-selector'
 import { Selectors } from '@/routes/docs/-components/selectors'
 import { sidebarSlots } from '@/routes/docs/-components/sidebar'
@@ -14,8 +16,12 @@ import {
   type PackageDocs,
 } from '@/routes/docs/-utils/registry'
 
-function Title() {
-  return <span className="font-display text-base font-bold tracking-tight">JF Develops</span>
+function NavTitle({ className }: { className?: string }) {
+  return (
+    <Link to="/" className={cn('no-underline', className)}>
+      <BrandLogo className="h-9" />
+    </Link>
+  )
 }
 
 type DocsShellProps = {
@@ -70,9 +76,8 @@ export function DocsShell({
       key={`${pkg.slug}/${framework.id}/${version.id}`}
       tree={version.tree ?? { name: pkg.name, children: [] }}
       tabs={false}
-      nav={{ title: <Title />, url: '/' }}
       searchToggle={{ enabled: false }}
-      slots={{ themeSwitch: ThemeToggle, sidebar: sidebarSlots }}
+      slots={{ navTitle: NavTitle, themeSwitch: ThemeToggle, sidebar: sidebarSlots }}
       links={[
         {
           type: 'icon',
